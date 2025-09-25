@@ -13,10 +13,52 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// =====================================================
+// ENUMS - Definición de estados y categorías
+// =====================================================
+
 enum Role {
-  USER
-  ADMIN
+  USER  // Usuario regular que puede crear fondos
+  ADMIN // Administrador del sistema
 }
+
+enum FundStatus {
+  DRAFT     // Borrador, aún no publicado
+  ACTIVE    // Activo, recibiendo contribuciones
+  PAUSED    // Pausado temporalmente
+  COMPLETED // Meta alcanzada o fecha límite cumplida
+  CANCELLED // Cancelado por el creador
+}
+
+enum ParticipantStatus {
+  INVITED  // Invitado pero no ha respondido
+  JOINED   // Aceptó la invitación y participa
+  DECLINED // Rechazó la invitación
+  LEFT     // Se retiró del fondo
+}
+
+enum ContributionStatus {
+  PENDING   // Pendiente de procesamiento
+  COMPLETED // Contribución exitosa
+  FAILED    // Falló el procesamiento
+  REFUNDED  // Reembolsado
+}
+
+enum ExpenseCategory {
+  FOOD        // Comida y bebidas
+  TRANSPORT   // Transporte
+  MEDICAL     // Gastos médicos
+  EDUCATION   // Educación
+  UTILITIES   // Servicios básicos
+  EMERGENCY   // Emergencias
+  EVENT       // Eventos y celebraciones
+  EQUIPMENT   // Equipos y herramientas
+  OTHER       // Otros gastos
+}
+
+// =====================================================
+// MODELOS - Entidades principales del sistema
+// =====================================================
 
 model User {
   id        Int      @id @default(autoincrement())
@@ -28,4 +70,147 @@ model User {
   lastLogin DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relaciones
+  createdFunds   Fund[]          @relation("FundCreator")
+  participations Participant[]
+  contributions  Contribution[]
+  expenses       Expense[]
+
+  // Índices optimizados para consultas frecuentes
+  @@index([role])
+  @@index([isActive])
+  @@index([createdAt])
+  @@index([lastLogin])
+  @@index([role, isActive])
+  @@map("users")
+}
+
+model Fund {
+  id            Int        @id @default(autoincrement())
+  title         String     // Título del fondo
+  description   String?    // Descripción detallada
+  goalAmount    Decimal    @db.Decimal(10, 2) // Meta a alcanzar
+  currentAmount Decimal    @default(0) @db.Decimal(10, 2) // Monto actual recaudado
+  deadline      DateTime?  // Fecha límite (opcional)
+  status        FundStatus @default(DRAFT)
+  isPublic      Boolean    @default(false) // Si es público o privado
+  
+  // Configuración de participación
+  allowOpenJoin Boolean @default(false) // Permite unirse sin invitación
+  maxParticipants Int? // Límite máximo de participantes (opcional)
+  
+  // Metadatos
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relaciones
+  creatorId     Int
+  creator       User            @relation("FundCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  participants  Participant[]
+  contributions Contribution[]
+  expenses      Expense[]
+
+  // Índices para optimizar consultas
+  @@index([creatorId])
+  @@index([status])
+  @@index([isPublic])
+  @@index([deadline])
+  @@index([createdAt])
+  @@index([status, isPublic])
+  @@map("funds")
+}
+
+model Participant {
+  id       Int               @id @default(autoincrement())
+  status   ParticipantStatus @default(INVITED)
+  joinedAt DateTime?         // Fecha cuando aceptó la invitación
+  leftAt   DateTime?         // Fecha cuando se retiró (si aplica)
+  
+  // Configuración de permisos
+  canAddExpenses    Boolean @default(false) // Puede agregar gastos
+  canEditFund       Boolean @default(false) // Puede editar el fondo
+  canInviteOthers   Boolean @default(false) // Puede invitar a otros
+  
+  // Metadatos
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  userId Int
+  fundId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fund   Fund @relation(fields: [fundId], references: [id], onDelete: Cascade)
+
+  // Índices y restricciones
+  @@unique([userId, fundId]) // Un usuario solo puede participar una vez por fondo
+  @@index([fundId])
+  @@index([userId])
+  @@index([status])
+  @@index([joinedAt])
+  @@map("participants")
+}
+
+model Contribution {
+  id          Int                @id @default(autoincrement())
+  amount      Decimal            @db.Decimal(10, 2)
+  description String?            // Descripción opcional de la contribución
+  status      ContributionStatus @default(PENDING)
+  
+  // Información de pago (para integración con Mercado Pago)
+  paymentId       String? // ID de pago externo
+  paymentMethod   String? // Método de pago usado
+  paymentDetails  Json?   // Detalles adicionales del pago
+  
+  // Fechas importantes
+  contributedAt DateTime? // Fecha de contribución exitosa
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relaciones
+  userId Int
+  fundId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fund   Fund @relation(fields: [fundId], references: [id], onDelete: Cascade)
+
+  // Índices
+  @@index([fundId])
+  @@index([userId])
+  @@index([status])
+  @@index([contributedAt])
+  @@index([paymentId])
+  @@map("contributions")
+}
+
+model Expense {
+  id          Int             @id @default(autoincrement())
+  title       String          // Título del gasto
+  description String?         // Descripción detallada
+  amount      Decimal         @db.Decimal(10, 2)
+  category    ExpenseCategory
+  
+  // Comprobantes y evidencia
+  receiptUrl    String? // URL del comprobante/recibo
+  attachmentUrl String? // URL de archivo adjunto adicional
+  
+  // Estado y fechas
+  isApproved Boolean   @default(false) // Si fue aprobado por el creador del fondo
+  expenseDate DateTime // Fecha del gasto real
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  userId Int // Quien registró el gasto
+  fundId Int // A qué fondo pertenece
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fund   Fund @relation(fields: [fundId], references: [id], onDelete: Cascade)
+
+  // Índices
+  @@index([fundId])
+  @@index([userId])
+  @@index([category])
+  @@index([isApproved])
+  @@index([expenseDate])
+  @@index([createdAt])
+  @@map("expenses")
 }

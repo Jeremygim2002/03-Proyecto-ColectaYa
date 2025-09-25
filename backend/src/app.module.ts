@@ -6,13 +6,21 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import configuration from './config/configuration';
+import { validationSchema } from './config/validation';
 
 @Module({
   imports: [
-    // Configuración de variables de entorno
+    // Configuración completa de variables de entorno con validación
     ConfigModule.forRoot({
-      isGlobal: true, // ConfigService globalmente
+      isGlobal: true, // ConfigService disponible globalmente
       envFilePath: '.env',
+      load: [configuration], // Carga configuración personalizada
+      validationSchema, // Validación con Joi
+      validationOptions: {
+        allowUnknown: true, // Permitir variables del sistema
+        abortEarly: true, // Detener en el primer error
+      },
     }),
 
     // Rate limiting global
