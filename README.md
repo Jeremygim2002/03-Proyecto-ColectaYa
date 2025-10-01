@@ -1,6 +1,7 @@
 # 🚀 ColectaYa - Plataforma de Gestión Colaborativa de Fondos
 
-**ColectaYa** es una aplicación web moderna diseñada para facilitar la gestión colaborativa de fondos y colectas grupal## 📚 **API Documentation**
+**ColectaYa** es una aplicación web moderna diseñada para facilitar la gestión colaborativa de fondos y colectas grupal
+## 📚 **API Documentation**
 
 Una vez iniciado el servidor backend, la documentación interactiva está disponible en:
 
@@ -18,25 +19,6 @@ Una vez iniciado el servidor backend, la documentación interactiva está dispon
 - `GET /users/:id` - Obtener usuario por ID
 - `PUT /users/:id` - Actualizar usuario
 - `DELETE /users/:id` - Eliminar usuario
-
-### **Ejemplo de Uso**
-
-```bash
-# Crear usuario
-curl -X POST http://localhost:3000/users \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","name":"Usuario","password":"password123"}'
-
-# Login
-curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"user@example.com","password":"password123"}'
-
-# Obtener perfil (con token)
-curl -X GET http://localhost:3000/auth/profile \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
 
 ## 📋 **Información General**
 
@@ -157,13 +139,6 @@ npm run start:dev
 - **PostgreSQL** - Base de datos principal
 - **Prisma ORM** - Gestión de esquemas y migraciones
 - **Connection Pooling** - Optimización de conexiones
-
-### **DevOps & Herramientas**
-- **Git** - Control de versiones
-- **ESLint + Prettier** - Calidad y formato de código
-- **Husky** - Git hooks para calidad
-- **VS Code** - Editor recomendado con configuración optimizada
-
 ---
 
 ## 📚 **Documentación Detallada**
@@ -218,19 +193,6 @@ npx prisma studio   # 🎨 GUI de base de datos
 npx prisma generate # 🔄 Generar cliente Prisma
 ```
 
----
-
-## 🧪 **Testing y Calidad**
-
-### **Backend**
-- ✅ **Tests Unitarios**: Jest configurado
-- ✅ **Tests E2E**: Supertest + Jest
-- ✅ **Coverage**: Reportes automáticos
-- ✅ **Linting**: ESLint + TypeScript
-- ✅ **Formatting**: Prettier
-
----
-
 ## 📁 **Estructura de Carpetas**
 
 ```
@@ -274,16 +236,6 @@ ColectaYa/
 └── README.md                  # 📖 Este archivo
 ```
 
-
-
-
-## 📞 **Soporte y Contacto**
-
-### **Documentación Técnica**
-- **General**: Este README principal
-- **Backend API**: [`backend/README.md`](./backend/README.md) - Documentación técnica completa
-- **API Docs**: [http://localhost:3000/api-docs](http://localhost:3000/api-docs) - Swagger UI
-
 ---
 
 ## 📜 **Licencia y Créditos**
@@ -291,7 +243,7 @@ ColectaYa/
 **Proyecto Universitario** - Desarrollado con fines educativos
 
 ### **Información del Proyecto**
-- **Desarrollador**: Jeremy García
+- **Desarrollador**: Jeremy Rosas Caparachin
 - **Repositorio**: [03-Proyecto-ColectaYa](https://github.com/Jeremygim2002/03-Proyecto-ColectaYa)
 
 ### **Tecnologías y Licencias**
