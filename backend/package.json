@@ -22,8 +22,7 @@
     "db:migrate": "prisma migrate dev --name init",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:generate": "prisma generate",
-    "db:seed": "ts-node --transpile-only prisma/seed.ts"
+    "db:generate": "prisma generate"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -80,9 +79,7 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.20.0"
   },
-  "prisma": {
-    "seed": "ts-node --transpile-only prisma/seed.ts"
-  },
+
   "jest": {
     "moduleFileExtensions": [
       "js",

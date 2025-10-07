@@ -1,0 +1,50 @@
+import { Controller, Get, Post, Patch, Delete, Body, Param, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { CollectionsService } from './collections.service';
+import { CreateCollectionDto, UpdateCollectionDto } from './dto';
+
+interface AuthenticatedRequest {
+  user: {
+    sub: string;
+    email: string;
+    roles: string[];
+  };
+}
+
+@ApiTags('collections')
+@ApiBearerAuth()
+@Controller('collections')
+export class CollectionsController {
+  constructor(private readonly collectionsService: CollectionsService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Crear colecta' })
+  async create(@Request() req: AuthenticatedRequest, @Body() dto: CreateCollectionDto) {
+    return this.collectionsService.create(req.user.sub, dto);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Listar mis colectas' })
+  async findMine(@Request() req: AuthenticatedRequest) {
+    return this.collectionsService.findUserCollections(req.user.sub);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Ver detalle de colecta' })
+  async findOne(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.collectionsService.findOne(id, req.user.sub);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Actualizar colecta' })
+  async update(@Param('id') id: string, @Request() req: AuthenticatedRequest, @Body() dto: UpdateCollectionDto) {
+    return this.collectionsService.update(id, req.user.sub, dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Eliminar colecta' })
+  async delete(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    await this.collectionsService.delete(id, req.user.sub);
+  }
+}

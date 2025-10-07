@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserModule } from '../user/user.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -10,6 +11,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     // 1) Importar ConfigModule para que ConfigService esté disponible
     ConfigModule,
     UserModule,
+    PrismaModule,
     JwtModule.registerAsync({
       global: true,
       // 2) Permitir la inyección en useFactory

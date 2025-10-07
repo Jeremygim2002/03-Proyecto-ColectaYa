@@ -10,7 +10,7 @@ import compression from 'compression';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Middleware de seguridad (primera línea de defensa)
+  // Middleware de seguridad - DEBE ir ANTES de cualquier otra configuración
   app.use(helmet());
   app.use(compression());
 
@@ -38,21 +38,7 @@ async function bootstrap() {
   app.useGlobalFilters(new PrismaExceptionFilter());
 
   // Swagger
-  const config = new DocumentBuilder()
-    .setTitle('ColectaYa API')
-    .setDescription('API REST para la plataforma de gestión colaborativa de fondos ColectaYa')
-    .setVersion('1.0')
-    .addTag('auth', 'Endpoints de autenticación')
-    .addTag('users', 'Gestión de usuarios')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-      },
-      'access-token',
-    )
-    .build();
+  const config = new DocumentBuilder().setTitle('ColectaYa API').setVersion('1.0').addBearerAuth().build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document, {

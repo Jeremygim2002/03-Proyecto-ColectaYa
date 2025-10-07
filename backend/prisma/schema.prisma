@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,203 +11,137 @@ datasource db {
 }
 
 // =====================================================
-// ENUMS - Definición de estados y categorías
+// ENUMS - Estados del sistema ColectaYa MVP
 // =====================================================
 
 enum Role {
-  USER  // Usuario regular que puede crear fondos
+  USER  // Usuario regular
   ADMIN // Administrador del sistema
 }
 
-enum FundStatus {
-  DRAFT     // Borrador, aún no publicado
-  ACTIVE    // Activo, recibiendo contribuciones
-  PAUSED    // Pausado temporalmente
-  COMPLETED // Meta alcanzada o fecha límite cumplida
-  CANCELLED // Cancelado por el creador
+enum CollectionStatus {
+  ACTIVE  // Activa, recibiendo aportes
+  CLOSED  // Cerrada, no acepta más aportes
+  HIDDEN  // Oculta (borrador o pausada)
 }
 
-enum ParticipantStatus {
-  INVITED  // Invitado pero no ha respondido
-  JOINED   // Aceptó la invitación y participa
-  DECLINED // Rechazó la invitación
-  LEFT     // Se retiró del fondo
+enum RuleType {
+  GOAL_ONLY  // Solo retiro al 100% de meta
+  THRESHOLD  // Retiro al alcanzar % umbral
+  ANYTIME    // Retiro en cualquier momento
 }
 
 enum ContributionStatus {
-  PENDING   // Pendiente de procesamiento
-  COMPLETED // Contribución exitosa
-  FAILED    // Falló el procesamiento
-  REFUNDED  // Reembolsado
+  PAID     // Pagado exitosamente
+  FAILED   // Pago fallido
+  REFUNDED // Reembolsado
 }
 
-enum ExpenseCategory {
-  FOOD        // Comida y bebidas
-  TRANSPORT   // Transporte
-  MEDICAL     // Gastos médicos
-  EDUCATION   // Educación
-  UTILITIES   // Servicios básicos
-  EMERGENCY   // Emergencias
-  EVENT       // Eventos y celebraciones
-  EQUIPMENT   // Equipos y herramientas
-  OTHER       // Otros gastos
+enum WithdrawalStatus {
+  REQUESTED // Solicitado
+  PAID      // Pagado
+  REJECTED  // Rechazado
 }
 
 // =====================================================
-// MODELOS - Entidades principales del sistema
+// MODELOS - Entidades principales ColectaYa MVP
 // =====================================================
 
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique
-  name      String?
   password  String
-  role      Role     @default(USER)
-  isActive  Boolean  @default(true)
-  lastLogin DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  roles     Role[]   @default([USER])
+  createdAt DateTime @default(now()) @db.Timestamptz
 
   // Relaciones
-  createdFunds   Fund[]          @relation("FundCreator")
-  participations Participant[]
-  contributions  Contribution[]
-  expenses       Expense[]
+  ownedCollections Collection[]        @relation("CollectionOwner")
+  memberships      CollectionMember[]
+  contributions    Contribution[]
+  withdrawals      Withdrawal[]
 
-  // Índices optimizados para consultas frecuentes
-  @@index([role])
-  @@index([isActive])
-  @@index([createdAt])
-  @@index([lastLogin])
-  @@index([role, isActive])
+  @@index([email])
   @@map("users")
 }
 
-model Fund {
-  id            Int        @id @default(autoincrement())
-  title         String     // Título del fondo
-  description   String?    // Descripción detallada
-  goalAmount    Decimal    @db.Decimal(10, 2) // Meta a alcanzar
-  currentAmount Decimal    @default(0) @db.Decimal(10, 2) // Monto actual recaudado
-  deadline      DateTime?  // Fecha límite (opcional)
-  status        FundStatus @default(DRAFT)
-  isPublic      Boolean    @default(false) // Si es público o privado
-  
-  // Configuración de participación
-  allowOpenJoin Boolean @default(false) // Permite unirse sin invitación
-  maxParticipants Int? // Límite máximo de participantes (opcional)
-  
-  // Metadatos
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relaciones
-  creatorId     Int
-  creator       User            @relation("FundCreator", fields: [creatorId], references: [id], onDelete: Cascade)
-  participants  Participant[]
-  contributions Contribution[]
-  expenses      Expense[]
+model Collection {
+  id           String           @id @default(uuid()) @db.Uuid
+  ownerId      String           @db.Uuid
+  title        String
+  description  String?
+  isPrivate    Boolean          @default(false)
+  goalAmount   Decimal          @db.Decimal(12, 2)
+  ruleType     RuleType
+  thresholdPct Decimal?         @db.Decimal(5, 2) // Solo si ruleType=THRESHOLD
+  status       CollectionStatus @default(ACTIVE)
+  deadlineAt   DateTime?        @db.Timestamptz
+  createdAt    DateTime         @default(now()) @db.Timestamptz
 
-  // Índices para optimizar consultas
-  @@index([creatorId])
+  // Relaciones
+  owner         User               @relation("CollectionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members       CollectionMember[]
+  contributions Contribution[]
+  withdrawals   Withdrawal[]
+
+  @@index([ownerId])
   @@index([status])
-  @@index([isPublic])
-  @@index([deadline])
-  @@index([createdAt])
-  @@index([status, isPublic])
-  @@map("funds")
+  @@index([deadlineAt])
+  @@map("collections")
 }
 
-model Participant {
-  id       Int               @id @default(autoincrement())
-  status   ParticipantStatus @default(INVITED)
-  joinedAt DateTime?         // Fecha cuando aceptó la invitación
-  leftAt   DateTime?         // Fecha cuando se retiró (si aplica)
-  
-  // Configuración de permisos
-  canAddExpenses    Boolean @default(false) // Puede agregar gastos
-  canEditFund       Boolean @default(false) // Puede editar el fondo
-  canInviteOthers   Boolean @default(false) // Puede invitar a otros
-  
-  // Metadatos
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model CollectionMember {
+  id           String    @id @default(uuid()) @db.Uuid
+  collectionId String    @db.Uuid
+  userId       String    @db.Uuid
+  invitedAt    DateTime? @db.Timestamptz
+  acceptedAt   DateTime? @db.Timestamptz
+  addedBy      String?   @db.Uuid
 
   // Relaciones
-  userId Int
-  fundId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fund   Fund @relation(fields: [fundId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Índices y restricciones
-  @@unique([userId, fundId]) // Un usuario solo puede participar una vez por fondo
-  @@index([fundId])
+  @@unique([collectionId, userId])
+  @@index([collectionId])
   @@index([userId])
-  @@index([status])
-  @@index([joinedAt])
-  @@map("participants")
+  @@map("collection_members")
 }
 
 model Contribution {
-  id          Int                @id @default(autoincrement())
-  amount      Decimal            @db.Decimal(10, 2)
-  description String?            // Descripción opcional de la contribución
-  status      ContributionStatus @default(PENDING)
-  
-  // Información de pago (para integración con Mercado Pago)
-  paymentId       String? // ID de pago externo
-  paymentMethod   String? // Método de pago usado
-  paymentDetails  Json?   // Detalles adicionales del pago
-  
-  // Fechas importantes
-  contributedAt DateTime? // Fecha de contribución exitosa
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String             @id @default(uuid()) @db.Uuid
+  collectionId String             @db.Uuid
+  userId       String?            @db.Uuid
+  amount       Decimal            @db.Decimal(12, 2)
+  status       ContributionStatus
+  paymentRef   String?            // Referencia interna de pago
+  createdAt    DateTime           @default(now()) @db.Timestamptz
 
   // Relaciones
-  userId Int
-  fundId Int
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fund   Fund @relation(fields: [fundId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  user       User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  // Índices
-  @@index([fundId])
+  @@index([collectionId])
   @@index([userId])
   @@index([status])
-  @@index([contributedAt])
-  @@index([paymentId])
+  @@index([paymentRef])
   @@map("contributions")
 }
 
-model Expense {
-  id          Int             @id @default(autoincrement())
-  title       String          // Título del gasto
-  description String?         // Descripción detallada
-  amount      Decimal         @db.Decimal(10, 2)
-  category    ExpenseCategory
-  
-  // Comprobantes y evidencia
-  receiptUrl    String? // URL del comprobante/recibo
-  attachmentUrl String? // URL de archivo adjunto adicional
-  
-  // Estado y fechas
-  isApproved Boolean   @default(false) // Si fue aprobado por el creador del fondo
-  expenseDate DateTime // Fecha del gasto real
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Withdrawal {
+  id           String           @id @default(uuid()) @db.Uuid
+  collectionId String           @db.Uuid
+  requestedBy  String?          @db.Uuid
+  amount       Decimal          @db.Decimal(12, 2)
+  status       WithdrawalStatus @default(REQUESTED)
+  createdAt    DateTime         @default(now()) @db.Timestamptz
+  processedAt  DateTime?        @db.Timestamptz
 
   // Relaciones
-  userId Int // Quien registró el gasto
-  fundId Int // A qué fondo pertenece
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fund   Fund @relation(fields: [fundId], references: [id], onDelete: Cascade)
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  requester  User?      @relation(fields: [requestedBy], references: [id], onDelete: SetNull)
 
-  // Índices
-  @@index([fundId])
-  @@index([userId])
-  @@index([category])
-  @@index([isApproved])
-  @@index([expenseDate])
-  @@index([createdAt])
-  @@map("expenses")
+  @@index([collectionId])
+  @@index([requestedBy])
+  @@index([status])
+  @@map("withdrawals")
 }

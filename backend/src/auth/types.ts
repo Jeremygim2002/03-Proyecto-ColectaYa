@@ -2,14 +2,14 @@ import { Request } from 'express';
 import { Role } from '@prisma/client';
 
 /**
- * Payload del JWT token - versión unificada y tipada
+ * Payload del JWT token - versión MVP simplificada
  */
 export interface JwtPayload {
-  sub: number; // user id
+  sub: string; // user id (UUID)
   email: string;
-  role: Role; // Enum de Prisma para consistencia
-  iat?: number; // issued at (opcional, añadido por JWT)
-  exp?: number; // expires at (opcional, añadido por JWT)
+  roles: Role[]; // Array de roles
+  iat?: number;
+  exp?: number;
 }
 
 /**
@@ -20,15 +20,13 @@ export interface AuthenticatedRequest extends Request {
 }
 
 /**
- * Respuesta del endpoint de autenticación
+ * Respuesta del endpoint de autenticación - MVP sin refresh token
  */
 export interface AuthResponse {
   access_token: string;
   user: {
-    id: number;
+    id: string;
     email: string;
-    name: string | null;
-    role: Role; // Usando enum de Prisma para consistencia
-    isActive: boolean;
+    roles: Role[];
   };
 }

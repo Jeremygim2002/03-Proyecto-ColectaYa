@@ -6,6 +6,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { CollectionsModule } from './collections/collections.module';
+import { MembersModule } from './members/members.module';
+import { FundingModule } from './funding/funding.module';
+import { WithdrawalsModule } from './withdrawals/withdrawals.module';
+import { AuthGuard } from './auth/auth.guard';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation';
 
@@ -17,6 +22,7 @@ import { validationSchema } from './config/validation';
       envFilePath: '.env',
       load: [configuration], // Carga configuración personalizada
       validationSchema, // Validación con Joi
+      cache: true, // Mejora performance del ConfigService#get
       validationOptions: {
         allowUnknown: true, // Permitir variables del sistema
         abortEarly: true, // Detener en el primer error
@@ -43,10 +49,19 @@ import { validationSchema } from './config/validation';
     ]),
     UserModule,
     AuthModule,
+    CollectionsModule,
+    MembersModule,
+    FundingModule,
+    WithdrawalsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    // AuthGuard globalmente (debe ir antes que ThrottlerGuard)
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
     // ThrottlerGuard globalmente
     {
       provide: APP_GUARD,
