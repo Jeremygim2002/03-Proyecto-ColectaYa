@@ -26,55 +26,55 @@ Una vez iniciado el servidor backend, la documentación interactiva está dispon
 |-------|---------|
 | **Tipo** | Proyecto Universitario - Aplicación Web Completa |
 | **Arquitectura** | Modular en capas (Frontend + Backend) |
-| **Estado** | ✅ Backend funcional, 🚧 Frontend en desarrollo |
-| **Documentación** | ✅ Completa con Swagger UI |
-| **Autenticación** | ✅ JWT implementado |
-| **Base de Datos** | ✅ PostgreSQL + Prisma ORM |
+| **Estado** |  Backend funcional,  Frontend en desarrollo |
+| **Documentación** |  Completa con Swagger UI |
+| **Autenticación** |  JWT implementado |
+| **Base de Datos** | PostgreSQL + Prisma ORM |
 
 ---
 
 ## 🌟 **Características Principales**
 
-### ✅ **Implementado**
-- **👥 Gestión de Usuarios**: Registro, autenticación y perfiles
-- **🔐 Autenticación JWT**: Sistema seguro con tokens Bearer
-- **📊 API REST**: Endpoints documentados con Swagger
-- **🛡️ Seguridad**: Rate limiting, validación, headers seguros
-- **📄 Paginación**: Consultas optimizadas con búsqueda y filtros
-- **🗄️ Base de Datos**: PostgreSQL con Prisma ORM
-- **📚 Documentación**: Swagger UI interactivo
-- **🧪 Testing**: Jest configurado para pruebas
+###  **Implementado**
+- ** Gestión de Usuarios**: Registro, autenticación y perfiles
+- ** Autenticación JWT**: Sistema seguro con tokens Bearer
+- ** API REST**: Endpoints documentados con Swagger
+- ** Seguridad**: Rate limiting, validación, headers seguros
+- ** Paginación**: Consultas optimizadas con búsqueda y filtros
+- ** Base de Datos**: PostgreSQL con Prisma ORM
+- ** Documentación**: Swagger UI interactivo
+- ** Testing**: Jest configurado para pruebas
 
 ---
 
 ## 🏗️ **Arquitectura del Proyecto**
 
 ```
-📦 ColectaYa
-├── � Frontend (React/Next.js) - En desarrollo
-└── 🛠️ Backend (NestJS) - ✅ Funcional
-    ├── 🎯 Controllers (API Endpoints)
-    ├── ⚙️ Services (Lógica de Negocio)
-    ├── 🗄️ Prisma (ORM & Database)
-    ├── 🛡️ Guards (Autenticación/Autorización)
-    ├── � Interceptors (Logging/Response)
-    ├── 📝 DTOs (Validación de Datos)
-    └── 🧪 Tests (Unit/Integration/e2e)
+ ColectaYa
+├──  Frontend (React/Next.js) - En desarrollo
+└──  Backend (NestJS) - ✅ Funcional
+    ├──  Controllers (API Endpoints)
+    ├──  Services (Lógica de Negocio)
+    ├──  Prisma (ORM & Database)
+    ├──  Guards (Autenticación/Autorización)
+    ├──  Interceptors (Logging/Response)
+    ├──  DTOs (Validación de Datos)
+    └──  Tests (Unit/Integration/e2e)
 ```
 
 ### Pipeline de Requests (Backend)
 ```
-📨 Request
-↓ 🛡️ Helmet + CORS + Compression
-↓ � ThrottlerGuard (Rate Limiting)
-↓ 🚪 AuthGuard (JWT Verification)
-↓ 🔍 LoggingInterceptor
-↓ 🧪 ValidationPipe + DTOs
-↓ 🎯 Controller
-↓ ⚙️ Service
-↓ 🗄️ Prisma + PostgreSQL
-↓ � ResponseInterceptor
-↓ 📤 Formatted Response
+ Request
+↓  Helmet + CORS + Compression
+↓  ThrottlerGuard (Rate Limiting)
+↓  AuthGuard (JWT Verification)
+↓  LoggingInterceptor
+↓  ValidationPipe + DTOs
+↓  Controller
+↓  Service
+↓  Prisma + PostgreSQL
+↓  ResponseInterceptor
+↓  Formatted Response
 ```
 
 ---
@@ -107,15 +107,15 @@ npx prisma generate
 
 # Iniciar servidor de desarrollo
 npm run start:dev
-# 🌐 Backend corriendo en: http://localhost:3000
-# 📚 Swagger UI en: http://localhost:3000/api-docs
+#  Backend corriendo en: http://localhost:3000
+#  Swagger UI en: http://localhost:3000/api-docs
 ```
 
 ---
 
 ## 🛠️ **Stack Tecnológico**
 
-### **Backend - API REST ✅ Funcional**
+### **Backend - API REST Funcional**
 | Tecnología | Versión | Propósito |
 |------------|---------|-----------|
 | **NestJS** | v11.0.1 | Framework para APIs REST |
@@ -135,7 +135,7 @@ npm run start:dev
 - **JWT Authentication**: Tokens seguros con expiración
 - **Validation Pipes**: Validación estricta de entrada
 
-### **Base de Datos ✅ Implementada**
+### **Base de Datos Implementada**
 - **PostgreSQL** - Base de datos principal
 - **Prisma ORM** - Gestión de esquemas y migraciones
 - **Connection Pooling** - Optimización de conexiones
@@ -146,8 +146,8 @@ npm run start:dev
 ### 🎯 **Para empezar a desarrollar:**
 
 1. **Backend (API)**: 
-   - 📖 Lee: [`backend/README.md`](./backend/README.md)
-   - 🚀 Contiene: Setup, comandos, estructura, troubleshooting
+   -  Lee: [`backend/README.md`](./backend/README.md)
+   -  Contiene: Setup, comandos, estructura, troubleshooting
 ---
 
 ## 🔧 **Configuración de Desarrollo**
@@ -178,26 +178,26 @@ THROTTLE_LIMIT=10
 #### **Backend ✅ Funcional**
 ```bash
 cd backend
-npm run start:dev    # 🚀 Desarrollo con hot-reload
-npm run start:debug  # 🐛 Modo debug
-npm run build        # 🏗️ Compilar para producción
-npm run start:prod   # 🚀 Ejecutar versión compilada
-npm test            # 🧪 Tests unitarios
-npm run test:e2e    # 🧪 Tests end-to-end
-npm run test:cov    # 📊 Coverage report
-npm run lint        # ✅ Verificar calidad de código
+npm run start:dev    #  Desarrollo con hot-reload
+npm run start:debug  #  Modo debug
+npm run build        #  Compilar para producción
+npm run start:prod   #  Ejecutar versión compilada
+npm test            #  Tests unitarios
+npm run test:e2e    #  Tests end-to-end
+npm run test:cov    #  Coverage report
+npm run lint        #  Verificar calidad de código
 
 # Base de datos
-npx prisma db push   # 🗄️ Aplicar cambios del schema
-npx prisma studio   # 🎨 GUI de base de datos
-npx prisma generate # 🔄 Generar cliente Prisma
+npx prisma db push   #  Aplicar cambios del schema
+npx prisma studio   #  GUI de base de datos
+npx prisma generate #  Generar cliente Prisma
 ```
 
 ## 📁 **Estructura de Carpetas**
 
 ```
 ColectaYa/
-├── backend/                   # 🏗️ API REST ✅ Funcional
+├── backend/                   #  API REST Funcional
 │   ├── src/
 │   │   ├── auth/              # Módulo de autenticación
 │   │   │   ├── dto/           # DTOs de autenticación
@@ -227,13 +227,13 @@ ColectaYa/
 │   ├── .vscode/              # Configuración VS Code
 │   ├── package.json          # Dependencias NPM
 │   └── README.md             # Docs técnicas del backend
-├── frontend/                   # 🖥️ Aplicación Web (en desarrollo)
-│   ├── src/                   # 🚧 Próximamente
-│   ├── public/                # 🚧 Próximamente  
-│   ├── package.json           # 🚧 Próximamente
-│   └── README.md              # 🚧 Próximamente                     
+├── frontend/                   # Aplicación Web (en desarrollo)
+│   ├── src/                   # Próximamente
+│   ├── public/                # Próximamente  
+│   ├── package.json           # Próximamente
+│   └── README.md              # Próximamente                     
 ├── .gitignore                 # Archivos ignorados por Git
-└── README.md                  # 📖 Este archivo
+└── README.md                  # Este archivo
 ```
 
 ---
