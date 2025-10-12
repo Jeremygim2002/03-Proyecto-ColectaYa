@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Request, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { WithdrawalsService } from './withdrawals.service';
 import { RequestWithdrawalDto } from './dto';
@@ -31,5 +31,37 @@ export class WithdrawalsController {
   @ApiOperation({ summary: 'Listar retiros' })
   async list(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
     return this.withdrawalsService.listWithdrawals(collectionId, req.user.sub);
+  }
+
+  @Patch(':withdrawalId/approve')
+  @ApiOperation({ summary: 'Aprobar retiro (cambio de estado)' })
+  approve(
+    @Param('collectionId') collectionId: string,
+    @Param('withdrawalId') withdrawalId: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    // TODO: Implementar approve logic en service
+    return {
+      message: 'TODO: Implement approve withdrawal',
+      collectionId,
+      withdrawalId,
+      userId: req.user.sub,
+    };
+  }
+
+  @Patch(':withdrawalId/reject')
+  @ApiOperation({ summary: 'Rechazar retiro (cambio de estado)' })
+  reject(
+    @Param('collectionId') collectionId: string,
+    @Param('withdrawalId') withdrawalId: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    // TODO: Implementar reject logic en service
+    return {
+      message: 'TODO: Implement reject withdrawal',
+      collectionId,
+      withdrawalId,
+      userId: req.user.sub,
+    };
   }
 }

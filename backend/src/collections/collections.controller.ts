@@ -1,7 +1,21 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Request,
+  HttpCode,
+  HttpStatus,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { CollectionsService } from './collections.service';
-import { CreateCollectionDto, UpdateCollectionDto } from './dto';
+import { CreateCollectionDto, UpdateCollectionDto, GetPublicCollectionsDto } from './dto';
+import { PublicCollectionsResponse } from '../types';
+import { Public } from '../auth/decorators/public.decorator';
 
 interface AuthenticatedRequest {
   user: {
@@ -16,6 +30,16 @@ interface AuthenticatedRequest {
 @Controller('collections')
 export class CollectionsController {
   constructor(private readonly collectionsService: CollectionsService) {}
+
+  @Public()
+  @Get('public')
+  @ApiOperation({
+    summary: 'Listar colectas públicas',
+    description: 'Obtiene colectas públicas con filtros para la página Explore. No requiere autenticación.',
+  })
+  async findPublic(@Query() filters: GetPublicCollectionsDto): Promise<PublicCollectionsResponse> {
+    return await this.collectionsService.findPublicCollections(filters);
+  }
 
   @Post()
   @ApiOperation({ summary: 'Crear colecta' })

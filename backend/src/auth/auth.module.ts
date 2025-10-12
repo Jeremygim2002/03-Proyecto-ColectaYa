@@ -8,13 +8,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    // 1) Importar ConfigModule para que ConfigService esté disponible
+    // Importar ConfigModule para que ConfigService esté disponible
     ConfigModule,
     UserModule,
     PrismaModule,
     JwtModule.registerAsync({
       global: true,
-      // 2) Permitir la inyección en useFactory
+      // Permitir la inyección en useFactory
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

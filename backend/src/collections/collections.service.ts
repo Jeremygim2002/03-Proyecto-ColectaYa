@@ -1,25 +1,50 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateCollectionDto, UpdateCollectionDto } from './dto';
-import { Collection, CollectionStatus } from '@prisma/client';
+import { CreateCollectionDto, UpdateCollectionDto, GetPublicCollectionsDto, PublicCollectionFilter } from './dto';
+import { Collection, CollectionStatus, Prisma } from '@prisma/client';
+import { CollectionWithStats, PublicCollectionsResponse } from '../types';
+
+// Tipo para el resultado de la query con includes
+type CollectionWithIncludesForPublic = Prisma.CollectionGetPayload<{
+  include: {
+    owner: {
+      select: {
+        id: true;
+        email: true;
+        name: true;
+        avatar: true;
+      };
+    };
+    contributions: {
+      select: {
+        amount: true;
+        userId: true;
+      };
+    };
+  };
+}>;
 
 @Injectable()
 export class CollectionsService {
   constructor(private prisma: PrismaService) {}
 
   async create(ownerId: string, dto: CreateCollectionDto): Promise<Collection> {
-    return this.prisma.collection.create({
+    // Temporalmente sin imageUrl hasta regenerar Prisma
+    const newCollection = await this.prisma.collection.create({
       data: {
-        title: dto.name,
+        ownerId: ownerId,
+        title: dto.title,
         description: dto.description,
+        imageUrl: dto.imageUrl,
+        isPrivate: dto.isPrivate,
         goalAmount: dto.goalAmount,
         ruleType: dto.ruleType,
-        thresholdPct: dto.ruleValue,
-        isPrivate: dto.isPrivate ?? false,
-        ownerId,
-        status: CollectionStatus.ACTIVE,
+        ruleValue: dto.ruleValue,
+        deadlineAt: dto.deadlineAt,
       },
     });
+
+    return newCollection;
   }
 
   async findOne(id: string, userId: string) {
@@ -94,12 +119,15 @@ export class CollectionsService {
     return this.prisma.collection.update({
       where: { id },
       data: {
-        title: dto.name,
+        title: dto.title,
         description: dto.description,
+        imageUrl: dto.imageUrl,
         goalAmount: dto.goalAmount,
         ruleType: dto.ruleType,
-        thresholdPct: dto.ruleValue,
+        ruleValue: dto.ruleValue,
         isPrivate: dto.isPrivate,
+        status: dto.status,
+        deadlineAt: dto.deadlineAt ? new Date(dto.deadlineAt) : undefined,
       },
     });
   }
@@ -158,5 +186,112 @@ export class CollectionsService {
         createdAt: 'desc',
       },
     });
+  }
+
+  async findPublicCollections(filters: GetPublicCollectionsDto): Promise<PublicCollectionsResponse> {
+    const { search, status, skip, take } = filters;
+
+    // Colectas publicas o privadas
+    const whereCondition: {
+      isPrivate: boolean;
+      status?: CollectionStatus;
+      OR?: Array<
+        | { title?: { contains: string; mode: 'insensitive' } }
+        | { description?: { contains: string; mode: 'insensitive' } }
+      >;
+    } = {
+      isPrivate: false, // Solo colectas públicas
+    };
+
+    // Filtro por estado
+    if (status && status !== PublicCollectionFilter.TODOS) {
+      whereCondition.status = status as CollectionStatus; // 'ACTIVE' o 'COMPLETED'
+    }
+    // Si es TODOS, no agregamos filtro de status (muestra ambos)
+
+    // Filtro de búsqueda en título y descripción
+    if (search) {
+      whereCondition.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    // Ejecutar query con paginación
+    const [collections, total] = await Promise.all([
+      this.prisma.collection.findMany({
+        where: whereCondition,
+        include: {
+          owner: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              avatar: true,
+            },
+          },
+          contributions: {
+            where: { status: 'PAID' },
+            select: {
+              amount: true,
+              userId: true,
+            },
+          },
+        },
+        skip,
+        take,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.collection.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    // Calcular estadísticas para cada colecta
+    const collectionsWithStats: CollectionWithStats[] = collections.map(
+      (collection: CollectionWithIncludesForPublic) => {
+        const validContributions = collection.contributions || [];
+        const currentAmount = validContributions.reduce((sum, contrib) => {
+          return sum + Number(contrib.amount);
+        }, 0);
+        const contributorsCount = new Set(validContributions.map((c) => c.userId)).size;
+        const progress = collection.goalAmount ? (currentAmount / Number(collection.goalAmount)) * 100 : 0;
+
+        return {
+          id: collection.id,
+          title: collection.title,
+          description: collection.description ?? undefined,
+          imageUrl: collection.imageUrl ?? undefined,
+          isPrivate: collection.isPrivate,
+          goalAmount: Number(collection.goalAmount),
+          currency: 'PEN' as const,
+          ruleType: collection.ruleType,
+          ruleValue: collection.ruleValue ? Number(collection.ruleValue) : undefined,
+          status: collection.status,
+          deadlineAt: collection.deadlineAt ?? undefined,
+          createdAt: collection.createdAt,
+          updatedAt: collection.updatedAt,
+          owner: {
+            id: collection.owner.id,
+            email: collection.owner.email,
+            name: collection.owner.name ?? undefined,
+            avatar: collection.owner.avatar ?? undefined,
+          },
+          currentAmount,
+          contributorsCount,
+          progress: Math.round(progress * 100) / 100,
+        };
+      },
+    );
+
+    return {
+      collections: collectionsWithStats,
+      total,
+      page: filters.page || 1,
+      limit: filters.limit || 12,
+      hasNextPage: skip + take < total,
+    };
   }
 }

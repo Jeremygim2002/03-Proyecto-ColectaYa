@@ -1,9 +1,6 @@
 import { Request } from 'express';
 import { Role } from '@prisma/client';
 
-/**
- * Payload del JWT token - versión MVP simplificada
- */
 export interface JwtPayload {
   sub: string; // user id (UUID)
   email: string;
@@ -12,9 +9,6 @@ export interface JwtPayload {
   exp?: number;
 }
 
-/**
- * Request extendido con información del usuario autenticado
- */
 export interface AuthenticatedRequest extends Request {
   user: JwtPayload;
 }

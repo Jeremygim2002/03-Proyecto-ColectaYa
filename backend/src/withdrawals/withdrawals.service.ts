@@ -39,7 +39,7 @@ export class WithdrawalsService {
         break;
 
       case RuleType.THRESHOLD: {
-        const thresholdPct = Number(collection.thresholdPct || 0);
+        const thresholdPct = Number(collection.ruleValue || 0); // ✅ CORREGIDO - Usar campo actualizado
         if (progressPct < thresholdPct) {
           throw new BadRequestException(`Cannot withdraw until threshold is reached (${thresholdPct}%)`);
         }

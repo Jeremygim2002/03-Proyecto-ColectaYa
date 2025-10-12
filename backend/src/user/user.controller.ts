@@ -1,6 +1,7 @@
 import { Controller, Get, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UserService } from './user.service';
+import { User } from '../types';
 
 interface AuthenticatedRequest {
   user: {
@@ -18,7 +19,7 @@ export class UserController {
   @Get('me')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener mi perfil' })
-  async getMyProfile(@Request() req: AuthenticatedRequest) {
+  async getMyProfile(@Request() req: AuthenticatedRequest): Promise<User | null> {
     return this.userService.getUserById(req.user.sub);
   }
 }

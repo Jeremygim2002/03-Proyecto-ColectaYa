@@ -39,7 +39,7 @@ export class FundingService {
     }
 
     // Simular pago exitoso (en producción aquí iría integración con pasarela)
-    const paymentSuccess = Math.random() > 0.1; // 90% de éxito simulado
+    const paymentSuccess = Math.random() > 0.1;
 
     // Crear contribución
     const contribution = await this.prisma.contribution.create({

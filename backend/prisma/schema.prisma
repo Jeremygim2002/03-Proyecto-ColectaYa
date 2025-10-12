@@ -20,9 +20,9 @@ enum Role {
 }
 
 enum CollectionStatus {
-  ACTIVE  // Activa, recibiendo aportes
-  CLOSED  // Cerrada, no acepta más aportes
-  HIDDEN  // Oculta (borrador o pausada)
+  ACTIVE     // Activa, recibiendo aportes (en proceso)
+  COMPLETED  // Completada, meta alcanzada
+  // TODOS es solo un filtro frontend
 }
 
 enum RuleType {
@@ -34,7 +34,6 @@ enum RuleType {
 enum ContributionStatus {
   PAID     // Pagado exitosamente
   FAILED   // Pago fallido
-  REFUNDED // Reembolsado
 }
 
 enum WithdrawalStatus {
@@ -51,6 +50,8 @@ model User {
   id        String   @id @default(uuid()) @db.Uuid
   email     String   @unique
   password  String
+  name      String?  // ✅ AGREGADO - Para mostrar nombre en UI
+  avatar    String?  // ✅ AGREGADO - Para avatares de usuario
   roles     Role[]   @default([USER])
   createdAt DateTime @default(now()) @db.Timestamptz
 
@@ -69,23 +70,27 @@ model Collection {
   ownerId      String           @db.Uuid
   title        String
   description  String?
+  imageUrl     String?          // ✅ AGREGADO - Para imágenes de colectas
   isPrivate    Boolean          @default(false)
   goalAmount   Decimal          @db.Decimal(12, 2)
   ruleType     RuleType
-  thresholdPct Decimal?         @db.Decimal(5, 2) // Solo si ruleType=THRESHOLD
+  ruleValue    Decimal?         @db.Decimal(5, 2) // ✅ RENOMBRADO de thresholdPct
   status       CollectionStatus @default(ACTIVE)
   deadlineAt   DateTime?        @db.Timestamptz
   createdAt    DateTime         @default(now()) @db.Timestamptz
+  updatedAt    DateTime         @updatedAt @db.Timestamptz // ✅ AGREGADO - Para tracking de cambios
 
   // Relaciones
   owner         User               @relation("CollectionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   members       CollectionMember[]
   contributions Contribution[]
   withdrawals   Withdrawal[]
+  stats         CollectionStats?   // ✅ RELACIÓN - Para estadísticas optimizadas
 
   @@index([ownerId])
   @@index([status])
   @@index([deadlineAt])
+  @@index([isPrivate])  // ✅ NUEVO - Para queries de colectas públicas
   @@map("collections")
 }
 
@@ -144,4 +149,24 @@ model Withdrawal {
   @@index([requestedBy])
   @@index([status])
   @@map("withdrawals")
+}
+
+// =====================================================
+// TABLA DE ESTADÍSTICAS - Para optimizar consultas
+// =====================================================
+
+model CollectionStats {
+  id                 String    @id @default(uuid()) @db.Uuid
+  collectionId       String    @unique @db.Uuid
+  currentAmount      Decimal   @default(0) @db.Decimal(12, 2)
+  contributorsCount  Int       @default(0)
+  contributionsCount Int       @default(0)
+  lastContribution   DateTime? @db.Timestamptz
+  lastUpdated        DateTime  @default(now()) @updatedAt @db.Timestamptz
+
+  // Relación
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@index([lastUpdated])
+  @@map("collection_stats")
 }
