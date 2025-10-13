@@ -53,7 +53,7 @@ export interface PublicCollectionsResponse {
   hasNextPage: boolean;
 }
 
-//  Filtros para colectas públicas
+// Filtros para colectas públicas
 export enum PublicCollectionFilter {
   ACTIVE = 'ACTIVE',
   COMPLETED = 'COMPLETED',
@@ -94,7 +94,7 @@ export interface CollectionResponse {
   message: string;
 }
 
-//  Dashboard de colecciones del usuario
+// Dashboard de colecciones del usuario
 export interface UserCollectionsDashboard {
   owned: CollectionWithStats[];
   participating: CollectionWithStats[];
