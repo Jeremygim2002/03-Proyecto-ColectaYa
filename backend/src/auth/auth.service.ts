@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { SignInDto } from './dto';
-import { AuthResponse } from './types';
+import { AuthResponse } from '../types/user.types';
 
 @Injectable()
 export class AuthService {
@@ -37,16 +37,29 @@ export class AuthService {
       roles: user.roles,
     };
 
+    const expiresIn = '24h';
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: this.configService.get('JWT_EXPIRES_IN', '24h'),
+      expiresIn,
+    });
+
+    // Generar refresh token (por ahora usa el mismo secreto, en producción debería ser diferente)
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '7d', // Refresh token dura más
     });
 
     return {
-      access_token: accessToken,
       user: {
         id: user.id,
         email: user.email,
+        name: user.name ?? undefined,
+        avatar: user.avatar ?? undefined,
         roles: user.roles,
+        createdAt: user.createdAt,
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: 24 * 60 * 60, // 24 horas en segundos
       },
     };
   }
@@ -73,16 +86,29 @@ export class AuthService {
       roles: user.roles,
     };
 
+    const expiresIn = '24h';
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: this.configService.get('JWT_EXPIRES_IN', '24h'),
+      expiresIn,
+    });
+
+    // Generar refresh token (por ahora usa el mismo secreto, en producción debería ser diferente)
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '7d', // Refresh token dura más
     });
 
     return {
-      access_token: accessToken,
       user: {
         id: user.id,
         email: user.email,
+        name: user.name ?? undefined,
+        avatar: user.avatar ?? undefined,
         roles: user.roles,
+        createdAt: user.createdAt,
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: 24 * 60 * 60, // 24 horas en segundos
       },
     };
   }

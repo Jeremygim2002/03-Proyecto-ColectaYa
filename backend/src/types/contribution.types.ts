@@ -1,50 +1,35 @@
-// ======================================================
-// CONTRIBUTION TYPES - BACKEND
-// ======================================================
-
 import { ContributionStatus } from '@prisma/client';
 import { BasicUser } from './user.types';
 
-/**
- * Contribución con información del usuario
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Contribución con información del usuario
 export interface ContributionWithUser {
   id: string;
   amount: number;
-  currency: 'PEN'; // 🏦 Siempre soles peruanos
+  currency: 'PEN';
   message?: string;
   status: ContributionStatus;
   createdAt: Date;
 
-  // Usuario que hizo la contribución
   user: BasicUser;
 
-  // Información de la colecta
   collection: {
     id: string;
     title: string;
   };
 }
 
-/**
- * Contribución básica para listas
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Contribución básica para listas
 export interface BasicContribution {
   id: string;
   amount: number;
-  currency: 'PEN'; // 🏦 Siempre soles peruanos
+  currency: 'PEN';
   message?: string;
   status: ContributionStatus;
   createdAt: Date;
   userId: string;
 }
 
-/**
- * Estadísticas de contribuciones
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Estadísticas de contribuciones
 export interface ContributionStats {
   total: number;
   totalAmount: number;
@@ -53,10 +38,7 @@ export interface ContributionStats {
   failedContributions: number;
 }
 
-/**
- * Respuesta de contribuciones del usuario
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Respuesta de contribuciones del usuario
 export interface UserContributionsResponse {
   contributions: ContributionWithUser[];
   stats: ContributionStats;

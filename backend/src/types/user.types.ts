@@ -1,14 +1,6 @@
-// ======================================================
-// USER TYPES - BACKEND
-// ======================================================
-
 import { Role } from '@prisma/client';
 
-/**
- * Usuario principal (sin datos sensibles)
- * 🎯 DEBE coincidir exactamente con frontend
- * 🔒 SEGURO: NO incluye password, refreshTokens, bankData
- */
+// Usuario principal (sin datos sensibles)
 export interface User {
   id: string;
   email: string;
@@ -16,13 +8,9 @@ export interface User {
   avatar?: string;
   roles: Role[];
   createdAt: Date;
-  // ❌ NUNCA incluir: password, refreshTokens, bankAccount, internalNotes
 }
 
-/**
- * Usuario con estadísticas
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Usuario con estadísticas
 export interface UserWithStats {
   id: string;
   email: string;
@@ -30,17 +18,14 @@ export interface UserWithStats {
   avatar?: string;
   roles: Role[];
   createdAt: Date;
-  // Estadísticas
+
   collectionsCount: number;
   contributionsCount: number;
   totalContributed: number;
   collectionsOwned: number;
 }
 
-/**
- * Perfil público de usuario
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Perfil público de usuario
 export interface PublicUserProfile {
   id: string;
   name?: string;
@@ -50,10 +35,7 @@ export interface PublicUserProfile {
   totalContributions: number;
 }
 
-/**
- * Usuario básico para relaciones
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Usuario básico para relaciones
 export interface BasicUser {
   id: string;
   email: string;
@@ -61,22 +43,20 @@ export interface BasicUser {
   avatar?: string;
 }
 
-/**
- * Respuesta de autenticación
- * 🎯 DEBE coincidir exactamente con frontend
- * 🔒 SEGURO: refreshToken solo en respuesta, nunca en User
- */
-export interface AuthResponse {
-  user: User; // User ya filtrado y seguro
+// Tokens de autenticación
+export interface AuthTokens {
   accessToken: string;
-  refreshToken?: string; // Solo aquí, nunca en User interface
+  refreshToken: string;
   expiresIn: number;
 }
 
-/**
- * Respuesta de perfil de usuario
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Respuesta de autenticación
+export interface AuthResponse {
+  user: User; // User ya filtrado y seguro
+  tokens: AuthTokens; // Tokens agrupados
+}
+
+// Respuesta de perfil de usuario
 export interface UserProfileResponse {
   user: UserWithStats;
   recentCollections: Array<{

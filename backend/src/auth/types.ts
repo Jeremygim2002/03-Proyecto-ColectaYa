@@ -13,14 +13,4 @@ export interface AuthenticatedRequest extends Request {
   user: JwtPayload;
 }
 
-/**
- * Respuesta del endpoint de autenticación - MVP sin refresh token
- */
-export interface AuthResponse {
-  access_token: string;
-  user: {
-    id: string;
-    email: string;
-    roles: Role[];
-  };
-}
+// AuthResponse se importa desde ../types/user.types.ts para mantener consistencia

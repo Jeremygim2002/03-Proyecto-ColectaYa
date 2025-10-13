@@ -1,18 +1,11 @@
-// ======================================================
-// WITHDRAWAL TYPES - BACKEND
-// ======================================================
-
 import { WithdrawalStatus } from '@prisma/client';
 import { BasicUser } from './user.types';
 
-/**
- * Retiro con información del usuario
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Retiro con información del usuario
 export interface WithdrawalWithUser {
   id: string;
   amount: number;
-  currency: 'PEN'; // 🏦 Siempre soles peruanos
+  currency: 'PEN';
   reason?: string;
   status: WithdrawalStatus;
   requestedAt: Date;
@@ -29,24 +22,18 @@ export interface WithdrawalWithUser {
   };
 }
 
-/**
- * Retiro básico para listas
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Retiro básico para listas
 export interface BasicWithdrawal {
   id: string;
   amount: number;
-  currency: 'PEN'; // 🏦 Siempre soles peruanos
+  currency: 'PEN';
   reason?: string;
   status: WithdrawalStatus;
   requestedAt: Date;
   processedAt?: Date;
 }
 
-/**
- * Estadísticas de retiros
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Estadísticas de retiros
 export interface WithdrawalStats {
   totalRequested: number;
   totalApproved: number;
@@ -55,10 +42,7 @@ export interface WithdrawalStats {
   totalAmount: number;
 }
 
-/**
- * Respuesta de retiros de colecta
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Respuesta de retiros de colecta
 export interface CollectionWithdrawalsResponse {
   withdrawals: WithdrawalWithUser[];
   stats: WithdrawalStats;

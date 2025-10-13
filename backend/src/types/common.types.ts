@@ -1,11 +1,4 @@
-// ======================================================
-// TYPES COMUNES - BACKEND
-// ======================================================
-
-/**
- * Respuesta estándar con paginación
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Respuesta estándar con paginación
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
@@ -15,10 +8,7 @@ export interface PaginatedResponse<T> {
   hasPreviousPage: boolean;
 }
 
-/**
- * Metadatos de paginación
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Metadatos de paginación
 export interface PaginationMeta {
   total: number;
   page: number;
@@ -28,10 +18,7 @@ export interface PaginationMeta {
   totalPages: number;
 }
 
-/**
- * Respuesta estándar de API
- * 📝 Solo para backend - estructura interna
- */
+// Respuesta estándar de API
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -40,10 +27,7 @@ export interface ApiResponse<T> {
   statusCode: number;
 }
 
-/**
- * Respuesta de error estándar
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Respuesta de error estándar
 export interface ErrorResponse {
   success: false;
   message: string;
@@ -53,10 +37,7 @@ export interface ErrorResponse {
   path: string;
 }
 
-/**
- * Filtros base para búsquedas
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Filtros base para búsquedas
 export interface BaseFilters {
   search?: string;
   page?: number;
@@ -65,10 +46,7 @@ export interface BaseFilters {
   sortOrder?: 'asc' | 'desc';
 }
 
-/**
- * Respuesta de operación exitosa
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Respuesta de operación exitosa
 export interface SuccessResponse {
   success: true;
   message: string;

@@ -8,7 +8,7 @@ export interface CollectionWithStats {
   imageUrl?: string;
   isPrivate: boolean;
   goalAmount: number;
-  currency: 'PEN'; // 🏦 Siempre soles peruanos
+  currency: 'PEN';
   ruleType: RuleType;
   ruleValue?: number;
   status: CollectionStatus;
@@ -16,7 +16,6 @@ export interface CollectionWithStats {
   createdAt: Date;
   updatedAt: Date;
 
-  // Dueño de la colecta
   owner: BasicUser;
 
   // Estadísticas calculadas
@@ -25,10 +24,6 @@ export interface CollectionWithStats {
   progress: number; // Porcentaje de progreso
 }
 
-/**
- * Colección con detalles completos
- * 🎯 DEBE coincidir exactamente con frontend
- */
 export interface CollectionWithDetails extends CollectionWithStats {
   // Miembros y contribuciones para vista detallada
   members: Array<{
@@ -42,17 +37,14 @@ export interface CollectionWithDetails extends CollectionWithStats {
   contributions: Array<{
     id: string;
     amount: number;
-    currency: 'PEN'; // 🏦 Siempre soles peruanos
+    currency: 'PEN';
     message?: string;
     user: BasicUser;
     createdAt: Date;
   }>;
 }
 
-/**
- * Respuesta de colectas públicas con paginación
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Respuesta de colectas públicas con paginación
 export interface PublicCollectionsResponse {
   collections: CollectionWithStats[];
   total: number;
@@ -61,26 +53,20 @@ export interface PublicCollectionsResponse {
   hasNextPage: boolean;
 }
 
-/**
- * Filtros para colectas públicas
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Filtros para colectas públicas
 export enum PublicCollectionFilter {
   ACTIVE = 'ACTIVE',
   COMPLETED = 'COMPLETED',
   TODOS = 'TODOS',
 }
 
-/**
- * Colección básica para listas
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Colección básica para listas
 export interface BasicCollection {
   id: string;
   title: string;
   imageUrl?: string;
   goalAmount: number;
-  currency: 'PEN'; // 🏦 Siempre soles peruanos
+  currency: 'PEN';
   currentAmount: number;
   progress: number;
   status: CollectionStatus;
@@ -91,10 +77,7 @@ export interface BasicCollection {
   };
 }
 
-/**
- * Estadísticas de una colección
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Estadísticas de una colección
 export interface CollectionStats {
   id: string;
   collectionId: string;
@@ -105,19 +88,13 @@ export interface CollectionStats {
   lastUpdated: Date;
 }
 
-/**
- * Respuesta de creación/actualización de colección
- * 🎯 DEBE coincidir exactamente con frontend
- */
+// Respuesta de creación/actualización de colección
 export interface CollectionResponse {
   collection: CollectionWithStats;
   message: string;
 }
 
-/**
- * Dashboard de colecciones del usuario
- * 🎯 DEBE coincidir exactamente con frontend
- */
+//  Dashboard de colecciones del usuario
 export interface UserCollectionsDashboard {
   owned: CollectionWithStats[];
   participating: CollectionWithStats[];
