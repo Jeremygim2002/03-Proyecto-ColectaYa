@@ -103,13 +103,13 @@ export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps
             value={formData.splitEqually}
             onValueChange={(v: string) => onUpdate("splitEqually", v as "yes" | "no")}
           >
-            <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-accent/50">
+            <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-muted/50">
               <RadioGroupItem value="no" id="split-no" />
               <Label htmlFor="split-no" className="flex-1 cursor-pointer font-normal">
                 No, cada miembro aporta libremente
               </Label>
             </div>
-            <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-accent/50">
+            <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-muted/50">
               <RadioGroupItem value="yes" id="split-yes" />
               <Label htmlFor="split-yes" className="flex-1 cursor-pointer font-normal">
                 Sí, dividir equitativamente
@@ -129,13 +129,13 @@ export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps
                   onUpdate("paymentMode", v as "unico" | "recurrente")
                 }
               >
-                <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-accent/50">
+                <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-muted/50">
                   <RadioGroupItem value="unico" id="payment-unico" />
                   <Label htmlFor="payment-unico" className="flex-1 cursor-pointer font-normal">
                     Pago único
                   </Label>
                 </div>
-                <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-accent/50">
+                <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-muted/50">
                   <RadioGroupItem value="recurrente" id="payment-recurrente" />
                   <Label
                     htmlFor="payment-recurrente"

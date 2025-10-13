@@ -14,6 +14,7 @@ export interface Invitation {
 }
 
 export type InvitationStatus = 
+  | 'pending'
   | 'accepted' 
   | 'declined';
 

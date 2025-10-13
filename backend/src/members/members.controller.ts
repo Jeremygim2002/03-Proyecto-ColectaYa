@@ -2,6 +2,7 @@ import { Controller, Get, Post, Delete, Body, Param, Request, HttpCode, HttpStat
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { MembersService } from './members.service';
 import { InviteMemberDto } from './dto';
+import { InvitationsService } from '../invitations/invitations.service';
 
 interface AuthenticatedRequest {
   user: {
@@ -15,22 +16,19 @@ interface AuthenticatedRequest {
 @ApiBearerAuth()
 @Controller('collections/:collectionId/members')
 export class MembersController {
-  constructor(private readonly membersService: MembersService) {}
+  constructor(
+    private readonly membersService: MembersService,
+    private readonly invitationsService: InvitationsService,
+  ) {}
 
   @Post('invite')
-  @ApiOperation({ summary: 'Invitar miembro' })
+  @ApiOperation({ summary: 'Invitar miembro (crea invitación pendiente)' })
   async invite(
     @Param('collectionId') collectionId: string,
     @Request() req: AuthenticatedRequest,
     @Body() dto: InviteMemberDto,
   ) {
-    return this.membersService.invite(collectionId, req.user.sub, dto.email);
-  }
-
-  @Post('accept')
-  @ApiOperation({ summary: 'Aceptar invitación' })
-  async accept(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    return this.membersService.accept(collectionId, req.user.sub);
+    return this.invitationsService.createInvitation(collectionId, req.user.sub, dto.email);
   }
 
   @Delete(':userId')

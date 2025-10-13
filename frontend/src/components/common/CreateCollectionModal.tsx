@@ -1,39 +1,19 @@
 "use client";
 
-import { useOptimistic, useTransition, Suspense, lazy } from "react";
+import { useOptimistic, useTransition } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { useStepNavigation } from "../collection-modal/hooks/useStepNavigation";
 import { useCollectionForm } from "../collection-modal/hooks/useCollectionForm";
 import { StepIndicator } from "../collection-modal/components";
 
-// Lazy loading de steps 
-const BasicInfoStep = lazy(() => 
-  import("../collection-modal/steps/BasicInfoStep").then(module => ({
-    default: module.BasicInfoStep
-  }))
-);
-
-const ConfigurationStep = lazy(() => 
-  import("../collection-modal/steps/ConfigurationStep").then(module => ({
-    default: module.ConfigurationStep
-  }))
-);
-
-const MembersStep = lazy(() => 
-  import("../collection-modal/steps/MembersStep").then(module => ({
-    default: module.MembersStep
-  }))
-);
-
-const SummaryStep = lazy(() => 
-  import("../collection-modal/steps/SummaryStep").then(module => ({
-    default: module.SummaryStep
-  }))
-);
+// Importaciones directas (sin lazy loading para formularios)
+import { BasicInfoStep } from "../collection-modal/steps/BasicInfoStep";
+import { ConfigurationStep } from "../collection-modal/steps/ConfigurationStep";
+import { MembersStep } from "../collection-modal/steps/MembersStep";
+import { SummaryStep } from "../collection-modal/steps/SummaryStep";
 
 interface CreateCollectionModalProps {
   isOpen: boolean;
@@ -47,15 +27,7 @@ interface OptimisticState {
   progress: number;
 }
 
-// Componente de carga 
-const StepSkeleton = () => (
-  <div className="space-y-6">
-    <Skeleton className="h-4 w-3/4" />
-    <Skeleton className="h-10 w-full" />
-    <Skeleton className="h-20 w-full" />
-    <Skeleton className="h-10 w-full" />
-  </div>
-);
+// Eliminado StepSkeleton - no es necesario para formularios
 
 const STEPS = [
   { number: 1, label: "Información Básica" },
@@ -186,30 +158,28 @@ export default function CreateCollectionModal({
             <StepIndicator steps={STEPS} currentStep={currentStep} />
             
             <div className="mt-6">
-              <Suspense fallback={<StepSkeleton />}>
-                {currentStep === 1 && (
-                  <BasicInfoStep
-                    formData={formData}
-                    onUpdate={updateField}
-                  />
-                )}
-                {currentStep === 2 && (
-                  <ConfigurationStep
-                    formData={formData}
-                    onUpdate={updateField}
-                  />
-                )}
-                {currentStep === 3 && (
-                  <MembersStep
-                    members={formData.members}
-                    onAddMember={addMember}
-                    onRemoveMember={removeMember}
-                  />
-                )}
-                {currentStep === 4 && (
-                  <SummaryStep formData={formData} />
-                )}
-              </Suspense>
+              {currentStep === 1 && (
+                <BasicInfoStep
+                  formData={formData}
+                  onUpdate={updateField}
+                />
+              )}
+              {currentStep === 2 && (
+                <ConfigurationStep
+                  formData={formData}
+                  onUpdate={updateField}
+                />
+              )}
+              {currentStep === 3 && (
+                <MembersStep
+                  members={formData.members}
+                  onAddMember={addMember}
+                  onRemoveMember={removeMember}
+                />
+              )}
+              {currentStep === 4 && (
+                <SummaryStep formData={formData} />
+              )}
             </div>
 
             <div className="flex justify-between mt-8">

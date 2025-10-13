@@ -42,6 +42,12 @@ enum WithdrawalStatus {
   REJECTED  // Rechazado
 }
 
+enum InvitationStatus {
+  PENDING   // Invitación pendiente
+  ACCEPTED  // Invitación aceptada
+  REJECTED  // Invitación rechazada
+}
+
 // =====================================================
 // MODELOS - Entidades principales ColectaYa MVP
 // =====================================================
@@ -59,7 +65,9 @@ model User {
   ownedCollections Collection[]        @relation("CollectionOwner")
   memberships      CollectionMember[]
   contributions    Contribution[]
-  withdrawals      Withdrawal[]
+  withdrawals         Withdrawal[]
+  sentInvitations     Invitation[] @relation("InviterInvitations")
+  receivedInvitations Invitation[] @relation("InvitedInvitations")
 
   @@index([email])
   @@map("users")
@@ -85,6 +93,7 @@ model Collection {
   members       CollectionMember[]
   contributions Contribution[]
   withdrawals   Withdrawal[]
+  invitations   Invitation[]
   stats         CollectionStats?   // ✅ RELACIÓN - Para estadísticas optimizadas
 
   @@index([ownerId])
@@ -92,6 +101,27 @@ model Collection {
   @@index([deadlineAt])
   @@index([isPrivate])  // ✅ NUEVO - Para queries de colectas públicas
   @@map("collections")
+}
+
+model Invitation {
+  id           String           @id @default(uuid()) @db.Uuid
+  collectionId String           @db.Uuid
+  inviterId    String           @db.Uuid
+  invitedId    String           @db.Uuid
+  status       InvitationStatus @default(PENDING)
+  createdAt    DateTime         @default(now()) @db.Timestamptz
+  respondedAt  DateTime?        @db.Timestamptz
+
+  // Relaciones
+  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  inviter    User       @relation("InviterInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
+  invited    User       @relation("InvitedInvitations", fields: [invitedId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, invitedId]) // Un usuario solo puede tener una invitación por colección
+  @@index([invitedId])
+  @@index([collectionId])
+  @@index([status])
+  @@map("invitations")
 }
 
 model CollectionMember {

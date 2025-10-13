@@ -123,4 +123,50 @@ export class AuthService {
       },
     });
   }
+
+  async logout(userId: string): Promise<void> {
+    // Por ahora simplemente validamos que el usuario existe
+    // En una implementación más robusta, agregaríamos el token a una blacklist
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid user');
+    }
+
+    // TODO: Implementar blacklist de tokens si es necesario
+    // Por ahora, el logout es manejado del lado del cliente
+  }
+
+  async refresh(userId: string): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid user');
+    }
+
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      roles: user.roles,
+    };
+
+    const expiresIn = '24h';
+    const accessToken = await this.jwtService.signAsync(payload, {
+      expiresIn,
+    });
+
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      expiresIn: '7d',
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+      expiresIn: 24 * 60 * 60, // 24 horas en segundos
+    };
+  }
 }

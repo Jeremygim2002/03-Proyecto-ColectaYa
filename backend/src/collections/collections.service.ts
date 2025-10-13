@@ -294,4 +294,75 @@ export class CollectionsService {
       hasNextPage: skip + take < total,
     };
   }
+
+  async joinCollection(collectionId: string, userId: string) {
+    // Verificar que la colección existe y es pública
+    const collection = await this.prisma.collection.findUnique({
+      where: { id: collectionId },
+      include: {
+        members: true,
+      },
+    });
+
+    if (!collection) {
+      throw new NotFoundException('Collection not found');
+    }
+
+    if (collection.isPrivate) {
+      throw new BadRequestException('Cannot join private collection directly - an invitation is required');
+    }
+
+    if (collection.status !== CollectionStatus.ACTIVE) {
+      throw new BadRequestException('Collection is not active');
+    }
+
+    // Verificar que no sea el owner
+    if (collection.ownerId === userId) {
+      throw new BadRequestException('You are already the owner of this collection');
+    }
+
+    // Verificar que no sea ya miembro
+    const existingMember = collection.members.find((member) => member.userId === userId);
+    if (existingMember) {
+      throw new BadRequestException('You are already a member of this collection');
+    }
+
+    // Agregar como miembro
+    const member = await this.prisma.collectionMember.create({
+      data: {
+        collectionId,
+        userId,
+        acceptedAt: new Date(),
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+          },
+        },
+        collection: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+          },
+        },
+      },
+    });
+
+    return {
+      message: 'Successfully joined the collection',
+      member: {
+        id: member.id,
+        userId: member.userId,
+        collectionId: member.collectionId,
+        joinedAt: member.acceptedAt,
+        user: member.user,
+        collection: member.collection,
+      },
+    };
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Request } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignInDto, RegisterDto } from './dto';
@@ -26,10 +26,20 @@ export class AuthController {
     return this.authService.signIn(signInDto);
   }
 
-  @Get('profile')
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Obtener mi perfil' })
-  getProfile(@Request() req: AuthenticatedRequest) {
-    return req.user;
+  @ApiOperation({ summary: 'Cerrar sesión' })
+  async logout(@Request() req: AuthenticatedRequest) {
+    await this.authService.logout(req.user.sub);
+    return { message: 'Logged out successfully' };
+  }
+
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Renovar token de acceso' })
+  async refresh(@Request() req: AuthenticatedRequest) {
+    return this.authService.refresh(req.user.sub);
   }
 }

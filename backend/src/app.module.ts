@@ -8,7 +8,8 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CollectionsModule } from './collections/collections.module';
 import { MembersModule } from './members/members.module';
-import { FundingModule } from './funding/funding.module';
+import { ContributionsModule } from './contributions/contributions.module';
+import { InvitationsModule } from './invitations/invitations.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
 import { AuthGuard } from './auth/auth.guard';
 import configuration from './config/configuration';
@@ -51,7 +52,8 @@ import { validationSchema } from './config/validation';
     AuthModule,
     CollectionsModule,
     MembersModule,
-    FundingModule,
+    ContributionsModule,
+    InvitationsModule,
     WithdrawalsModule,
   ],
   controllers: [AppController],

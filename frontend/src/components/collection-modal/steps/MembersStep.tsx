@@ -78,7 +78,7 @@ export function MembersStep({ members, onAddMember, onRemoveMember }: MembersSte
             {members.map((member) => (
               <div
                 key={member.id}
-                className="flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50"
+                className="flex items-center justify-between rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
               >
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">

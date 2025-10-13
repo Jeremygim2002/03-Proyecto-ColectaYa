@@ -71,4 +71,10 @@ export class CollectionsController {
   async delete(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     await this.collectionsService.delete(id, req.user.sub);
   }
+
+  @Post(':id/members/join')
+  @ApiOperation({ summary: 'Unirse a colección pública' })
+  async joinCollection(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.collectionsService.joinCollection(id, req.user.sub);
+  }
 }

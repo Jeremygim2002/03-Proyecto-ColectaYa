@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ContributionStatus, CollectionStatus } from '@prisma/client';
 
 @Injectable()
-export class FundingService {
+export class ContributionsService {
   constructor(private prisma: PrismaService) {}
 
   async contribute(collectionId: string, userId: string, amount: number) {
@@ -38,7 +38,7 @@ export class FundingService {
       }
     }
 
-    // Simular pago exitoso (en producción aquí iría integración con pasarela)
+    // Simular pago exitoso
     const paymentSuccess = Math.random() > 0.1;
 
     // Crear contribución
@@ -106,6 +106,29 @@ export class FundingService {
           select: {
             id: true,
             email: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async getMyContributions(userId: string) {
+    return this.prisma.contribution.findMany({
+      where: {
+        userId,
+        status: ContributionStatus.PAID,
+      },
+      include: {
+        collection: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            imageUrl: true,
+            goalAmount: true,
           },
         },
       },
