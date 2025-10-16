@@ -51,9 +51,9 @@ export default function Dashboard() {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-2xl lg:text-3xl font-bold">
-              Mis Colectas <span className="wave inline-block animate-wave-hand text-3xl lg:text-4xl">👋</span>
+              Mis Colectas 
             </h1>
-            <p className="text-sm md:text-base text-muted-foreground">Gestiona tus vaquitas y sigue el progreso de cada una</p>
+            <p className="text-sm md:text-base text-muted-foreground">Gestiona tus colectas grupales</p>
           </motion.div>
 
           {/* Tabs */}

@@ -1,9 +1,8 @@
 import { httpClient } from '../client';
 import { API_ENDPOINTS } from '@/constants';
 import type {
-  Withdrawal,
   WithdrawalListResponse,
-  CreateWithdrawalData,
+  IntelligentWithdrawResponse,
 } from '@/types';
 
 export const withdrawalsApi = {
@@ -15,11 +14,12 @@ export const withdrawalsApi = {
     );
   },
 
-  // Request un retiro de una colección
-  create: (collectionId: string, data: CreateWithdrawalData): Promise<Withdrawal> => {
-    return httpClient.post<Withdrawal, CreateWithdrawalData>(
-      API_ENDPOINTS.WITHDRAWALS.CREATE(collectionId),
-      data
+  // ✅ CORREGIDO: Retiro inteligente (sin body, solo owner)
+  intelligentWithdraw: (collectionId: string): Promise<IntelligentWithdrawResponse> => {
+    return httpClient.post<IntelligentWithdrawResponse>(
+      API_ENDPOINTS.WITHDRAWALS.INTELLIGENT_WITHDRAW(collectionId)
     );
   },
+
+  // ✅ ELIMINADO: create() con amount - Ahora es retiro inteligente automático
 };

@@ -8,7 +8,7 @@ import type {
 
 export const invitationsApi = {
   
-    // Get Todas las invitaciones para el usuario actual.
+  // Get Todas las invitaciones para el usuario actual.
   list: (): Promise<Invitation[]> => {
     return httpClient.get<Invitation[]>(API_ENDPOINTS.INVITATIONS.LIST);
   },
@@ -21,18 +21,19 @@ export const invitationsApi = {
     );
   },
 
-
-  // Responder a la invitacion (accept/decline)
-  respond: (id: string, accepted: boolean): Promise<InvitationResponse> => {
-    return httpClient.post<InvitationResponse, { accepted: boolean }>(
-      API_ENDPOINTS.INVITATIONS.RESPOND(id),
-      { accepted }
+  // ✅ CORREGIDO: Aceptar invitación (endpoint separado)
+  accept: (id: string): Promise<InvitationResponse> => {
+    return httpClient.put<InvitationResponse>(
+      API_ENDPOINTS.INVITATIONS.ACCEPT(id)
     );
   },
 
-
-    // Delete invitacion
-  delete: (id: string): Promise<void> => {
-    return httpClient.delete<void>(API_ENDPOINTS.INVITATIONS.DELETE(id));
+  // ✅ CORREGIDO: Rechazar invitación (endpoint separado)
+  reject: (id: string): Promise<InvitationResponse> => {
+    return httpClient.put<InvitationResponse>(
+      API_ENDPOINTS.INVITATIONS.REJECT(id)
+    );
   },
+
+  // ✅ ELIMINADO: delete() ya no existe en backend
 };

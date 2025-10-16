@@ -41,13 +41,6 @@ export function Footer() {
             ))}
           </nav>
         </div>
-
-        {/* IInfo sobre metodos de pago */}
-        <div className="mt-6 border-t border-border/40 pt-6 text-center">
-          <p className="text-xs text-muted-foreground">
-            Usamos Yape, Plin y MercadoPago para pagos directos y seguros
-          </p>
-        </div>
       </div>
     </footer>
   );

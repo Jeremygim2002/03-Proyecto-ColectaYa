@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { InvitationsService } from './invitations.service';
 import { CreateInvitationDto } from './dto';
@@ -45,12 +45,5 @@ export class InvitationsController {
   @ApiOperation({ summary: 'Rechazar invitación' })
   async rejectInvitation(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.invitationsService.rejectInvitation(id, req.user.sub);
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Cancelar invitación enviada' })
-  async cancelInvitation(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
-    return this.invitationsService.cancelInvitation(id, req.user.sub);
   }
 }

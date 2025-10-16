@@ -26,7 +26,7 @@ export function useCollections(filters?: CollectionFilters) {
 export function useExploreCollections(filters?: CollectionFilters) {
   return useQuery({
     queryKey: queryKeys.collections.explore(filters as Record<string, unknown>),
-    queryFn: () => collectionsApi.explore(filters),
+    queryFn: () => collectionsApi.public(filters),
     staleTime: APP_CONFIG.STALE_TIME.SHORT,
   });
 }

@@ -1,19 +1,22 @@
 "use client";
 
 import { useOptimistic, useTransition } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 import { useStepNavigation } from "../collection-modal/hooks/useStepNavigation";
 import { useCollectionForm } from "../collection-modal/hooks/useCollectionForm";
 import { StepIndicator } from "../collection-modal/components";
+import { collectionsApi } from "@/api/endpoints/collections";
+import { invitationsApi } from "@/api/endpoints/invitations";
+import { mapFormToApiData, validateFormData } from "@/utils/collectionMapper";
+import type { CreateInvitationData } from "@/types";
 
 // Importaciones directas (sin lazy loading para formularios)
 import { BasicInfoStep } from "../collection-modal/steps/BasicInfoStep";
 import { ConfigurationStep } from "../collection-modal/steps/ConfigurationStep";
 import { MembersStep } from "../collection-modal/steps/MembersStep";
-import { SummaryStep } from "../collection-modal/steps/SummaryStep";
 
 interface CreateCollectionModalProps {
   isOpen: boolean;
@@ -33,7 +36,6 @@ const STEPS = [
   { number: 1, label: "Información Básica" },
   { number: 2, label: "Configuración" },
   { number: 3, label: "Miembros" },
-  { number: 4, label: "Resumen" }
 ];
 
 export default function CreateCollectionModal({ 
@@ -42,7 +44,7 @@ export default function CreateCollectionModal({
   step: initialStep = 1
 }: CreateCollectionModalProps) {
   const { currentStep, nextStep, prevStep } = useStepNavigation(initialStep);
-  const { formData, updateField, validateStep, addMember, removeMember, resetForm } = useCollectionForm();
+  const { formData, updateField, addMember, removeMember, resetForm } = useCollectionForm();
   
   // Estado optimista para UX más fluida
   const [optimisticState, addOptimistic] = useOptimistic(
@@ -67,12 +69,11 @@ export default function CreateCollectionModal({
 
   const [isPending, startTransition] = useTransition();
 
-  // Validar si el formulario está completo
-  const isFormValid = validateStep(1) && validateStep(2) && formData.members.length > 0;
-
   const handleSubmit = async () => {
-    if (!isFormValid) {
-      toast.error("Por favor completa todos los campos requeridos");
+    // Validar formulario antes de enviar
+    const validation = validateFormData(formData);
+    if (!validation.isValid) {
+      validation.errors.forEach(error => toast.error(error));
       return;
     }
 
@@ -81,16 +82,31 @@ export default function CreateCollectionModal({
     
     startTransition(async () => {
       try {
-        // Simular progreso de envío optimista
+        // Preparar datos para la API
         addOptimistic({ type: 'progress', progress: 25 });
+        const collectionData = mapFormToApiData(formData);
         
-        // llamada real a la API
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Crear la colección
+        addOptimistic({ type: 'progress', progress: 50 });
+        const newCollection = await collectionsApi.create(collectionData);
+        
+        // Crear invitaciones para los miembros si hay
         addOptimistic({ type: 'progress', progress: 75 });
+        if (formData.members.length > 0) {
+          const invitationPromises = formData.members
+            .filter(member => member.type === 'email') // Solo emails por ahora
+            .map(member => {
+              const invitationData: CreateInvitationData = {
+                collectionId: newCollection.id,
+                invitedEmail: member.identifier,
+              };
+              return invitationsApi.create(invitationData);
+            });
+          
+          await Promise.allSettled(invitationPromises);
+        }
         
-        await new Promise(resolve => setTimeout(resolve, 500));
         addOptimistic({ type: 'success' });
-        
         toast.success("¡Colecta creada exitosamente!");
         
         // Reset después de mostrar éxito
@@ -98,12 +114,20 @@ export default function CreateCollectionModal({
           addOptimistic({ type: 'reset' });
           resetForm();
           onClose();
+          // Opcional: recargar datos o navegar a la colección
+          window.location.reload(); // Temporal - mejor usar React Query invalidation
         }, 1500);
         
       } catch (error) {
         addOptimistic({ type: 'error' });
-        toast.error("Error al crear la colecta");
         console.error("Error creating collection:", error);
+        
+        // Mostrar error específico basado en la respuesta
+        if (error && typeof error === 'object' && 'message' in error) {
+          toast.error(`Error: ${error.message}`);
+        } else {
+          toast.error("Error al crear la colecta. Intenta nuevamente.");
+        }
       }
     });
   };
@@ -118,9 +142,9 @@ export default function CreateCollectionModal({
     onClose();
   };
 
-  const canGoNext = currentStep < 4 && !optimisticState.isSubmitting;
+  const canGoNext = currentStep < 3 && !optimisticState.isSubmitting;
   const canGoPrev = currentStep > 1 && !optimisticState.isSubmitting;
-  const showSubmit = currentStep === 4 && !optimisticState.isSuccess;
+  const showSubmit = currentStep === 3 && !optimisticState.isSuccess;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -136,6 +160,12 @@ export default function CreateCollectionModal({
               "Crear Nueva Colecta"
             )}
           </DialogTitle>
+          <DialogDescription className="text-center text-gray-600">
+            {optimisticState.isSuccess 
+              ? "Tu colecta ha sido creada exitosamente y ya está disponible"
+              : "Configura tu colecta paso a paso para empezar a recaudar fondos"
+            }
+          </DialogDescription>
         </DialogHeader>
 
         {/* Indicador de progreso optimista */}
@@ -176,9 +206,6 @@ export default function CreateCollectionModal({
                   onAddMember={addMember}
                   onRemoveMember={removeMember}
                 />
-              )}
-              {currentStep === 4 && (
-                <SummaryStep formData={formData} />
               )}
             </div>
 

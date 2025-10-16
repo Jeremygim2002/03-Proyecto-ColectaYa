@@ -30,22 +30,22 @@ import { validationSchema } from './config/validation';
       },
     }),
 
-    // Rate limiting global
+    // Rate limiting global - Relajado para desarrollo
     ThrottlerModule.forRoot([
       {
         name: 'short',
         ttl: 1000,
-        limit: 3,
+        limit: 10, // Aumentado de 3 a 10
       },
       {
         name: 'medium',
         ttl: 10000,
-        limit: 20,
+        limit: 50, // Aumentado de 20 a 50
       },
       {
         name: 'long',
         ttl: 60000,
-        limit: 100,
+        limit: 200, // Aumentado de 100 a 200
       },
     ]),
     UserModule,

@@ -1,8 +1,6 @@
-import { Controller, Get, Post, Delete, Body, Param, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Delete, Param, Request, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { MembersService } from './members.service';
-import { InviteMemberDto } from './dto';
-import { InvitationsService } from '../invitations/invitations.service';
 
 interface AuthenticatedRequest {
   user: {
@@ -16,20 +14,7 @@ interface AuthenticatedRequest {
 @ApiBearerAuth()
 @Controller('collections/:collectionId/members')
 export class MembersController {
-  constructor(
-    private readonly membersService: MembersService,
-    private readonly invitationsService: InvitationsService,
-  ) {}
-
-  @Post('invite')
-  @ApiOperation({ summary: 'Invitar miembro (crea invitación pendiente)' })
-  async invite(
-    @Param('collectionId') collectionId: string,
-    @Request() req: AuthenticatedRequest,
-    @Body() dto: InviteMemberDto,
-  ) {
-    return this.invitationsService.createInvitation(collectionId, req.user.sub, dto.email);
-  }
+  constructor(private readonly membersService: MembersService) {}
 
   @Delete(':userId')
   @HttpCode(HttpStatus.NO_CONTENT)

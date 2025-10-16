@@ -365,4 +365,25 @@ export class CollectionsService {
       },
     };
   }
+
+  async leaveCollection(collectionId: string, userId: string) {
+    // Buscar la membresía del usuario en la colección
+    const member = await this.prisma.collectionMember.findFirst({
+      where: {
+        collectionId,
+        userId,
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException('You are not a member of this collection');
+    }
+
+    // Eliminar la membresía
+    await this.prisma.collectionMember.delete({
+      where: {
+        id: member.id,
+      },
+    });
+  }
 }

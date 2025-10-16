@@ -20,11 +20,16 @@ export type WithdrawalStatus =
   | 'REJECTED' 
   | 'COMPLETED';
 
-export interface CreateWithdrawalData {
-  amount: number;
-}
+// ✅ ELIMINADO: CreateWithdrawalData ya no se usa (retiro inteligente sin body)
 
 export interface WithdrawalListResponse {
   withdrawals: Withdrawal[];
   total: number;
+}
+
+// ✅ NUEVO: Respuesta del retiro inteligente
+export interface IntelligentWithdrawResponse {
+  message: string;
+  action: 'TRANSFERRED' | 'REFUNDED';
+  amount: number;
 }

@@ -1,11 +1,8 @@
 import { httpClient } from '../client';
 import { API_ENDPOINTS } from '@/constants';
 import type {
-  Member,
   MemberListResponse,
-  InviteMemberData,
 } from '@/types';
-
 
 export const membersApi = {
 
@@ -16,23 +13,10 @@ export const membersApi = {
     );
   },
 
-  // Invitar a un miembro de una colección
-  invite: (collectionId: string, data: InviteMemberData): Promise<Member> => {
-    return httpClient.post<Member, InviteMemberData>(
-      API_ENDPOINTS.MEMBERS.INVITE(collectionId),
-      data
-    );
-  },
+  // ✅ ELIMINADO: invite() - Ahora se usa invitationsApi.create()
+  // ✅ ELIMINADO: accept() - Ahora se usa collectionsApi.join()
 
-  // Accept la invitacion de union a la colecta
-  accept: (collectionId: string): Promise<Member> => {
-    return httpClient.post<Member, never>(
-      API_ENDPOINTS.MEMBERS.ACCEPT(collectionId),
-      undefined
-    );
-  },
-
-  // Remove a un miembro de la colecta
+  // Remove a un miembro de la colecta (solo owner)
   remove: (collectionId: string, userId: string): Promise<void> => {
     return httpClient.delete<void>(
       API_ENDPOINTS.MEMBERS.REMOVE(collectionId, userId)

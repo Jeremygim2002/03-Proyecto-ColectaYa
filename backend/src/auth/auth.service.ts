@@ -14,13 +14,13 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async register(email: string, password: string): Promise<AuthResponse> {
+  async register(email: string, password: string, name?: string): Promise<AuthResponse> {
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
-      throw new UnauthorizedException('Email already registered');
+      throw new UnauthorizedException('Este email ya está registrado');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -28,6 +28,7 @@ export class AuthService {
       data: {
         email,
         password: hashedPassword,
+        name,
       },
     });
 
@@ -44,7 +45,7 @@ export class AuthService {
 
     // Generar refresh token (por ahora usa el mismo secreto, en producción debería ser diferente)
     const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: '7d', // Refresh token dura más
+      expiresIn: '7d',
     });
 
     return {
@@ -59,7 +60,7 @@ export class AuthService {
       tokens: {
         accessToken,
         refreshToken,
-        expiresIn: 24 * 60 * 60, // 24 horas en segundos
+        expiresIn: 24 * 60 * 60,
       },
     };
   }
@@ -72,12 +73,12 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Credenciales inválidas');
     }
 
     const payload = {
@@ -108,7 +109,7 @@ export class AuthService {
       tokens: {
         accessToken,
         refreshToken,
-        expiresIn: 24 * 60 * 60, // 24 horas en segundos
+        expiresIn: 24 * 60 * 60,
       },
     };
   }
@@ -134,9 +135,6 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid user');
     }
-
-    // TODO: Implementar blacklist de tokens si es necesario
-    // Por ahora, el logout es manejado del lado del cliente
   }
 
   async refresh(userId: string): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {

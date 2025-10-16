@@ -12,5 +12,3 @@ export interface JwtPayload {
 export interface AuthenticatedRequest extends Request {
   user: JwtPayload;
 }
-
-// AuthResponse se importa desde ../types/user.types.ts para mantener consistencia

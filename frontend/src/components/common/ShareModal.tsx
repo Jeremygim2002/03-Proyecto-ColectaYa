@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
@@ -47,6 +47,9 @@ export function ShareModal({ open, onOpenChange, title, url }: ShareModalProps) 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Compartir colecta</DialogTitle>
+          <DialogDescription>
+            Comparte tu colecta con amigos y familiares en redes sociales
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">

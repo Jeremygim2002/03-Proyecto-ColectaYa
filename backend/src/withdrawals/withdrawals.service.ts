@@ -1,73 +1,44 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { WithdrawalStatus, RuleType, ContributionStatus } from '@prisma/client';
 
 @Injectable()
 export class WithdrawalsService {
   constructor(private prisma: PrismaService) {}
 
-  async requestWithdrawal(collectionId: string, userId: string, amount: number) {
-    // Verificar que la colecta existe y que el usuario es el owner
-    const collection = await this.prisma.collection.findUnique({
-      where: { id: collectionId },
+  async intelligentWithdraw(collectionId: string, userId: string) {
+    // Verificar que el usuario es el owner de la colección
+    const collection = await this.prisma.collection.findFirst({
+      where: {
+        id: collectionId,
+        ownerId: userId,
+      },
       include: {
         contributions: {
-          where: { status: ContributionStatus.PAID },
+          where: { status: 'PAID' },
         },
       },
     });
 
     if (!collection) {
-      throw new NotFoundException('Collection not found');
+      throw new NotFoundException('Collection not found or you are not the owner');
     }
 
-    if (collection.ownerId !== userId) {
-      throw new ForbiddenException('Only owner can request withdrawals');
-    }
-
-    // Calcular fondos disponibles
-    const totalPaid = collection.contributions.reduce((sum, c) => sum + Number(c.amount), 0);
+    const totalAmount = collection.contributions.reduce((sum, contrib) => sum + Number(contrib.amount), 0);
     const goalAmount = Number(collection.goalAmount);
-    const progressPct = goalAmount > 0 ? (totalPaid / goalAmount) * 100 : 0;
 
-    // Validar según tipo de regla
-    switch (collection.ruleType) {
-      case RuleType.GOAL_ONLY:
-        if (progressPct < 100) {
-          throw new BadRequestException('Cannot withdraw until goal is reached (100%)');
-        }
-        break;
-
-      case RuleType.THRESHOLD: {
-        const thresholdPct = Number(collection.ruleValue || 0); // ✅ CORREGIDO - Usar campo actualizado
-        if (progressPct < thresholdPct) {
-          throw new BadRequestException(`Cannot withdraw until threshold is reached (${thresholdPct}%)`);
-        }
-        break;
-      }
-
-      case RuleType.ANYTIME:
-        // Permitido en cualquier momento
-        break;
-
-      default:
-        throw new BadRequestException('Invalid rule type');
+    if (totalAmount >= goalAmount) {
+      // Meta alcanzada: transferir fondos al owner
+      return {
+        action: 'TRANSFERRED' as const,
+        amount: totalAmount,
+      };
+    } else {
+      // Meta no alcanzada: reembolsar a contribuidores
+      return {
+        action: 'REFUNDED' as const,
+        amount: totalAmount,
+      };
     }
-
-    // Verificar que hay fondos suficientes
-    if (amount > totalPaid) {
-      throw new BadRequestException(`Insufficient funds. Available: ${totalPaid}`);
-    }
-
-    // Crear solicitud de retiro
-    return this.prisma.withdrawal.create({
-      data: {
-        collectionId,
-        requestedBy: userId,
-        amount,
-        status: WithdrawalStatus.REQUESTED,
-      },
-    });
   }
 
   async listWithdrawals(collectionId: string, userId: string) {

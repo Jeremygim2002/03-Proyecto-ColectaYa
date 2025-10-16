@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, Menu, User, Settings, LogOut, Mail } from "lucide-react";
+import { Bell, Menu, User, LogOut, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -143,10 +143,6 @@ export function Header() {
                     </span>
                   )}
                 </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer">
-                <Settings className="mr-2 h-4 w-4" />
-                Configuración
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">

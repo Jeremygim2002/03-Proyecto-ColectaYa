@@ -77,4 +77,11 @@ export class CollectionsController {
   async joinCollection(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.collectionsService.joinCollection(id, req.user.sub);
   }
+
+  @Post(':id/members/leave')
+  @ApiOperation({ summary: 'Salirse de la colección' })
+  async leaveCollection(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    await this.collectionsService.leaveCollection(id, req.user.sub);
+    return { message: 'Left collection successfully' };
+  }
 }

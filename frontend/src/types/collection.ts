@@ -1,16 +1,16 @@
 export interface Collection {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   ownerId: string; 
   goalAmount: number;
   currentAmount: number;
   progress: number; 
   imageUrl?: string;
-  deadlineAt: string;
+  deadlineAt?: string;
   isPrivate: boolean;
   ruleType: CollectionRuleType;
-  ruleValue: number;
+  ruleValue?: number;
   status: CollectionStatus;
   createdAt: string;
   updatedAt: string;
@@ -19,9 +19,9 @@ export interface Collection {
 }
 
 export type CollectionRuleType = 
-  | 'GOAL_ONLY'
-  | 'DEADLINE'
-  | 'MANUAL';
+  | 'GOAL_ONLY'   // Solo retiro al 100% de meta  
+  | 'THRESHOLD'   // Retiro al alcanzar % umbral
+  | 'ANYTIME';    // Retiro en cualquier momento
 
 export type CollectionStatus = 
   | 'ACTIVE' 
@@ -29,12 +29,12 @@ export type CollectionStatus =
 
 export interface CreateCollectionData {
   title: string;
-  description: string;
+  description?: string;
   goalAmount: number;
-  deadlineAt: string;
-  isPrivate: boolean;
+  deadlineAt?: string;
+  isPrivate?: boolean;
   ruleType: CollectionRuleType;
-  ruleValue: number;
+  ruleValue?: number;
   imageUrl?: string;
 }
 

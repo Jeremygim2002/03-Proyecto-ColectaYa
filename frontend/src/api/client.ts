@@ -1,5 +1,5 @@
 import { API_BASE_URL, APP_CONFIG } from '@/constants';
-import type { ApiError, ApiResponse, RequestConfig } from '@/types';
+import type { ApiError, RequestConfig } from '@/types';
 
 /**
  * Modern fetch wrapper with interceptors
@@ -125,8 +125,10 @@ class HttpClient {
         return {} as T;
       }
 
-      const data: ApiResponse<T> = await response.json();
-      return data.data;
+      const responseData = await response.json();
+      
+      // Backend envuelve respuestas en { data: T, message, timestamp, path, method }
+      return responseData.data || responseData;
     } catch (error) {
       // Re-throw ApiError as-is
       if ((error as ApiError).status) {

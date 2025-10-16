@@ -14,17 +14,17 @@ export interface Invitation {
 }
 
 export type InvitationStatus = 
-  | 'pending'
-  | 'accepted' 
-  | 'declined';
+  | 'PENDING'    // ✅ CORREGIDO: Backend usa PENDING (mayúscula)
+  | 'ACCEPTED'   // ✅ CORREGIDO: Backend usa ACCEPTED (mayúscula)
+  | 'REJECTED';  // ✅ CORREGIDO: Backend usa REJECTED (mayúscula)
 
 export interface CreateInvitationData {
   collectionId: string;
-  recipientEmail: string;
+  invitedEmail: string; // ✅ CORREGIDO: Backend espera invitedEmail no recipientEmail
   message?: string;
 }
 
 export interface InvitationResponse {
-  collectionId: string;
-  accepted: boolean;
+  message: string;
+  // ✅ CORREGIDO: Respuestas diferentes para accept/reject según backend
 }
