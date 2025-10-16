@@ -32,33 +32,33 @@ Backend API REST desarrollado con **NestJS** para la plataforma ColectaYa. Propo
 
 ### Pipeline de Requests
 ```
-📨 HTTP Request
+HTTP Request
     ↓
-🛡️  Middleware (Helmet + CORS + Compression)
+Middleware (Helmet + CORS + Compression)
     ↓
-🚪  Guards (ThrottlerGuard → AuthGuard)
+Guards (ThrottlerGuard → AuthGuard)
     ↓
-🔍  Interceptors (LoggingInterceptor - before)
+Interceptors (LoggingInterceptor - before)
     ↓
-🧪  Pipes (ValidationPipe + DTOs)
+Pipes (ValidationPipe + DTOs)
     ↓
-🎯  Controller Method
+Controller Method
     ↓
-⚙️  Service (Business Logic)
+Service (Business Logic)
     ↓
-🗄️  Prisma Client → PostgreSQL
+Prisma Client → PostgreSQL
     ↓
-🔍  Interceptors (ResponseInterceptor - after)
+Interceptors (ResponseInterceptor - after)
     ↓
-🛠️  Exception Filters (si hay error)
+Exception Filters (si hay error)
     ↓
-📤  JSON Response
+JSON Response
 ```
 
 ### Estructura de Módulos
 ```
 src/
-├── auth/                      # 🔐 Autenticación
+├── auth/                      # Autenticación
 │   ├── dto/sign-in.dto.ts    # DTO para login
 │   ├── auth.controller.ts     # /auth/login, /auth/profile
 │   ├── auth.service.ts        # Lógica JWT + bcrypt
@@ -66,16 +66,16 @@ src/
 │   ├── auth.module.ts        # Configuración del módulo
 │   ├── constants.ts          # Constantes JWT
 │   └── types.ts             # Interfaces centralizadas
-├── user/                     # 👥 Gestión de Usuarios
+├── user/                     # Gestión de Usuarios
 │   ├── dto/                  # DTOs con validación
 │   ├── user.controller.ts    # CRUD completo
 │   ├── user.service.ts      # Lógica + Prisma
 │   └── user.module.ts       # Configuración
-├── common/                   # 🛠️ Utilidades
+├── common/                   # Utilidades
 │   ├── filters/             # Exception filters
 │   ├── interceptors/        # Logging + Response
 │   └── pipes/               # Custom validation
-├── prisma/                  # 🗄️ Base de Datos
+├── prisma/                  # Base de Datos
 │   └── prisma.service.ts    # Conexión a PostgreSQL
 ├── app.module.ts           # Módulo principal
 └── main.ts                # Bootstrap + Swagger
@@ -92,7 +92,6 @@ npm install
 
 # Configurar variables de entorno
 cp .env.example .env
-# Editar .env con configuración de PostgreSQL
 ```
 
 ### **2. Base de Datos**
@@ -112,8 +111,8 @@ npx prisma studio
 
 ### **Desarrollo**
 ```bash
-npm run start:dev     # Servidor con hot reload ⚡
-npm run start:debug   # Modo debug con inspector 🐛
+npm run start:dev     # Servidor con hot reload
+npm run start:debug   # Modo debug con inspector
 npm run start         # Servidor básico
 ```
 
@@ -146,30 +145,6 @@ npm run format      # Prettier formato
 ```
 
 ---
-
-## �️ **Base de Datos**
-
-### **Schema Principal (Prisma)**
-```prisma
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String   // Hasheado con bcrypt (factor 12)
-  role      Role     @default(USER)
-  isActive  Boolean  @default(true)
-  lastLogin DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("users")
-}
-
-enum Role {
-  USER
-  ADMIN
-}
-```
 
 ### **Configuración de Conexión**
 ```env
@@ -234,94 +209,3 @@ THROTTLE_LIMIT=10     # 10 requests por TTL
 ```
 
 ---
-
-
-## 🧪 **Testing**
-
-### **Configuración de Tests**
-```bash
-# Tests unitarios
-npm test
-
-# Tests con coverage
-npm run test:cov
-
-# Tests end-to-end
-npm run test:e2e
-
-# Watch mode (desarrollo)
-npm run test:watch
-```
-
-### **Estructura de Tests**
-```
-test/
-├── app.e2e-spec.ts     # Tests de integración
-└── jest-e2e.json       # Configuración Jest e2e
-
-src/
-├── app.controller.spec.ts   # Tests unitarios
-└── **/*.spec.ts            # Tests por módulo
-```
-
----
-
-### **Configuraciones Especiales**
-
-#### **Saltos de Línea (Windows)**
-✅ **Resuelto automáticamente**:
-- `.gitattributes` - Control de Git
-- `.editorconfig` - Estandarización  
-- `prettier.config` - `endOfLine: "lf"`
-
-#### **VS Code Optimizado**
-- ✅ Formateo automático al guardar
-- ✅ ESLint integrado
-- ✅ Debugging configurado
-- ✅ Tasks predefinidas
-
----
-
-## 🔄 **Flujo de Trabajo Recomendado**
-
-### **Desarrollo Diario**
-```bash
-# Terminal 1 - Servidor
-npm run start:dev
-
-# Terminal 2 - Tests (opcional)
-npm run test:watch
-
-# Terminal 3 - Base de datos (opcional)
-npx prisma studio
-```
-
-### **Antes de Commit**
-```bash
-npm run lint         # Verificar código
-npm run format       # Formatear
-npm test            # Tests completos
-npm run build       # Verificar compilación
-```
-
-### **Deploy/Producción**
-```bash
-npm run build       # Compilar
-npm run start:prod  # Probar producción local
-```
-
----
-
-## 📊 **Performance**
-
-### **Optimizaciones Implementadas**
-- **Connection Pooling**: Prisma gestiona conexiones eficientemente
-- **Select Específicos**: Solo campos necesarios en queries
-- **Paginación**: Offset/limit para grandes datasets
-- **Índices DB**: En campos de búsqueda frecuente (email)
-- **Compression**: Gzip en responses HTTP
-- **Rate Limiting**: Prevención de abuso
-
----
-
-📚 **Para información general del proyecto, consulta el [`README.md`](../README.md) principal**
