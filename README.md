@@ -36,14 +36,14 @@ Una vez iniciado el servidor backend, la documentación interactiva está dispon
 ## 🌟 **Características Principales**
 
 ###  **Implementado**
-- ** Gestión de Usuarios**: Registro, autenticación y perfiles
-- ** Autenticación JWT**: Sistema seguro con tokens Bearer
-- ** API REST**: Endpoints documentados con Swagger
-- ** Seguridad**: Rate limiting, validación, headers seguros
-- ** Paginación**: Consultas optimizadas con búsqueda y filtros
-- ** Base de Datos**: PostgreSQL con Prisma ORM
-- ** Documentación**: Swagger UI interactivo
-- ** Testing**: Jest configurado para pruebas
+-  **Gestión de Usuarios**: Registro, autenticación y perfiles
+-  **Autenticación JWT**: Sistema seguro con tokens Bearer
+-  **API REST**: Endpoints documentados con Swagger
+-  **Seguridad**: Rate limiting, validación, headers seguros
+-  **Paginación**: Consultas optimizadas con búsqueda y filtros
+-  **Base de Datos**: PostgreSQL con Prisma ORM
+-  **Documentación**: Swagger UI interactivo
+-  **Testing**: Jest configurado para pruebas
 
 ---
 
@@ -51,30 +51,14 @@ Una vez iniciado el servidor backend, la documentación interactiva está dispon
 
 ```
  ColectaYa
-├──  Frontend (React/Next.js) - En desarrollo
+├──  Frontend (React) - En desarrollo
 └──  Backend (NestJS) - ✅ Funcional
     ├──  Controllers (API Endpoints)
     ├──  Services (Lógica de Negocio)
     ├──  Prisma (ORM & Database)
     ├──  Guards (Autenticación/Autorización)
     ├──  Interceptors (Logging/Response)
-    ├──  DTOs (Validación de Datos)
-    └──  Tests (Unit/Integration/e2e)
-```
-
-### Pipeline de Requests (Backend)
-```
- Request
-↓  Helmet + CORS + Compression
-↓  ThrottlerGuard (Rate Limiting)
-↓  AuthGuard (JWT Verification)
-↓  LoggingInterceptor
-↓  ValidationPipe + DTOs
-↓  Controller
-↓  Service
-↓  Prisma + PostgreSQL
-↓  ResponseInterceptor
-↓  Formatted Response
+    └──  DTOs (Validación de Datos)
 ```
 
 ---
@@ -147,7 +131,6 @@ npm run start:dev
 
 1. **Backend (API)**: 
    -  Lee: [`backend/README.md`](./backend/README.md)
-   -  Contiene: Setup, comandos, estructura, troubleshooting
 ---
 
 ## 🔧 **Configuración de Desarrollo**
@@ -236,27 +219,3 @@ ColectaYa/
 └── README.md                  # Este archivo
 ```
 
----
-
-## 📜 **Licencia y Créditos**
-
-**Proyecto Universitario** - Desarrollado con fines educativos
-
-### **Información del Proyecto**
-- **Desarrollador**: Jeremy Rosas Caparachin
-- **Repositorio**: [03-Proyecto-ColectaYa](https://github.com/Jeremygim2002/03-Proyecto-ColectaYa)
-
-### **Tecnologías y Licencias**
-- **NestJS Framework** - MIT License
-- **Prisma ORM** - Apache License 2.0  
-- **TypeScript** - Apache License 2.0
-- **Node.js** - MIT License
-- **PostgreSQL** - PostgreSQL License
-
----
-
-⭐ **Si te gusta este proyecto, ¡dale una estrella en GitHub!**
-
-📚 **Para más información técnica detallada, consulta la documentación del backend en [`backend/README.md`](./backend/README.md)**
-
-````
