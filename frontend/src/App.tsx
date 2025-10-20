@@ -14,7 +14,7 @@ const Explore = lazy(() => import("@/pages/Explore"));
 const CollectionDetail = lazy(() => import("@/pages/CollectionDetail"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Login = lazy(() => import("@/pages/Login"));
-const Register = lazy(() => import("@/pages/Register"));
+const AuthCallback = lazy(() => import("@/pages/AuthCallback"));
 const Invitations = lazy(() => import("@/pages/Invitations"));
 const Onboarding = lazy(() => import("@/pages/Onboarding"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -34,12 +34,12 @@ function App() {
           <Toaster />
           <Suspense fallback={<LoadingFallback />}>
             <Routes>
-              {/* Public routes - sin layout */}
+              {/* Rutas publicas */}
               <Route path="/" element={<Onboarding />} />
-              <Route path="/register" element={<Register />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
               
-              {/* Protected routes - con AppLayout compartido */}
+              {/* Rutas protegidas*/}
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/explore" element={<Explore />} />
@@ -48,7 +48,7 @@ function App() {
                 <Route path="/invitations" element={<Invitations />} />
               </Route>
               
-              {/* 404 - sin layout */}
+              {/* Error 404*/}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

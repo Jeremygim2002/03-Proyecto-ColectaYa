@@ -22,11 +22,11 @@ export class CreateCollectionDto {
   @Min(0)
   goalAmount!: number;
 
-  @ApiProperty({ enum: RuleType, example: 'THRESHOLD', description: 'Tipo de regla para retiros' })
+  @ApiProperty({ enum: RuleType, example: 'GOAL_ONLY', description: 'Tipo de regla para retiros' })
   @IsEnum(RuleType)
   ruleType!: RuleType;
 
-  @ApiPropertyOptional({ example: 50, description: 'Valor de la regla (ej: 50% para THRESHOLD)' })
+  @ApiPropertyOptional({ example: 50, description: 'Valor de la regla (ya no se usa con los nuevos tipos de retiro)' })
   @IsNumber()
   @Min(0)
   @IsOptional()

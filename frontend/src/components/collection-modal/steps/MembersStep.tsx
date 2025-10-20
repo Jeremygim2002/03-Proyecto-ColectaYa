@@ -36,10 +36,10 @@ export function MembersStep({ members, onAddMember, onRemoveMember }: MembersSte
           <Users className="h-5 w-5 shrink-0 text-blue-600 dark:text-blue-400" />
           <div className="space-y-1">
             <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
-              Los miembros son opcionales
+              Miembros opcionales
             </p>
             <p className="text-xs text-blue-700 dark:text-blue-300">
-              Puedes añadir miembros ahora o invitarlos más tarde desde el panel de la colecta
+              Puedes añadir miembros ahora o invitarlos más tarde
             </p>
           </div>
         </div>
@@ -51,7 +51,7 @@ export function MembersStep({ members, onAddMember, onRemoveMember }: MembersSte
         <div className="flex gap-2">
           <Input
             id="newMember"
-            placeholder="Celular o correo electrónico"
+            placeholder="Correo electrónico"
             value={newMember}
             onChange={(e) => setNewMember(e.target.value)}
             onKeyDown={(e) => {

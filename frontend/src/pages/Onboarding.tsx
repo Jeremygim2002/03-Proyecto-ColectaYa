@@ -121,15 +121,6 @@ export default function Onboarding() {
               size="lg"
               variant="hero"
               className="w-full"
-              onClick={() => navigate("/register")}
-              aria-label="Crear cuenta"
-            >
-              Crear cuenta
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-full"
               onClick={() => navigate("/login")}
               aria-label="Iniciar sesión"
             >

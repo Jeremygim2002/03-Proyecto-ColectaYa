@@ -12,7 +12,7 @@ export const ROUTES = {
   NOT_FOUND: '/404',
 } as const;
 
-// Constructores de rutas con parámetros
+// Rutas con parametros
 export const buildCollectionRoute = (id: string): string => `/collection/${id}`;
 
 export const buildProfileRoute = (userId?: string): string => 

@@ -1,113 +1,140 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { authApi } from '@/api';
-import { queryKeys } from '@/constants';
-import { APP_CONFIG } from '@/constants';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { authApi } from '@/api/endpoints/auth';
 import { useAuthStore } from '@/stores/authStore';
+import { toast } from 'sonner';
+import { APP_CONFIG } from '@/constants';
 import type {
-  LoginCredentials,
-  RegisterData,
   AuthResponse,
-  User,
-} from '@/types';
+  MagicLinkRequest,
+  OAuthResponse,
+} from '@/types/user';
 
+// ========================= QUERIES =========================
 
-//  Hook para obtener el usuario autenticado actual
-//  Integrado con Zustand authStore
-export function useCurrentUser() {
-  const setUser = useAuthStore((state) => state.setUser);
+// Obtener usuario actual
+export const useCurrentUser = () => {
+  const { user, isAuthenticated } = useAuthStore();
   
   return useQuery({
-    queryKey: queryKeys.auth.me(),
-    queryFn: async () => {
-      const user = await authApi.me();
-      setUser(user); // Sincroniza con Zustand
-      return user;
-    },
-    staleTime: APP_CONFIG.STALE_TIME.LONG,
+    queryKey: ['auth', 'me'],
+    queryFn: authApi.me,
+    enabled: isAuthenticated && !!user,
     retry: false,
+    staleTime: APP_CONFIG.STALE_TIME.LONG,
   });
-}
+};
 
+// ========================= MUTATIONS =========================
 
-//  Hook para iniciar sesión como usuario
-//  Stores  tokens y sincroniza con Zustand
-export function useLogin() {
-  const queryClient = useQueryClient();
-  const login = useAuthStore((state) => state.login);
-
+// Magic Link
+export const useMagicLink = () => {
   return useMutation({
-    mutationKey: ['auth', 'login'],
-    mutationFn: (credentials: LoginCredentials) => authApi.login(credentials),
-    onSuccess: (response: AuthResponse) => {
-      // Store tokens en almacenamiento local
-      localStorage.setItem(APP_CONFIG.TOKEN_KEY, response.tokens.accessToken);
-      localStorage.setItem(APP_CONFIG.REFRESH_TOKEN_KEY, response.tokens.refreshToken);
-
-      login(response.user, response.tokens.accessToken);
-      
-      queryClient.setQueryData<User>(queryKeys.auth.me(), response.user);
-      
-      // Invalidar todas las consultas para volver a obtenerlas con la nueva autorización
-      queryClient.invalidateQueries();
-    },
-  });
-}
-
-
-//  Hook para registrar un nuevo usuario
-//  Inicia sesión automáticamente después de un registro exitoso
-export function useRegister() {
-  const queryClient = useQueryClient();
-  const login = useAuthStore((state) => state.login);
-
-  return useMutation({
-    mutationKey: ['auth', 'register'],
-    mutationFn: (data: RegisterData) => authApi.register(data),
-    onSuccess: (response: AuthResponse) => {
-
-      localStorage.setItem(APP_CONFIG.TOKEN_KEY, response.tokens.accessToken);
-      localStorage.setItem(APP_CONFIG.REFRESH_TOKEN_KEY, response.tokens.refreshToken);
-      
-      login(response.user, response.tokens.accessToken);
-      
-      queryClient.setQueryData<User>(queryKeys.auth.me(), response.user);
-      
-      // Invalidar todas las consultas
-      queryClient.invalidateQueries();
-    },
-  });
-}
-
-
-// Hook para cerrar sesión de usuario
-// Limpia todos los datos de autenticación y caché
-export function useLogout() {
-  const queryClient = useQueryClient();
-  const logout = useAuthStore((state) => state.logout);
-
-  return useMutation({
-    mutationKey: ['auth', 'logout'],
-    mutationFn: () => authApi.logout(),
+    mutationFn: (data: MagicLinkRequest) => authApi.magicLink(data.email),
     onSuccess: () => {
-      // Clear tokens
-      localStorage.removeItem(APP_CONFIG.TOKEN_KEY);
-      localStorage.removeItem(APP_CONFIG.REFRESH_TOKEN_KEY);
-      localStorage.removeItem(APP_CONFIG.USER_KEY);
-      
-      // Update Zustand 
-      logout();
-      
-      // Clear todas las solicitudes
-      queryClient.clear();
+      toast.success('Magic link enviado! Revisa tu email y haz clic en el enlace para ingresar.');
     },
-    onError: () => {
-      // Incluso si falla la llamada a la API, borre los datos locales
-      localStorage.removeItem(APP_CONFIG.TOKEN_KEY);
-      localStorage.removeItem(APP_CONFIG.REFRESH_TOKEN_KEY);
-      localStorage.removeItem(APP_CONFIG.USER_KEY);
-      
-      logout();
-      queryClient.clear();
+    onError: (error: Error) => {
+      console.error('Error en magic link:', error);
+      toast.error(error?.message || 'Error al enviar magic link');
     },
   });
-}
+};
+
+// Google OAuth
+export const useGoogleAuth = () => {
+  return useMutation({
+    mutationFn: authApi.google,
+    onSuccess: (response: OAuthResponse) => {
+      // Redirigir a Google OAuth
+      window.location.href = response.url;
+    },
+    onError: (error: Error) => {
+      console.error('Error en Google Auth:', error);
+      toast.error(error?.message || 'Error al iniciar sesión con Google');
+    },
+  });
+};
+
+// Facebook OAuth  
+export const useFacebookAuth = () => {
+  return useMutation({
+    mutationFn: authApi.facebook,
+    onSuccess: (response: OAuthResponse) => {
+      // Redirigir a Facebook OAuth
+      window.location.href = response.url;
+    },
+    onError: (error: Error) => {
+      console.error('Error en Facebook Auth:', error);
+      toast.error(error?.message || 'Error al iniciar sesión con Facebook');
+    },
+  });
+};
+
+// Auth Callback (para Magic Link y OAuth)
+export const useAuthCallback = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { login, logout } = useAuthStore();
+
+  return useMutation({
+    mutationFn: ({ accessToken, refreshToken }: { accessToken: string; refreshToken?: string }) =>
+      authApi.callback(accessToken, refreshToken),
+    onSuccess: (response: AuthResponse) => {
+      // Guardar tokens en localStorage
+      localStorage.setItem(APP_CONFIG.TOKEN_KEY, response.tokens.accessToken);
+      localStorage.setItem(APP_CONFIG.REFRESH_TOKEN_KEY, response.tokens.refreshToken);
+      
+      // Guardar en store
+      login(response.user, response.tokens.accessToken);
+      
+      // Invalidar queries
+      queryClient.invalidateQueries({ queryKey: ['auth'] });
+      
+      toast.success('¡Bienvenido a ColectaYa!');
+      navigate('/dashboard');
+    },
+    onError: (error: Error) => {
+      console.error('Error en callback de autenticación:', error);
+      logout();
+      toast.error(error?.message || 'Error al procesar autenticación');
+      navigate('/login');
+    },
+  });
+};
+
+// Logout
+export const useLogout = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { logout } = useAuthStore();
+
+  return useMutation({
+    mutationFn: authApi.logout,
+    onSuccess: () => {
+      // Limpiar localStorage
+      localStorage.removeItem(APP_CONFIG.TOKEN_KEY);
+      localStorage.removeItem(APP_CONFIG.REFRESH_TOKEN_KEY);
+      localStorage.removeItem(APP_CONFIG.USER_KEY);
+      
+      // Limpiar store
+      logout();
+      
+      // Limpiar cache
+      queryClient.clear();
+      
+      toast.success('Sesión cerrada exitosamente');
+      navigate('/login');
+    },
+    onError: (error: Error) => {
+      console.error('Error en logout:', error);
+      // Incluso si falla el logout en el servidor, limpiar localmente
+      localStorage.removeItem(APP_CONFIG.TOKEN_KEY);
+      localStorage.removeItem(APP_CONFIG.REFRESH_TOKEN_KEY);
+      localStorage.removeItem(APP_CONFIG.USER_KEY);
+      logout();
+      queryClient.clear();
+      navigate('/login');
+    },
+  });
+};

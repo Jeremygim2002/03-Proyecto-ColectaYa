@@ -18,7 +18,7 @@ export class PaginationDto {
   @Max(100, { message: 'El límite no puede ser mayor a 100' })
   limit?: number = 10;
 
-  // Propiedades calculadas para facilitar su uso
+  // 10 cosas por pagina
   get skip(): number {
     return ((this.page ?? 1) - 1) * (this.limit ?? 10);
   }

@@ -1,47 +1,54 @@
 import { httpClient } from '../client';
 import { API_ENDPOINTS } from '@/constants';
 import type {
-  LoginCredentials,
-  RegisterData,
   AuthResponse,
   User,
+  MagicLinkResponse,
+  OAuthResponse,
 } from '@/types';
 
 export const authApi = {
-
-  login: (credentials: LoginCredentials): Promise<AuthResponse> => {
-    return httpClient.post<AuthResponse, LoginCredentials>(
-      API_ENDPOINTS.AUTH.LOGIN,
-      credentials,
-      { requiresAuth: false }
-    );
+  logout: (): Promise<{ message: string }> => {
+    return httpClient.post<{ message: string }>(API_ENDPOINTS.AUTH.LOGOUT);
   },
 
-  register: (data: RegisterData): Promise<AuthResponse> => {
-    // Filtrar confirmPassword ya que el backend no lo necesita
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { confirmPassword, ...registerPayload } = data;
-    return httpClient.post<AuthResponse, Omit<RegisterData, 'confirmPassword'>>(
-      API_ENDPOINTS.AUTH.REGISTER,
-      registerPayload,
-      { requiresAuth: false }
-    );
-  },
-
-  logout: (): Promise<void> => {
-    return httpClient.post<void>(API_ENDPOINTS.AUTH.LOGOUT);
-  },
-
-  refreshToken: (refreshToken: string): Promise<AuthResponse> => {
-    return httpClient.post<AuthResponse, { refreshToken: string }>(
+  refreshToken: (refreshToken: string): Promise<{ accessToken: string; refreshToken: string; expiresIn: number; expiresAt: number }> => {
+    return httpClient.post<{ accessToken: string; refreshToken: string; expiresIn: number; expiresAt: number }, { refreshToken: string }>(
       API_ENDPOINTS.AUTH.REFRESH,
       { refreshToken },
       { requiresAuth: false }
     );
   },
 
-  // ✅ CORREGIDO: Ahora usa /users/me
   me: (): Promise<User> => {
     return httpClient.get<User>(API_ENDPOINTS.AUTH.ME);
+  },
+
+  // Magic Link
+  magicLink: (email: string): Promise<MagicLinkResponse> => {
+    return httpClient.post<MagicLinkResponse, { email: string }>(
+      API_ENDPOINTS.AUTH.MAGIC_LINK,
+      { email },
+      { requiresAuth: false }
+    );
+  },
+
+  // Google OAuth
+  google: (): Promise<OAuthResponse> => {
+    return httpClient.get<OAuthResponse>(API_ENDPOINTS.AUTH.GOOGLE, { requiresAuth: false });
+  },
+
+  // Facebook OAuth
+  facebook: (): Promise<OAuthResponse> => {
+    return httpClient.get<OAuthResponse>(API_ENDPOINTS.AUTH.FACEBOOK, { requiresAuth: false });
+  },
+
+  // OAuth Callback
+  callback: (accessToken: string, refreshToken?: string): Promise<AuthResponse> => {
+    return httpClient.post<AuthResponse, { access_token: string; refresh_token?: string }>(
+      API_ENDPOINTS.AUTH.CALLBACK,
+      { access_token: accessToken, refresh_token: refreshToken },
+      { requiresAuth: false }
+    );
   },
 };

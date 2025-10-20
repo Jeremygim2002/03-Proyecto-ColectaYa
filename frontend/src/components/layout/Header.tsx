@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Bell, Menu, User, LogOut, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLogout } from "@/hooks/queries/useAuth";
+import { useUserInfo } from "@/hooks/useUserInfo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +20,8 @@ export function Header() {
   const location = useLocation();
   const [notificationCount] = useState(3);
   const [invitationCount] = useState(2);
+  const logoutMutation = useLogout();
+  const { userInitials, userName, userEmail, userAvatar } = useUserInfo();
 
   const navigation = [
     { name: "Inicio", href: "/dashboard" },
@@ -25,6 +29,10 @@ export function Header() {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+
+  const handleLogout = () => {
+    logoutMutation.mutate();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -48,11 +56,10 @@ export function Header() {
             <Link
               key={item.name}
               to={item.href}
-              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ${
-                isActive(item.href)
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ${isActive(item.href)
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
-              }`}
+                }`}
             >
               {item.name}
             </Link>
@@ -114,17 +121,17 @@ export function Header() {
                 aria-label="Menú de usuario"
               >
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src="" alt="Usuario" />
+                  <AvatarImage src={userAvatar} alt="Usuario" />
                   <AvatarFallback className="bg-primary text-primary-foreground">
-                    JD
+                    {userInitials}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="px-2 py-3">
-                <p className="text-sm font-semibold">Juan Díaz</p>
-                <p className="text-xs text-muted-foreground">juan@example.com</p>
+                <p className="text-sm font-semibold">{userName}</p>
+                <p className="text-xs text-muted-foreground">{userEmail}</p>
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
@@ -145,9 +152,13 @@ export function Header() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+              <DropdownMenuItem 
+                className="cursor-pointer text-destructive focus:text-destructive"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
-                Cerrar sesión
+                {logoutMutation.isPending ? 'Cerrando sesión...' : 'Cerrar sesión'}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -163,14 +174,14 @@ export function Header() {
               <div className="flex flex-col space-y-4 py-4">
                 <div className="flex items-center space-x-3 border-b border-border pb-4">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src="" alt="Usuario" />
+                    <AvatarImage src={userAvatar} alt="Usuario" />
                     <AvatarFallback className="bg-primary text-primary-foreground">
-                      JD
+                      {userInitials}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-sm font-semibold">Juan Díaz</p>
-                    <p className="text-xs text-muted-foreground">juan@example.com</p>
+                    <p className="text-sm font-semibold">{userName}</p>
+                    <p className="text-xs text-muted-foreground">{userEmail}</p>
                   </div>
                 </div>
                 <nav className="flex flex-col space-y-1">
@@ -178,11 +189,10 @@ export function Header() {
                     <Link
                       key={item.name}
                       to={item.href}
-                      className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-300 ${
-                        isActive(item.href)
+                      className={`rounded-lg px-4 py-3 text-sm font-medium transition-all duration-300 ${isActive(item.href)
                           ? "bg-primary/10 text-primary"
                           : "text-muted-foreground hover:bg-muted/30 hover:text-foreground"
-                      }`}
+                        }`}
                     >
                       {item.name}
                     </Link>

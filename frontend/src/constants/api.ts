@@ -1,15 +1,16 @@
-// API Base URL 
+// Base URL 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-// API Endpoints
 export const API_ENDPOINTS = {
   // Auth 
   AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
     LOGOUT: '/auth/logout',
     REFRESH: '/auth/refresh',
-    ME: '/users/me', // ✅ CORREGIDO: Era /auth/me
+    ME: '/auth/me', 
+    MAGIC_LINK: '/auth/magic-link',
+    GOOGLE: '/auth/google', 
+    FACEBOOK: '/auth/facebook', 
+    CALLBACK: '/auth/callback', 
   },
   
   // Collections 
@@ -19,8 +20,7 @@ export const API_ENDPOINTS = {
     GET: (id: string) => `/collections/${id}`,
     UPDATE: (id: string) => `/collections/${id}`,
     DELETE: (id: string) => `/collections/${id}`,
-    PUBLIC: '/collections/public', // ✅ CORREGIDO: Era /collections/explore
-    // ✅ NUEVOS endpoints de members en collections
+    PUBLIC: '/collections/public',
     JOIN: (id: string) => `/collections/${id}/members/join`,
     LEAVE: (id: string) => `/collections/${id}/members/leave`,
   },
@@ -28,32 +28,27 @@ export const API_ENDPOINTS = {
   // Contributions 
   CONTRIBUTIONS: {
     LIST: (collectionId: string) => `/collections/${collectionId}/contributions`,
-    CREATE: (collectionId: string) => `/collections/${collectionId}/contributions`, // ✅ CORREGIDO
-    MY_CONTRIBUTIONS: '/contributions', // ✅ NUEVO: Mis contribuciones globales
-    // ✅ ELIMINADO: GET /contributions/{id} no existe en backend
-    // ✅ ELIMINADO: STATS no existe en backend
+    CREATE: (collectionId: string) => `/collections/${collectionId}/contributions`,
+    MY_CONTRIBUTIONS: '/contributions',
   },
   
   // Invitations 
   INVITATIONS: {
     LIST: '/invitations',
     CREATE: '/invitations',
-    ACCEPT: (id: string) => `/invitations/${id}/accept`, // ✅ CORREGIDO: Era respond
-    REJECT: (id: string) => `/invitations/${id}/reject`, // ✅ CORREGIDO: Era respond
-    // ✅ ELIMINADO: DELETE no existe más en backend
+    ACCEPT: (id: string) => `/invitations/${id}/accept`, 
+    REJECT: (id: string) => `/invitations/${id}/reject`,
   },
 
   // Members 
   MEMBERS: {
     LIST: (collectionId: string) => `/collections/${collectionId}/members`,
-    // ✅ ELIMINADO: INVITE ya no existe, ahora se usa INVITATIONS.CREATE
-    // ✅ ELIMINADO: ACCEPT ya no existe, ahora es COLLECTIONS.JOIN
     REMOVE: (collectionId: string, userId: string) => `/collections/${collectionId}/members/${userId}`,
   },
 
   // Withdrawals 
   WITHDRAWALS: {
     LIST: (collectionId: string) => `/collections/${collectionId}/withdrawals`,
-    INTELLIGENT_WITHDRAW: (collectionId: string) => `/collections/${collectionId}/withdrawals`, // ✅ CORREGIDO: Sin body
+    INTELLIGENT_WITHDRAW: (collectionId: string) => `/collections/${collectionId}/withdrawals`,
   },
 } as const;

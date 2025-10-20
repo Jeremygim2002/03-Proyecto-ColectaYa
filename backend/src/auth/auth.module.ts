@@ -1,30 +1,16 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { UserModule } from '../user/user.module';
 import { PrismaModule } from '../prisma/prisma.module';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SupabaseModule } from '../supabase/supabase.module';
+import { SupabaseAuthGuard } from './guards';
 
 @Module({
-  imports: [
-    // Importar ConfigModule para que ConfigService esté disponible
-    ConfigModule,
-    UserModule,
-    PrismaModule,
-    JwtModule.registerAsync({
-      global: true,
-      // Permitir la inyección en useFactory
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET', ''),
-        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN', '1h') },
-      }),
-    }),
-  ],
+  imports: [ConfigModule, PrismaModule, SupabaseModule],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService, JwtModule],
+  providers: [
+    SupabaseAuthGuard, // Registrar el guard
+  ],
+  exports: [SupabaseAuthGuard], // Exportar para usar en otros módulos
 })
 export class AuthModule {}

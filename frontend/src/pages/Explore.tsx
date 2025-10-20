@@ -148,7 +148,7 @@ export default function Explore() {
                       <CollectCard
                         id={collection.id}
                         title={collection.title}
-                        description={collection.description}
+                        description={collection.description || 'Sin descripción'}
                         imageUrl={collection.imageUrl}
                         ownerId={collection.ownerId}
                         ownerName="Usuario" // TODO: Agregar nombre de usuario al tipo Collection

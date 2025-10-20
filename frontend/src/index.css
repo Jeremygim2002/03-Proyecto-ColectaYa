@@ -2,7 +2,6 @@
 @import "tw-animate-css";
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* Colectaya Design System - Professional & Modern (Tailwind 4 Compatible) */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -13,7 +12,7 @@
   --radius-xl: calc(var(--radius) + 8px);
   --radius-full: 9999px;
   
-  /* Core Colors - Professional Fintech Palette */
+  /* Core Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -21,22 +20,22 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   
-  /* Primary - Vibrant Blue (#4C6EF5 / oklch) */
+  /* Primary  */
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary-light: var(--primary-light);
   --color-primary-dark: var(--primary-dark);
   
-  /* Accent - Verde éxito */
+  /* Accent  */
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent-light: var(--accent-light);
   
-  /* Neutral - Gris interacciones */
+  /* Neutral  */
   --color-neutral: var(--neutral);
   --color-neutral-foreground: var(--neutral-foreground);
   
-  /* Secondary, Muted, Destructive */
+  /* Secondary */
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -68,7 +67,7 @@
 :root {
   --radius: 0.75rem;
   
-  /* Light Mode - Professional */
+  /* Light Mode  */
   --background: oklch(0.98 0 0);
   --foreground: oklch(0.18 0.02 250);
   
@@ -78,18 +77,18 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.18 0.02 250);
   
-  /* Primary - Vibrant Blue (#4C6EF5 ≈ oklch(0.63 0.22 250)) */
+  /* Primary  */
   --primary: oklch(0.63 0.22 250);
   --primary-foreground: oklch(1 0 0);
   --primary-light: oklch(0.73 0.22 250);
   --primary-dark: oklch(0.53 0.22 250);
   
-  /* Accent - Verde éxito (solo para estados positivos) */
+  /* Accent  */
   --accent: oklch(0.55 0.16 145);
   --accent-foreground: oklch(1 0 0);
   --accent-light: oklch(0.65 0.16 145);
   
-  /* Neutral - Gris para interacciones generales */
+  /* Neutral  */
   --neutral: oklch(0.92 0.005 250);
   --neutral-foreground: oklch(0.18 0.02 250);
   
@@ -101,7 +100,7 @@
   --muted: oklch(0.88 0.01 250);
   --muted-foreground: oklch(0.52 0.016 250);
   
-  /* Skeleton - Gris oscuro para loading */
+  /* Skeleton  */
   --skeleton: oklch(0.85 0.01 250);
   
   /* Destructive */
@@ -141,7 +140,7 @@
   --accent-foreground: oklch(1 0 0);
   --accent-light: oklch(0.65 0.16 145);
   
-  /* Neutral - Gris para interacciones generales (modo oscuro) */
+  /* Neutral - Gris para  */
   --neutral: oklch(0.35 0.02 250);
   --neutral-foreground: oklch(0.98 0 0);
   
@@ -151,7 +150,7 @@
   --muted: oklch(0.32 0.02 250);
   --muted-foreground: oklch(0.65 0.015 250);
   
-  /* Skeleton - Gris oscuro para loading (modo oscuro) */
+  /* Skeleton - Gris oscuro */
   --skeleton: oklch(0.4 0.02 250);
   
   --destructive: oklch(0.45 0.2 25);
@@ -197,7 +196,7 @@
   }
 }
 
-/* Custom Utilities (Tailwind 4 Compatible) */
+/* Custom Utilities */
 .glass-card {
   background: oklch(from var(--card) l c h / 0.8);
   backdrop-filter: blur(12px);
@@ -235,7 +234,7 @@
   background: linear-gradient(135deg, oklch(0.63 0.22 250) 0%, oklch(0.72 0.17 180) 100%);
 }
 
-/* Skeleton Loading Animation - Wave Effect */
+/* Skeleton Loading Animation  */
 @keyframes shimmer-wave {
   0% {
     transform: translateX(-100%);

@@ -32,7 +32,9 @@ export class CollectionsService {
     // Temporalmente sin imageUrl hasta regenerar Prisma
     const newCollection = await this.prisma.collection.create({
       data: {
-        ownerId: ownerId,
+        owner: {
+          connect: { id: ownerId },
+        },
         title: dto.title,
         description: dto.description,
         imageUrl: dto.imageUrl,

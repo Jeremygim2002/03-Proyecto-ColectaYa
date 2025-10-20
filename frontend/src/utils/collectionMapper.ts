@@ -1,37 +1,25 @@
 import type { CollectionFormData } from '@/components/collection-modal/hooks/useCollectionForm';
 import type { CreateCollectionData, CollectionRuleType } from '@/types';
 
-/**
- * Mapea los tipos de reglas del formulario a los tipos del backend
- */
+
+//  Mapea los tipos de reglas del formulario a los tipos del backend
 export const mapRuleType = (withdrawalType: string): CollectionRuleType => {
   switch (withdrawalType) {
     case 'al100':
       return 'GOAL_ONLY';
-    case 'alporciento':
-      return 'THRESHOLD';
-    case 'cuandoquiera':
+    case 'libre':
       return 'ANYTIME';
     default:
       return 'GOAL_ONLY';
   }
 };
 
-/**
- * Convierte los datos del formulario a la estructura esperada por la API
- */
+
+//  Convierte los datos del formulario a la estructura esperada por la API
 export const mapFormToApiData = (formData: CollectionFormData): CreateCollectionData => {
   const goalAmount = parseFloat(formData.goal) || 0;
   const ruleType = mapRuleType(formData.withdrawalType);
-  
-  // Calcular ruleValue basado en el tipo
-  let ruleValue: number | undefined;
-  if (ruleType === 'THRESHOLD') {
-    // Para THRESHOLD, usar un valor por defecto del 50% si no se especifica
-    ruleValue = 50;
-  }
 
-  // Calcular deadlineAt basado en endDate
   let deadlineAt: string | undefined;
   if (formData.endDate) {
     deadlineAt = new Date(formData.endDate).toISOString();
@@ -42,15 +30,13 @@ export const mapFormToApiData = (formData: CollectionFormData): CreateCollection
     description: formData.description.trim() || undefined,
     goalAmount,
     ruleType,
-    ruleValue,
-    isPrivate: formData.members.length > 0, // Privada si tiene miembros específicos
+    ruleValue: undefined, // Ya no usamos ruleValue
+    isPrivate: formData.members.length > 0, 
     deadlineAt,
   };
 };
 
-/**
- * Valida que los datos del formulario son correctos para enviar a la API
- */
+//  Valida que los datos del formulario son correctos para enviar a la API
 export const validateFormData = (formData: CollectionFormData): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
 

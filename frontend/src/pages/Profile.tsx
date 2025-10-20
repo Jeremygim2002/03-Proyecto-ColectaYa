@@ -9,10 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Camera, User, Mail, Calendar } from "lucide-react";
+import { Camera, User, Mail} from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useAuthStore } from "@/stores/authStore";
+import { useUserInfo } from "@/hooks/useUserInfo";
 
 const profileSchema = z.object({
   name: z.string().min(2, "El nombre debe tener al menos 2 caracteres").max(100),
@@ -22,19 +23,20 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>;
 
 export default function Profile() {
-  const user = useAuthStore((state) => state.user);
+  const { user } = useAuthStore();
+  const { userInitials, userName, userEmail, userAvatar } = useUserInfo();
   const [isEditing, setIsEditing] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isSubmitting, isDirty },
+    formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: user?.name || "",
-      email: user?.email || "",
+      name: userName || "",
+      email: userEmail || "",
     },
   });
 
@@ -49,26 +51,6 @@ export default function Profile() {
       toast.error("Error al actualizar el perfil");
     }
   };
-
-  const handleCancel = () => {
-    reset(); // Restore initial values
-    setIsEditing(false);
-  };
-
-  const userInitials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-    : "??";
-
-  const joinedDate = user?.createdAt 
-    ? new Date(user.createdAt).toLocaleDateString('es-PE', {
-        month: 'long',
-        year: 'numeric'
-      })
-    : "Cargando...";
 
   return (
     <div className="container mx-auto max-w-3xl px-4 md:px-6 py-6 md:py-8">
@@ -110,7 +92,7 @@ export default function Profile() {
             <div className="mb-8 flex flex-col items-center">
               <div className="relative">
                 <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
-                  <AvatarImage src="" alt={user?.name || ""} />
+                  <AvatarImage src={userAvatar || ""} alt={userName || ""} />
                   <AvatarFallback className="bg-gradient-primary text-4xl text-primary-foreground">
                     {userInitials}
                   </AvatarFallback>
@@ -125,8 +107,7 @@ export default function Profile() {
                   <Camera className="h-5 w-5" />
                 </Button>
               </div>
-              <h2 className="mt-4 text-2xl font-bold">{user?.name}</h2>
-              <p className="text-sm text-muted-foreground">Miembro desde {joinedDate}</p>
+              <h2 className="mt-4 text-2xl font-bold">{userName}</h2>
             </div>
 
             {/* Info Section */}
@@ -166,33 +147,6 @@ export default function Profile() {
                     <p className="text-sm text-destructive">{errors.email.message}</p>
                   )}
                 </div>
-
-                {/* Join Date (Read-only) */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    Miembro desde
-                  </Label>
-                  <Input value={joinedDate} disabled className="disabled:opacity-100" />
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4">
-                {!isEditing ? (
-                  <Button type="button" variant="accent" className="flex-1" onClick={() => setIsEditing(true)}>
-                    Editar perfil
-                  </Button>
-                ) : (
-                  <>
-                    <Button type="button" variant="outline" className="flex-1" onClick={handleCancel}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit" variant="accent" className="flex-1" disabled={isSubmitting || !isDirty}>
-                      {isSubmitting ? "Guardando..." : "Guardar cambios"}
-                    </Button>
-                  </>
-                )}
               </div>
             </form>
           </>

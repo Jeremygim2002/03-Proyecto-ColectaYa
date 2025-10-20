@@ -1,14 +1,34 @@
 import { Request } from 'express';
 import { Role } from '@prisma/client';
 
-export interface JwtPayload {
-  sub: string; // user id (UUID)
+// TIPOS PARA SUPABASE AUTH
+export interface SupabaseAuthUser {
+  id: string;
   email: string;
-  roles: Role[]; // Array de roles
-  iat?: number;
-  exp?: number;
+  name?: string | null;
+  avatar?: string | null;
+  roles?: Role[];
+  aud?: string;
+  role?: string;
 }
 
 export interface AuthenticatedRequest extends Request {
-  user: JwtPayload;
+  user: SupabaseAuthUser;
+}
+
+// RESPUESTAS DE AUTENTICACIÓN
+export interface AuthResponse {
+  user: {
+    id: string;
+    email: string;
+    name?: string;
+    avatar?: string;
+    emailVerified: boolean;
+  };
+  tokens: {
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+    expiresAt?: number;
+  };
 }

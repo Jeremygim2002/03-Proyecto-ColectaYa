@@ -20,7 +20,6 @@ export interface Collection {
 
 export type CollectionRuleType = 
   | 'GOAL_ONLY'   // Solo retiro al 100% de meta  
-  | 'THRESHOLD'   // Retiro al alcanzar % umbral
   | 'ANYTIME';    // Retiro en cualquier momento
 
 export type CollectionStatus = 

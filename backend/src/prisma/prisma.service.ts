@@ -7,13 +7,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   constructor() {
     super({
-      // Configuración de logging optimizada por ambiente
-      log:
-        process.env.NODE_ENV === 'development'
-          ? ['warn', 'error'] // En desarrollo: solo warnings y errores
-          : ['error'], // En producción: solo errores críticos
+      log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
 
-      // Formateo de errores más legible
       errorFormat: 'pretty',
     });
   }
@@ -23,7 +18,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       await this.$connect();
       this.logger.log('🔗 Prisma conectado exitosamente con connection pooling optimizado');
 
-      // Configurar event listeners para monitoreo
+      // Configurar event listeners
       this.$on('warn' as never, (event: { message: string }) => {
         this.logger.warn(`Base de datos: ${event.message}`);
       });
@@ -63,7 +58,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
   }
 
-  // Método para obtener estadísticas de conexión (útil para monitoreo)
+  // Método para obtener estadísticas de conexión
   async getConnectionStats() {
     try {
       const stats = await this.$queryRaw`

@@ -13,14 +13,12 @@ export interface Member {
   addedBy: string;
 }
 
-// ✅ ELIMINADO: InviteMemberData ya no se usa (se usa invitationsApi.create())
 
 export interface MemberListResponse {
   members: Member[];
   total: number;
 }
 
-// ✅ NUEVO: Respuesta al unirse a una colección
 export interface JoinCollectionResponse {
   message: string;
   member: {
@@ -42,7 +40,6 @@ export interface JoinCollectionResponse {
   };
 }
 
-// ✅ NUEVO: Respuesta al salirse de una colección
 export interface LeaveCollectionResponse {
   message: string;
 }

@@ -17,7 +17,6 @@ interface ConfigurationStepProps {
 export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps) {
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Monto final */}
       <div className="space-y-2">
         <Label htmlFor="goal">
           Monto objetivo <span className="text-destructive">*</span>
@@ -39,7 +38,6 @@ export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps
         </div>
       </div>
 
-      {/* Tipo de retiro */}
       <div className="space-y-2">
         <div className="flex items-center gap-2">
           <Label>Tipo de retiro</Label>
@@ -54,9 +52,7 @@ export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps
                 <p className="text-sm">
                   <strong>Al 100%:</strong> Solo se puede retirar cuando se alcance la meta completa.
                   <br />
-                  <strong>Por rango:</strong> Retiros parciales al alcanzar ciertos porcentajes.
-                  <br />
-                  <strong>Libre:</strong> Retiros en cualquier momento.
+                  <strong>Libre:</strong> Retira en cualquier momento.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -71,7 +67,6 @@ export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="al100">Al 100% del objetivo</SelectItem>
-            <SelectItem value="rango">Por rango de avance</SelectItem>
             <SelectItem value="libre">Libre</SelectItem>
           </SelectContent>
         </Select>
@@ -91,8 +86,7 @@ export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p className="text-sm">
-                    Colectaya calculará automáticamente cuánto le corresponde aportar a cada miembro
-                    según la cantidad de participantes y el plazo definido.
+                    Si escoges "dividir equitativamente", Colectaya calculará automáticamente cuánto le corresponde aportar a cada miembro.
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -141,72 +135,44 @@ export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps
                     htmlFor="payment-recurrente"
                     className="flex-1 cursor-pointer font-normal"
                   >
-                    Pagos recurrentes
+                    Pagos recurrentes (mensual)
                   </Label>
                 </div>
               </RadioGroup>
             </div>
 
-            {/* Opciones de pago recurrente */}
-            {formData.paymentMode === "recurrente" && (
-              <div className="space-y-4 animate-fade-in">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="period">Período de pago</Label>
-                    <TooltipProvider>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <button type="button" className="focus:outline-none">
-                            <HelpCircle className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-sm">
-                            Frecuencia con la que cada miembro realizará sus aportes
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <Select value={formData.period} onValueChange={(v) => onUpdate("period", v)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="semanal">Semanal</SelectItem>
-                      <SelectItem value="mensual">Mensual</SelectItem>
-                    </SelectContent>
-                  </Select>
+            {/* Fecha límite para ambos tipos de pago */}
+            <div className="space-y-4 animate-fade-in border-t pt-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="endDate">Fecha límite</Label>
+                  <TooltipProvider>
+                    <Tooltip delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <button type="button" className="focus:outline-none">
+                          <HelpCircle className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-sm">
+                          {formData.paymentMode === "recurrente" 
+                            ? "Fecha límite para completar los pagos recurrentes"
+                            : "Fecha límite para completar la colecta"
+                          }
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="endDate">Fecha límite</Label>
-                    <TooltipProvider>
-                      <Tooltip delayDuration={0}>
-                        <TooltipTrigger asChild>
-                          <button type="button" className="focus:outline-none">
-                            <HelpCircle className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="text-sm">
-                            Fecha límite para completar los pagos recurrentes
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) => onUpdate("endDate", e.target.value)}
-                    min={new Date().toISOString().split("T")[0]}
-                  />
-                </div>
+                <Input
+                  id="endDate"
+                  type="date"
+                  value={formData.endDate}
+                  onChange={(e) => onUpdate("endDate", e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
+                />
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>

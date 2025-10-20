@@ -11,6 +11,7 @@ import { StepIndicator } from "../collection-modal/components";
 import { collectionsApi } from "@/api/endpoints/collections";
 import { invitationsApi } from "@/api/endpoints/invitations";
 import { mapFormToApiData, validateFormData } from "@/utils/collectionMapper";
+import { useAuthStore } from "@/stores/authStore";
 import type { CreateInvitationData } from "@/types";
 
 // Importaciones directas (sin lazy loading para formularios)
@@ -45,6 +46,7 @@ export default function CreateCollectionModal({
 }: CreateCollectionModalProps) {
   const { currentStep, nextStep, prevStep } = useStepNavigation(initialStep);
   const { formData, updateField, addMember, removeMember, resetForm } = useCollectionForm();
+  const { isAuthenticated, user } = useAuthStore();
   
   // Estado optimista para UX más fluida
   const [optimisticState, addOptimistic] = useOptimistic(
@@ -70,6 +72,22 @@ export default function CreateCollectionModal({
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = async () => {
+    // Verificar autenticación
+    if (!isAuthenticated || !user) {
+      toast.error("Debes iniciar sesión para crear una colecta");
+      return;
+    }
+
+    // Debug: Log estado de autenticación
+    const token = localStorage.getItem('colectaya_auth_token');
+    const authStorage = localStorage.getItem('auth-storage');
+    console.log('🔐 Estado de autenticación:', {
+      isAuthenticated,
+      user,
+      token,
+      authStorage
+    });
+
     // Validar formulario antes de enviar
     const validation = validateFormData(formData);
     if (!validation.isValid) {
@@ -77,14 +95,16 @@ export default function CreateCollectionModal({
       return;
     }
 
-    // Actualización optimista inmediata
-    addOptimistic({ type: 'start' });
-    
     startTransition(async () => {
       try {
+        // Actualización optimista inicial
+        addOptimistic({ type: 'start' });
+        
         // Preparar datos para la API
         addOptimistic({ type: 'progress', progress: 25 });
         const collectionData = mapFormToApiData(formData);
+        
+        console.log('🚀 Enviando datos de colecta:', collectionData);
         
         // Crear la colección
         addOptimistic({ type: 'progress', progress: 50 });
@@ -137,9 +157,12 @@ export default function CreateCollectionModal({
       toast.warning("Espera a que termine el proceso...");
       return;
     }
-    addOptimistic({ type: 'reset' });
-    resetForm();
-    onClose();
+    
+    startTransition(() => {
+      addOptimistic({ type: 'reset' });
+      resetForm();
+      onClose();
+    });
   };
 
   const canGoNext = currentStep < 3 && !optimisticState.isSubmitting;

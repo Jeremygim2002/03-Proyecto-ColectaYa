@@ -11,13 +11,14 @@ import { MembersModule } from './members/members.module';
 import { ContributionsModule } from './contributions/contributions.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
-import { AuthGuard } from './auth/auth.guard';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation';
+import { SupabaseModule } from './supabase/supabase.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { SupabaseAuthGuard, RolesGuard } from './auth/guards';
 
 @Module({
   imports: [
-    // Configuración completa de variables de entorno con validación
     ConfigModule.forRoot({
       isGlobal: true, // ConfigService disponible globalmente
       envFilePath: '.env',
@@ -30,26 +31,16 @@ import { validationSchema } from './config/validation';
       },
     }),
 
-    // Rate limiting global - Relajado para desarrollo
     ThrottlerModule.forRoot([
       {
-        name: 'short',
-        ttl: 1000,
-        limit: 10, // Aumentado de 3 a 10
-      },
-      {
-        name: 'medium',
-        ttl: 10000,
-        limit: 50, // Aumentado de 20 a 50
-      },
-      {
-        name: 'long',
-        ttl: 60000,
-        limit: 200, // Aumentado de 100 a 200
+        ttl: parseInt(process.env.THROTTLE_TTL ?? '60000', 10),
+        limit: parseInt(process.env.THROTTLE_LIMIT ?? '20', 10),
       },
     ]),
     UserModule,
     AuthModule,
+    PrismaModule,
+    SupabaseModule,
     CollectionsModule,
     MembersModule,
     ContributionsModule,
@@ -59,15 +50,17 @@ import { validationSchema } from './config/validation';
   controllers: [AppController],
   providers: [
     AppService,
-    // AuthGuard globalmente (debe ir antes que ThrottlerGuard)
     {
       provide: APP_GUARD,
-      useClass: AuthGuard,
+      useClass: SupabaseAuthGuard,
     },
-    // ThrottlerGuard globalmente
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, // Autorización por roles
     },
   ],
 })

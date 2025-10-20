@@ -3,16 +3,17 @@ export default () => ({
   database: {
     url: process.env.DATABASE_URL,
   },
-  jwt: {
-    secret: process.env.JWT_SECRET,
-    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+  supabase: {
+    url: process.env.SUPABASE_URL,
+    anonKey: process.env.SUPABASE_ANON_KEY,
+    serviceKey: process.env.SUPABASE_SERVICE_KEY,
   },
   environment: process.env.NODE_ENV || 'development',
   frontend: {
-    url: process.env.FRONTEND_URL || 'http://localhost:3001',
+    url: process.env.FRONTEND_URL || 'http://localhost:5173',
   },
   throttle: {
     ttl: parseInt(process.env.THROTTLE_TTL || '60000', 10),
-    limit: parseInt(process.env.THROTTLE_LIMIT || '100', 10),
+    limit: parseInt(process.env.THROTTLE_LIMIT || '20', 10),
   },
 });
