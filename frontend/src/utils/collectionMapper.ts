@@ -31,7 +31,7 @@ export const mapFormToApiData = (formData: CollectionFormData): CreateCollection
     goalAmount,
     ruleType,
     ruleValue: undefined, // Ya no usamos ruleValue
-    isPrivate: formData.members.length > 0, 
+    isPrivate: !!formData.isPrivate,
     deadlineAt,
   };
 };

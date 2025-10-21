@@ -1,6 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Sparkles } from "lucide-react";
 import type { CollectionFormData } from "../hooks/useCollectionForm";
 
@@ -45,6 +46,23 @@ export function BasicInfoStep({ formData, onUpdate }: BasicInfoStepProps) {
         <p className="text-xs text-muted-foreground">
           {formData.description.length}/150 caracteres
         </p>
+
+        {/* Privacidad de la colecta */}
+        <div className="mt-4 flex items-center justify-between rounded-lg border bg-muted/40 p-4">
+          <div>
+            <Label htmlFor="isPrivate" className="cursor-pointer">
+              Colecta privada
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              Si es privada, solo usuarios invitados podrán verla y unirse.
+            </p>
+          </div>
+          <Switch
+            id="isPrivate"
+            checked={formData.isPrivate}
+            onCheckedChange={(checked) => onUpdate("isPrivate", !!checked)}
+          />
+        </div>
 
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
           <div className="flex items-start gap-3">

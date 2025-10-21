@@ -1,105 +1,57 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
-// =====================================================
-// ENUMS - Estados del sistema ColectaYa MVP
-// =====================================================
-
-enum Role {
-  USER  // Usuario regular
-  ADMIN // Administrador del sistema
-}
-
-enum CollectionStatus {
-  ACTIVE     // Activa, recibiendo aportes (en proceso)
-  COMPLETED  // Completada, meta alcanzada
-  // TODOS es solo un filtro frontend
-}
-
-enum RuleType {
-  GOAL_ONLY  // Solo retiro al 100% de meta
-  ANYTIME    // Retiro en cualquier momento
-}
-
-enum ContributionStatus {
-  PAID     // Pagado exitosamente
-  FAILED   // Pago fallido
-}
-
-enum WithdrawalStatus {
-  REQUESTED // Solicitado
-  PAID      // Pagado
-  REJECTED  // Rechazado
-}
-
-enum InvitationStatus {
-  PENDING   // Invitación pendiente
-  ACCEPTED  // Invitación aceptada
-  REJECTED  // Invitación rechazada
-}
-
-// =====================================================
-// MODELOS - Entidades principales ColectaYa MVP
-// =====================================================
-
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  password  String
-  name      String?  // ✅ AGREGADO - Para mostrar nombre en UI
-  avatar    String?  // ✅ AGREGADO - Para avatares de usuario
-  roles     Role[]   @default([USER])
-  createdAt DateTime @default(now()) @db.Timestamptz
-
-  // Relaciones
-  ownedCollections Collection[]        @relation("CollectionOwner")
-  memberships      CollectionMember[]
-  contributions    Contribution[]
+  id                  String             @id @default(uuid()) @db.Uuid
+  email               String             @unique
+  password            String
+  roles               Role[]             @default([USER])
+  createdAt           DateTime           @default(now()) @db.Timestamptz(6)
+  name                String?
+  avatar              String?
+  memberships         CollectionMember[]
+  ownedCollections    Collection[]       @relation("CollectionOwner")
+  contributions       Contribution[]
+  receivedInvitations Invitation[]       @relation("InvitedInvitations")
+  sentInvitations     Invitation[]       @relation("InviterInvitations")
   withdrawals         Withdrawal[]
-  sentInvitations     Invitation[] @relation("InviterInvitations")
-  receivedInvitations Invitation[] @relation("InvitedInvitations")
 
   @@index([email])
   @@map("users")
 }
 
 model Collection {
-  id           String           @id @default(uuid()) @db.Uuid
-  ownerId      String           @db.Uuid
-  title        String
-  description  String?
-  imageUrl     String?          // ✅ AGREGADO - Para imágenes de colectas
-  isPrivate    Boolean          @default(false)
-  goalAmount   Decimal          @db.Decimal(12, 2)
-  ruleType     RuleType
-  ruleValue    Decimal?         @db.Decimal(5, 2) // ✅ RENOMBRADO de thresholdPct
-  status       CollectionStatus @default(ACTIVE)
-  deadlineAt   DateTime?        @db.Timestamptz
-  createdAt    DateTime         @default(now()) @db.Timestamptz
-  updatedAt    DateTime         @updatedAt @db.Timestamptz // ✅ AGREGADO - Para tracking de cambios
-
-  // Relaciones
-  owner         User               @relation("CollectionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  id            String             @id @default(uuid()) @db.Uuid
+  ownerId       String             @db.Uuid
+  title         String
+  description   String?
+  isPrivate     Boolean            @default(false)
+  goalAmount    Decimal            @db.Decimal(12, 2)
+  ruleType      RuleType
+  status        CollectionStatus   @default(ACTIVE)
+  deadlineAt    DateTime?          @db.Timestamptz(6)
+  createdAt     DateTime           @default(now()) @db.Timestamptz(6)
+  imageUrl      String?
+  ruleValue     Decimal?           @db.Decimal(5, 2)
+  updatedAt     DateTime           @updatedAt @db.Timestamptz(6)
   members       CollectionMember[]
+  stats         CollectionStats?
+  owner         User               @relation("CollectionOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   contributions Contribution[]
-  withdrawals   Withdrawal[]
   invitations   Invitation[]
-  stats         CollectionStats?   // ✅ RELACIÓN - Para estadísticas optimizadas
+  withdrawals   Withdrawal[]
 
   @@index([ownerId])
   @@index([status])
   @@index([deadlineAt])
-  @@index([isPrivate])  // ✅ NUEVO - Para queries de colectas públicas
+  @@index([isPrivate])
   @@map("collections")
 }
 
@@ -109,15 +61,13 @@ model Invitation {
   inviterId    String           @db.Uuid
   invitedId    String           @db.Uuid
   status       InvitationStatus @default(PENDING)
-  createdAt    DateTime         @default(now()) @db.Timestamptz
-  respondedAt  DateTime?        @db.Timestamptz
+  createdAt    DateTime         @default(now()) @db.Timestamptz(6)
+  respondedAt  DateTime?        @db.Timestamptz(6)
+  collection   Collection       @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  invited      User             @relation("InvitedInvitations", fields: [invitedId], references: [id], onDelete: Cascade)
+  inviter      User             @relation("InviterInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
 
-  // Relaciones
-  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  inviter    User       @relation("InviterInvitations", fields: [inviterId], references: [id], onDelete: Cascade)
-  invited    User       @relation("InvitedInvitations", fields: [invitedId], references: [id], onDelete: Cascade)
-
-  @@unique([collectionId, invitedId]) // Un usuario solo puede tener una invitación por colección
+  @@unique([collectionId, invitedId])
   @@index([invitedId])
   @@index([collectionId])
   @@index([status])
@@ -125,16 +75,14 @@ model Invitation {
 }
 
 model CollectionMember {
-  id           String    @id @default(uuid()) @db.Uuid
-  collectionId String    @db.Uuid
-  userId       String    @db.Uuid
-  invitedAt    DateTime? @db.Timestamptz
-  acceptedAt   DateTime? @db.Timestamptz
-  addedBy      String?   @db.Uuid
-
-  // Relaciones
-  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String     @id @default(uuid()) @db.Uuid
+  collectionId String     @db.Uuid
+  userId       String     @db.Uuid
+  invitedAt    DateTime?  @db.Timestamptz(6)
+  acceptedAt   DateTime?  @db.Timestamptz(6)
+  addedBy      String?    @db.Uuid
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([collectionId, userId])
   @@index([collectionId])
@@ -148,12 +96,10 @@ model Contribution {
   userId       String?            @db.Uuid
   amount       Decimal            @db.Decimal(12, 2)
   status       ContributionStatus
-  paymentRef   String?            // Referencia interna de pago
-  createdAt    DateTime           @default(now()) @db.Timestamptz
-
-  // Relaciones
-  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  user       User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  paymentRef   String?
+  createdAt    DateTime           @default(now()) @db.Timestamptz(6)
+  collection   Collection         @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  user         User?              @relation(fields: [userId], references: [id])
 
   @@index([collectionId])
   @@index([userId])
@@ -168,12 +114,10 @@ model Withdrawal {
   requestedBy  String?          @db.Uuid
   amount       Decimal          @db.Decimal(12, 2)
   status       WithdrawalStatus @default(REQUESTED)
-  createdAt    DateTime         @default(now()) @db.Timestamptz
-  processedAt  DateTime?        @db.Timestamptz
-
-  // Relaciones
-  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
-  requester  User?      @relation(fields: [requestedBy], references: [id], onDelete: SetNull)
+  createdAt    DateTime         @default(now()) @db.Timestamptz(6)
+  processedAt  DateTime?        @db.Timestamptz(6)
+  collection   Collection       @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  requester    User?            @relation(fields: [requestedBy], references: [id])
 
   @@index([collectionId])
   @@index([requestedBy])
@@ -181,22 +125,48 @@ model Withdrawal {
   @@map("withdrawals")
 }
 
-// =====================================================
-// TABLA DE ESTADÍSTICAS - Para optimizar consultas
-// =====================================================
-
 model CollectionStats {
-  id                 String    @id @default(uuid()) @db.Uuid
-  collectionId       String    @unique @db.Uuid
-  currentAmount      Decimal   @default(0) @db.Decimal(12, 2)
-  contributorsCount  Int       @default(0)
-  contributionsCount Int       @default(0)
-  lastContribution   DateTime? @db.Timestamptz
-  lastUpdated        DateTime  @default(now()) @updatedAt @db.Timestamptz
-
-  // Relación
-  collection Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  id                 String     @id @default(uuid()) @db.Uuid
+  collectionId       String     @unique @db.Uuid
+  currentAmount      Decimal    @default(0) @db.Decimal(12, 2)
+  contributorsCount  Int        @default(0)
+  contributionsCount Int        @default(0)
+  lastContribution   DateTime?  @db.Timestamptz(6)
+  lastUpdated        DateTime   @default(now()) @updatedAt @db.Timestamptz(6)
+  collection         Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
 
   @@index([lastUpdated])
   @@map("collection_stats")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum CollectionStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum RuleType {
+  GOAL_ONLY
+  ANYTIME
+}
+
+enum ContributionStatus {
+  PAID
+  FAILED
+}
+
+enum WithdrawalStatus {
+  REQUESTED
+  PAID
+  REJECTED
+}
+
+enum InvitationStatus {
+  ACCEPTED
+  REJECTED
+  PENDING
 }

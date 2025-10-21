@@ -29,24 +29,47 @@ export class CollectionsService {
   constructor(private prisma: PrismaService) {}
 
   async create(ownerId: string, dto: CreateCollectionDto): Promise<Collection> {
-    // Temporalmente sin imageUrl hasta regenerar Prisma
-    const newCollection = await this.prisma.collection.create({
-      data: {
-        owner: {
-          connect: { id: ownerId },
-        },
-        title: dto.title,
-        description: dto.description,
-        imageUrl: dto.imageUrl,
-        isPrivate: dto.isPrivate,
-        goalAmount: dto.goalAmount,
-        ruleType: dto.ruleType,
-        ruleValue: dto.ruleValue,
-        deadlineAt: dto.deadlineAt,
-      },
-    });
+    // Validar existencia del owner para evitar error 500 por FK
+    const owner = await this.prisma.user.findUnique({ where: { id: ownerId } });
+    if (!owner) {
+      throw new NotFoundException('Owner user not found');
+    }
 
-    return newCollection;
+    try {
+      // Crear colecta
+      const newCollection = await this.prisma.collection.create({
+        data: {
+          owner: { connect: { id: ownerId } },
+          title: dto.title,
+          description: dto.description,
+          imageUrl: dto.imageUrl,
+          isPrivate: dto.isPrivate,
+          goalAmount: dto.goalAmount,
+          ruleType: dto.ruleType,
+          ruleValue: dto.ruleValue,
+          deadlineAt: dto.deadlineAt ? new Date(dto.deadlineAt) : undefined,
+        },
+      });
+
+      return newCollection;
+    } catch (err: unknown) {
+      // Log detallado para diagnóstico en desarrollo
+      console.error('[CollectionsService.create] Prisma error:', err);
+      // Prisma errores comunes: P2002 unique, P2003 FK, etc.
+      const code =
+        typeof err === 'object' && err && 'code' in err
+          ? ((err as Record<string, unknown>)['code'] as string)
+          : undefined;
+      if (code === 'P2003') {
+        // Violación de FK
+        throw new BadRequestException('Invalid relation: owner not found or invalid reference');
+      }
+      if (code === 'P2002') {
+        throw new BadRequestException('Duplicate value violates a unique constraint');
+      }
+      // Re-lanzar con detalle para depuración en desarrollo
+      throw err;
+    }
   }
 
   async findOne(id: string, userId: string) {
@@ -161,21 +184,43 @@ export class CollectionsService {
     });
   }
 
-  async findUserCollections(userId: string) {
-    return this.prisma.collection.findMany({
-      where: {
-        OR: [
-          { ownerId: userId },
-          {
-            members: {
-              some: {
-                userId,
-                acceptedAt: { not: null },
-              },
+  async findUserCollections(userId: string, filters?: { search?: string; status?: CollectionStatus }) {
+    const where: Prisma.CollectionWhereInput = {
+      OR: [
+        { ownerId: userId },
+        {
+          members: {
+            some: {
+              userId,
+              acceptedAt: { not: null },
             },
           },
-        ],
-      },
+        },
+      ],
+    };
+
+    // Aplicar filtro de estado si se proporciona
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+
+    // Aplicar búsqueda en título/descripcion si se proporciona
+    if (filters?.search) {
+      // Normalize existing AND to an array if needed
+      const existingAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : [];
+      where.AND = [
+        ...existingAnd,
+        {
+          OR: [
+            { title: { contains: filters.search, mode: 'insensitive' } },
+            { description: { contains: filters.search, mode: 'insensitive' } },
+          ],
+        },
+      ];
+    }
+
+    return this.prisma.collection.findMany({
+      where,
       include: {
         owner: {
           select: {

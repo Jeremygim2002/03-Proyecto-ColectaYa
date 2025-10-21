@@ -17,6 +17,7 @@ export interface CollectionFormData {
   paymentMode: "unico" | "recurrente";
   period: string;
   endDate: string;
+  isPrivate: boolean;
   members: Member[];
 }
 
@@ -34,6 +35,7 @@ export function useCollectionForm({ initialData }: UseCollectionFormProps = {}) 
     paymentMode: initialData?.paymentMode || "unico",
     period: initialData?.period || "mensual",
     endDate: initialData?.endDate || "",
+    isPrivate: initialData?.isPrivate ?? false,
     members: initialData?.members || [],
   });
 
@@ -109,6 +111,7 @@ export function useCollectionForm({ initialData }: UseCollectionFormProps = {}) 
       paymentMode: "unico",
       period: "mensual",
       endDate: "",
+      isPrivate: false,
       members: [],
     });
   };
