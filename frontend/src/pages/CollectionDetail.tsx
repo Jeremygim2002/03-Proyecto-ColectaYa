@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, Share2, MoreVertical, DollarSign, UserPlus, CreditCard } from "lucide-react";
+import { ChevronLeft, Share2, MoreVertical, DollarSign, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -278,15 +278,6 @@ export default function CollectionDetail() {
               >
                 <DollarSign className="h-4 w-4" />
                 Aportar ahora
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="flex-1 sm:flex-initial"
-                onClick={() => setIsAddMemberModalOpen(true)}
-              >
-                <UserPlus className="h-4 w-4" />
-                Añadir miembro
               </Button>
             </div>
           </Card>

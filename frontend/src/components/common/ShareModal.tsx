@@ -37,11 +37,6 @@ export function ShareModal({ open, onOpenChange, title, url }: ShareModalProps) 
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, "_blank");
   };
 
-  const shareOnInstagram = () => {
-    handleCopy();
-    toast.info("Copia el enlace y compártelo en Instagram Stories o DM");
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -73,16 +68,6 @@ export function ShareModal({ open, onOpenChange, title, url }: ShareModalProps) 
                 <span>📘</span>
               </div>
               <span className="text-xs font-medium">Facebook</span>
-            </button>
-
-            <button
-              onClick={shareOnInstagram}
-              className="flex flex-col items-center gap-2 rounded-lg border-2 border-border p-4 transition-all hover:border-primary hover:bg-primary/5"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-tr from-[#FCAF45] via-[#E1306C] to-[#833AB4] text-white text-2xl">
-                <span>📷</span>
-              </div>
-              <span className="text-xs font-medium">Instagram</span>
             </button>
           </div>
 
