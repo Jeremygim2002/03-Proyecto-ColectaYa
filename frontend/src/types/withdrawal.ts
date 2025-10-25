@@ -16,9 +16,12 @@ export interface Withdrawal {
 
 export type WithdrawalStatus = 
   | 'REQUESTED' 
-  | 'APPROVED' 
-  | 'REJECTED' 
-  | 'COMPLETED';
+  | 'PAID' 
+  | 'REJECTED';
+
+export interface CreateWithdrawalData {
+  amount: number;
+}
 
 
 export interface WithdrawalListResponse {

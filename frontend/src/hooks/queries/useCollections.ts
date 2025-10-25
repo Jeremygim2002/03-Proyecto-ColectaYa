@@ -130,3 +130,45 @@ export function useDeleteCollection() {
     },
   });
 }
+
+// Hook to join a collection
+export function useJoinCollection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['collections', 'join'],
+    mutationFn: (id: string) => collectionsApi.join(id),
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.collections.detail(id) 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.collections.lists() 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.members.list(id) 
+      });
+    },
+  });
+}
+
+// Hook to leave a collection  
+export function useLeaveCollection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['collections', 'leave'],
+    mutationFn: (id: string) => collectionsApi.leave(id),
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.collections.detail(id) 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.collections.lists() 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.members.list(id) 
+      });
+    },
+  });
+}

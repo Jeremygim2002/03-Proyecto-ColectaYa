@@ -74,7 +74,6 @@ export default function Explore() {
             transition={{ duration: 0.5 }}
           >
             <h1 className="flex items-center gap-2 text-2xl lg:text-3xl font-bold">
-              <Globe className="h-7 w-7 lg:h-8 lg:w-8 text-accent" />
               Explorar Colectas
             </h1>
             <p className="text-sm md:text-base text-muted-foreground">Descubre vaquitas públicas y únete para contribuir</p>

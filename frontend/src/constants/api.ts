@@ -49,6 +49,6 @@ export const API_ENDPOINTS = {
   // Withdrawals 
   WITHDRAWALS: {
     LIST: (collectionId: string) => `/collections/${collectionId}/withdrawals`,
-    INTELLIGENT_WITHDRAW: (collectionId: string) => `/collections/${collectionId}/withdrawals`,
+    CREATE: (collectionId: string) => `/collections/${collectionId}/withdrawals`,
   },
 } as const;

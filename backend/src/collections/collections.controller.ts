@@ -56,11 +56,24 @@ export class CollectionsController {
   @Get()
   @ApiOperation({ summary: 'Listar colectas del usuario (dashboard)' })
   async list(@Query() filters: { search?: string; status?: string }, @Request() req: AuthenticatedRequest) {
+    console.log('🔍 [CollectionsController.list] Filters received:', filters);
+
     // Map status to CollectionStatus if provided
     const serviceFilters: { search?: string; status?: CollectionStatus | undefined } = {};
     if (filters.search) serviceFilters.search = filters.search;
-    if (filters.status) serviceFilters.status = filters.status as CollectionStatus;
+    if (filters.status && filters.status !== 'all') {
+      // Validate status value - convert to uppercase
+      const statusUpper = filters.status.toUpperCase();
 
+      if (statusUpper === 'ACTIVE' || statusUpper === 'COMPLETED') {
+        serviceFilters.status = statusUpper as CollectionStatus;
+      } else {
+        throw new BadRequestException(`Invalid status: ${filters.status}. Valid values: active, completed, all`);
+      }
+    }
+    // Si status es 'all' o undefined, no agregamos filtro de status para mostrar todas
+
+    console.log('🔍 [CollectionsController.list] Service filters:', serviceFilters);
     return this.collectionsService.findUserCollections(req.user.id, serviceFilters);
   }
 

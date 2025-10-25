@@ -90,8 +90,7 @@ export const useAuthCallback = () => {
       
       // Invalidar queries
       queryClient.invalidateQueries({ queryKey: ['auth'] });
-      
-      toast.success('¡Bienvenido a ColectaYa!');
+
       navigate('/dashboard');
     },
     onError: (error: Error) => {

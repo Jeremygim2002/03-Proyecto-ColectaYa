@@ -12,6 +12,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Explore = lazy(() => import("@/pages/Explore"));
 const CollectionDetail = lazy(() => import("@/pages/CollectionDetail"));
+const JoinCollection = lazy(() => import("@/pages/JoinCollection"));
 const Profile = lazy(() => import("@/pages/Profile"));
 const Login = lazy(() => import("@/pages/Login"));
 const AuthCallback = lazy(() => import("@/pages/AuthCallback"));
@@ -38,6 +39,7 @@ function App() {
               <Route path="/" element={<Onboarding />} />
               <Route path="/login" element={<Login />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/join/:id" element={<JoinCollection />} />
               
               {/* Rutas protegidas*/}
               <Route element={<AppLayout />}>

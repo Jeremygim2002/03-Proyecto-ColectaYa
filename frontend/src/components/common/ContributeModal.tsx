@@ -18,6 +18,8 @@ interface ContributeModalProps {
   collectionTitle: string;
   collectionId: string;
   suggestedAmount?: number;
+  currentAmount: number;
+  goalAmount: number;
 }
 
 export function ContributeModal({ 
@@ -25,7 +27,9 @@ export function ContributeModal({
   onOpenChange, 
   collectionTitle,
   collectionId,
-  suggestedAmount 
+  suggestedAmount,
+  currentAmount,
+  goalAmount
 }: ContributeModalProps) {
   const [amount, setAmount] = useState(suggestedAmount?.toString() || "");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("credit_card");
@@ -83,6 +87,28 @@ export function ContributeModal({
   const handleSubmit = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       toast.error("Por favor ingresa un monto válido");
+      return;
+    }
+
+    const contributionAmount = parseFloat(amount);
+    const remainingAmount = goalAmount - currentAmount;
+    
+    // Validar que no supere el 100%
+    if (contributionAmount > remainingAmount) {
+      const formattedRemaining = remainingAmount.toFixed(2);
+      toast.error("No puedes agregar un monto que supere el 100%", {
+        description: `Solo falta S/ ${formattedRemaining} para completar la colecta.`,
+        duration: 5000,
+      });
+      return;
+    }
+
+    // Validar que no sea exactamente 0 lo que falta
+    if (remainingAmount <= 0) {
+      toast.error("Esta colecta ya ha alcanzado su meta", {
+        description: "No se pueden agregar más contribuciones.",
+        duration: 5000,
+      });
       return;
     }
 
@@ -192,6 +218,14 @@ export function ContributeModal({
                 Monto sugerido: S/ {suggestedAmount.toFixed(2)}
               </p>
             )}
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">
+                Recaudado: S/ {currentAmount.toFixed(2)}
+              </span>
+              <span className="text-muted-foreground">
+                Falta: S/ {(goalAmount - currentAmount).toFixed(2)}
+              </span>
+            </div>
           </div>
 
           {/* Metodo de pago */}

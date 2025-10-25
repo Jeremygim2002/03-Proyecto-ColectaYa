@@ -113,6 +113,39 @@ export class MembersService {
     }
   }
 
+  async leave(collectionId: string, userId: string) {
+    // Verificar que la colecta existe
+    const collection = await this.prisma.collection.findUnique({
+      where: { id: collectionId },
+    });
+
+    if (!collection) {
+      throw new NotFoundException('Collection not found');
+    }
+
+    // Verificar que el usuario no es el owner
+    if (collection.ownerId === userId) {
+      throw new ForbiddenException('Owner cannot leave the collection');
+    }
+
+    // Verificar que es miembro de la colecta
+    const member = await this.prisma.collectionMember.findFirst({
+      where: {
+        collectionId,
+        userId,
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException('You are not a member of this collection');
+    }
+
+    // Eliminar al miembro
+    await this.prisma.collectionMember.delete({
+      where: { id: member.id },
+    });
+  }
+
   async listMembers(collectionId: string, userId: string) {
     // Verificar acceso (owner o miembro)
     const collection = await this.prisma.collection.findUnique({

@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { withdrawalsApi } from '@/api/endpoints';
 import { queryKeys } from '@/constants';
-import type { CreateWithdrawalData } from '@/types';
 
 
 //  Hook para obtener todos los retiros de una colecta
@@ -15,13 +14,13 @@ export function useWithdrawals(collectionId: string) {
 }
 
 
-//  Hook para solicitar un retiro de una colecta
+//  Hook para solicitar un retiro total de una colecta
 export function useCreateWithdrawal(collectionId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ['withdrawals', 'create'],
-    mutationFn: (data: CreateWithdrawalData) => withdrawalsApi.create(collectionId, data),
+    mutationFn: () => withdrawalsApi.create(collectionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.withdrawals.list(collectionId) 

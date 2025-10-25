@@ -1,25 +1,33 @@
 import { httpClient } from '../client';
 import { API_ENDPOINTS } from '@/constants';
-import type {
-  WithdrawalListResponse,
-  IntelligentWithdrawResponse,
-} from '@/types';
+
+export interface Withdrawal {
+  id: string;
+  collectionId: string;
+  requestedBy: string;
+  amount: number;
+  status: 'REQUESTED' | 'PAID' | 'REJECTED';
+  createdAt: string;
+  processedAt?: string;
+  requester: {
+    id: string;
+    name?: string;
+    email: string;
+  };
+}
 
 export const withdrawalsApi = {
+  // Create withdrawal (retiro total)
+  create: (collectionId: string): Promise<Withdrawal> => {
+    return httpClient.post<Withdrawal>(
+      API_ENDPOINTS.WITHDRAWALS.CREATE(collectionId)
+    );
+  },
 
-  // List todos los retiros para una colección
-  list: (collectionId: string): Promise<WithdrawalListResponse> => {
-    return httpClient.get<WithdrawalListResponse>(
+  // List withdrawals
+  list: (collectionId: string): Promise<Withdrawal[]> => {
+    return httpClient.get<Withdrawal[]>(
       API_ENDPOINTS.WITHDRAWALS.LIST(collectionId)
     );
   },
-
-  // ✅ CORREGIDO: Retiro inteligente (sin body, solo owner)
-  intelligentWithdraw: (collectionId: string): Promise<IntelligentWithdrawResponse> => {
-    return httpClient.post<IntelligentWithdrawResponse>(
-      API_ENDPOINTS.WITHDRAWALS.INTELLIGENT_WITHDRAW(collectionId)
-    );
-  },
-
-  // ✅ ELIMINADO: create() con amount - Ahora es retiro inteligente automático
 };

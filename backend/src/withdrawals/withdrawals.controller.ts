@@ -4,7 +4,7 @@ import { WithdrawalsService } from './withdrawals.service';
 
 interface AuthenticatedRequest {
   user: {
-    sub: string;
+    id: string;
     email: string;
     roles: string[];
   };
@@ -17,19 +17,14 @@ export class WithdrawalsController {
   constructor(private readonly withdrawalsService: WithdrawalsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Retiro inteligente de fondos' })
-  async intelligentWithdraw(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    const result = await this.withdrawalsService.intelligentWithdraw(collectionId, req.user.sub);
-    return {
-      message: 'Processed successfully',
-      action: result.action,
-      amount: result.amount,
-    };
+  @ApiOperation({ summary: 'Crear retiro total de fondos' })
+  async create(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
+    return this.withdrawalsService.createWithdrawal(collectionId, req.user.id);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar retiros' })
   async list(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    return this.withdrawalsService.listWithdrawals(collectionId, req.user.sub);
+    return this.withdrawalsService.listWithdrawals(collectionId, req.user.id);
   }
 }

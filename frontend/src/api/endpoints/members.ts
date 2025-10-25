@@ -22,4 +22,11 @@ export const membersApi = {
       API_ENDPOINTS.MEMBERS.REMOVE(collectionId, userId)
     );
   },
+
+  // Leave - Dejar una colecta (solo miembros, no owner)
+  leave: (collectionId: string): Promise<void> => {
+    return httpClient.delete<void>(
+      API_ENDPOINTS.MEMBERS.LIST(collectionId)
+    );
+  },
 };

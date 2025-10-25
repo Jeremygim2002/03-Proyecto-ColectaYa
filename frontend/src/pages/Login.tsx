@@ -58,7 +58,7 @@ export default function Login() {
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
                     <CardTitle className="text-3xl font-bold text-gray-900">
-                        olectaYa
+                            ColectaYa
                     </CardTitle>
                     <CardDescription className="text-gray-600">
                         Inicia sesión en tu cuenta

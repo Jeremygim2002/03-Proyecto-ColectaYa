@@ -36,14 +36,14 @@ export class CollectionsService {
     }
 
     try {
-      // Crear colecta
+      // Crear colecta - Todas las colectas son privadas por defecto
       const newCollection = await this.prisma.collection.create({
         data: {
           owner: { connect: { id: ownerId } },
           title: dto.title,
           description: dto.description,
           imageUrl: dto.imageUrl,
-          isPrivate: dto.isPrivate,
+          isPrivate: true, // Forzar que todas las colectas sean privadas
           goalAmount: dto.goalAmount,
           ruleType: dto.ruleType,
           ruleValue: dto.ruleValue,
@@ -198,6 +198,9 @@ export class CollectionsService {
   }
 
   async findUserCollections(userId: string, filters?: { search?: string; status?: CollectionStatus }) {
+    // Primero actualizar automáticamente el status de las colectas
+    await this.updateCollectionStatuses();
+
     const where: Prisma.CollectionWhereInput = {
       OR: [
         { ownerId: userId },
@@ -298,6 +301,9 @@ export class CollectionsService {
   }
 
   async findPublicCollections(filters: GetPublicCollectionsDto): Promise<PublicCollectionsResponse> {
+    // Primero actualizar automáticamente el status de las colectas
+    await this.updateCollectionStatuses();
+
     const { search, status, skip, take } = filters;
 
     // Colectas publicas o privadas
@@ -494,5 +500,38 @@ export class CollectionsService {
         id: member.id,
       },
     });
+  }
+
+  // Función para actualizar automáticamente el status de las colectas
+  private async updateCollectionStatuses() {
+    // Obtener todas las colectas ACTIVE
+    const activeCollections = await this.prisma.collection.findMany({
+      where: {
+        status: CollectionStatus.ACTIVE,
+      },
+      include: {
+        contributions: {
+          where: {
+            status: 'PAID',
+          },
+        },
+      },
+    });
+
+    // Actualizar status de las colectas que han alcanzado la meta
+    for (const collection of activeCollections) {
+      const totalContributions = collection.contributions.reduce(
+        (sum, contribution) => sum + Number(contribution.amount),
+        0,
+      );
+
+      // Si alcanzó la meta (100%), cambiar a COMPLETED
+      if (totalContributions >= Number(collection.goalAmount)) {
+        await this.prisma.collection.update({
+          where: { id: collection.id },
+          data: { status: CollectionStatus.COMPLETED },
+        });
+      }
+    }
   }
 }

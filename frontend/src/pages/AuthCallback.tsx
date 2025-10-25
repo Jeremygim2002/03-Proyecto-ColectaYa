@@ -35,11 +35,17 @@ export default function AuthCallback() {
       });
 
       toast.success("¡Autenticación exitosa!", {
-        description: "Redirigiendo al dashboard...",
       });
 
       setTimeout(() => {
-        navigate("/dashboard", { replace: true });
+        // Verificar si hay una URL de retorno
+        const returnTo = sessionStorage.getItem('returnTo');
+        if (returnTo) {
+          sessionStorage.removeItem('returnTo');
+          navigate(returnTo, { replace: true });
+        } else {
+          navigate("/dashboard", { replace: true });
+        }
       }, 1000);
 
     } catch (error) {

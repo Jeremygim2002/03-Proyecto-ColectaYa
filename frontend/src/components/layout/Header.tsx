@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Bell, Menu, User, LogOut, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLogout } from "@/hooks/queries/useAuth";
+import { useInvitations } from "@/hooks/queries/useInvitations";
 import { useUserInfo } from "@/hooks/useUserInfo";
 import {
   DropdownMenu,
@@ -18,10 +18,13 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/s
 
 export function Header() {
   const location = useLocation();
-  const [notificationCount] = useState(3);
-  const [invitationCount] = useState(2);
   const logoutMutation = useLogout();
   const { userInitials, userName, userEmail, userAvatar } = useUserInfo();
+  
+  // Fetch invitations data
+  const { data: invitations = [] } = useInvitations();
+  const invitationCount = invitations.length;
+  const notificationCount = invitationCount; // Las notificaciones son solo las invitaciones
 
   const navigation = [
     { name: "Inicio", href: "/dashboard" },
@@ -91,22 +94,24 @@ export function Header() {
               </div>
               <DropdownMenuSeparator />
               <div className="max-h-96 overflow-y-auto">
-                <DropdownMenuItem className="cursor-pointer py-3">
-                  <div className="flex flex-col">
-                    <p className="text-sm font-medium">Nuevo aporte recibido</p>
-                    <p className="text-xs text-muted-foreground">
-                      Ana contribuyó S/ 200 a "Viaje a Paracas"
-                    </p>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer py-3">
-                  <div className="flex flex-col">
-                    <p className="text-sm font-medium">Invitación pendiente</p>
-                    <p className="text-xs text-muted-foreground">
-                      Carlos te invitó a "Regalo cumpleaños"
-                    </p>
-                  </div>
-                </DropdownMenuItem>
+                {invitations.length > 0 ? (
+                  invitations.map((invitation) => (
+                    <DropdownMenuItem key={invitation.id} className="cursor-pointer py-3">
+                      <div className="flex flex-col">
+                        <p className="text-sm font-medium">Nueva invitación</p>
+                        <p className="text-xs text-muted-foreground">
+                          {invitation.inviter.name || invitation.inviter.email} te invitó a "{invitation.collection.title}"
+                        </p>
+                      </div>
+                    </DropdownMenuItem>
+                  ))
+                ) : (
+                  <DropdownMenuItem className="py-3">
+                    <div className="flex flex-col">
+                      <p className="text-sm text-muted-foreground">No hay notificaciones nuevas</p>
+                    </div>
+                  </DropdownMenuItem>
+                )}
               </div>
             </DropdownMenuContent>
           </DropdownMenu>

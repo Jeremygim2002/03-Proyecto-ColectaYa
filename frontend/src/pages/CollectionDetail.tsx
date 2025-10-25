@@ -20,9 +20,12 @@ import { toast } from "sonner";
 import CreateCollectionModal from "@/components/common/CreateCollectionModal";
 import { ContributeModal } from "@/components/common/ContributeModal";
 import { ShareModal } from "@/components/common/ShareModal";
-import { useCollection } from "@/hooks/queries/useCollections";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { WithdrawalsList } from "@/components/common/WithdrawalsList";
+import { useCollection, useLeaveCollection } from "@/hooks/queries/useCollections";
 import { useContributions } from "@/hooks/queries/useContributions";
 import { useMembers } from "@/hooks/queries/useMembers";
+import { useCreateWithdrawal } from "@/hooks/queries/useWithdrawals";
 import { useAuthStore } from "@/stores/authStore";
 import { getCollectionMetadata } from "@/lib/utils";
 
@@ -43,6 +46,12 @@ export default function CollectionDetail() {
     data: members = [],
     isLoading: isLoadingMembers,
   } = useMembers(collectionId || "");
+
+  // Leave collection mutation
+  const leaveMutation = useLeaveCollection();
+
+  // Withdrawal mutation
+  const withdrawMutation = useCreateWithdrawal(collectionId || "");
   
   // DEBUG: Verificar los datos de la colección
   console.log('Collection data:', collection);
@@ -59,6 +68,8 @@ export default function CollectionDetail() {
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false);
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
+  const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
 
   // Error state
   if (collectionError && !isLoadingCollection) {
@@ -92,18 +103,15 @@ export default function CollectionDetail() {
       userId: contribution.userId,
     });
   });
-  
-  const mockWithdrawals: Array<{
-    id: string;
-    amount: number;
-    byUserName: string;
-    createdAt: string;
-    note?: string;
-  }> = []; // TODO: Replace with withdrawals endpoint when available
 
   // Calculate values only when collection is available
-  const percentage = collection ? Math.round((collection.currentAmount / collection.goalAmount) * 100) : 0;
+  const percentage = collection ? Math.min(100, Math.round((collection.currentAmount / collection.goalAmount) * 100)) : 0;
   const isOwner = collection ? collection.ownerId === user?.id : false;
+  
+  // Check if current user is a member (but not owner)
+  const isMember = members && 'members' in members && user ? 
+    members.members.some(member => member.userId === user.id && member.acceptedAt) : false;
+  const canLeave = isMember && !isOwner;
 
   // Owner info (temporary until we have user data in collection)
   const ownerName = user?.name || "Organizador";
@@ -138,6 +146,39 @@ export default function CollectionDetail() {
 
   const handleShare = () => {
     setIsShareModalOpen(true);
+  };
+
+  const handleLeaveCollection = async () => {
+    if (!collection) return;
+    
+    try {
+      await leaveMutation.mutateAsync(collection.id);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error leaving collection:', error);
+    }
+  };
+
+  const handleLeaveClick = () => {
+    setIsLeaveDialogOpen(true);
+  };
+
+  const handleWithdrawFunds = async () => {
+    if (!collection) return;
+    
+    try {
+      await withdrawMutation.mutateAsync();
+      toast.success('Retiro solicitado exitosamente');
+      setIsWithdrawDialogOpen(false);
+    } catch (error) {
+      console.error('Error requesting withdrawal:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Error al solicitar retiro';
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleWithdrawClick = () => {
+    setIsWithdrawDialogOpen(true);
   };
 
   return (
@@ -255,7 +296,7 @@ export default function CollectionDetail() {
               <div className="flex items-baseline justify-between">
                 <div>
                   <span className="text-2xl font-bold text-foreground">
-                    S/ {collection.currentAmount.toLocaleString("es-PE")}
+                    S/ {Math.min(collection.currentAmount, collection.goalAmount).toLocaleString("es-PE")}
                   </span>
                   <span className="text-muted-foreground"> / S/ {collection.goalAmount.toLocaleString("es-PE")}</span>
                 </div>
@@ -279,6 +320,18 @@ export default function CollectionDetail() {
                 <DollarSign className="h-4 w-4" />
                 Aportar ahora
               </Button>
+              
+              {canLeave && (
+                <Button 
+                  variant="destructive" 
+                  size="lg" 
+                  className="flex-1 sm:flex-initial"
+                  onClick={handleLeaveClick}
+                  disabled={leaveMutation.isPending}
+                >
+                  {leaveMutation.isPending ? "Saliendo..." : "Dejar colecta"}
+                </Button>
+              )}
             </div>
           </Card>
 
@@ -392,43 +445,17 @@ export default function CollectionDetail() {
             <TabsContent value="withdrawals" className="mt-6 space-y-4">
               {isOwner && (
                 <div className="mb-4">
-                  <Button variant="accent" className="w-full md:w-auto">
+                  <Button 
+                    variant="accent" 
+                    className="w-full md:w-auto"
+                    onClick={handleWithdrawClick}
+                  >
                     <CreditCard className="h-4 w-4" />
                     Retirar fondos
                   </Button>
                 </div>
               )}
-              {mockWithdrawals.length > 0 ? (
-                mockWithdrawals.map((withdrawal) => (
-                  <Card key={withdrawal.id} className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarFallback>{getInitials(withdrawal.byUserName)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-semibold">{withdrawal.byUserName || "Usuario sin nombre"}</p>
-                          <p className="text-sm text-muted-foreground">{formatDate(withdrawal.createdAt)}</p>
-                          {withdrawal.note && <p className="mt-1 text-sm text-muted-foreground">{withdrawal.note}</p>}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-destructive">
-                          -S/ {withdrawal.amount.toLocaleString("es-PE")}
-                        </p>
-                        <Badge variant="outline" className="text-xs">
-                          Completado
-                        </Badge>
-                      </div>
-                    </div>
-                  </Card>
-                ))
-              ) : (
-                <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 text-center">
-                  <CreditCard className="mb-3 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">No hay retiros registrados aún</p>
-                </div>
-              )}
+              <WithdrawalsList collectionId={collectionId || ""} />
             </TabsContent>
           </Tabs>
             </>
@@ -454,13 +481,39 @@ export default function CollectionDetail() {
             collectionTitle={collection.title}
             collectionId={collection.id}
             suggestedAmount={collection.goalAmount / (memberCount || 1)}
+            currentAmount={collection.currentAmount}
+            goalAmount={collection.goalAmount}
           />
           
           <ShareModal
             open={isShareModalOpen}
             onOpenChange={setIsShareModalOpen}
             title={collection.title}
-            url={window.location.href}
+            url={`${window.location.origin}/join/${collection.id}`}
+          />
+
+          <ConfirmDialog
+            open={isLeaveDialogOpen}
+            onOpenChange={setIsLeaveDialogOpen}
+            title="Dejar colecta"
+            description={`¿Deseas dejar la colecta "${collection.title}"?\n\nEsta acción no se puede deshacer.`}
+            confirmText="Sí, dejar colecta"
+            cancelText="Cancelar"
+            variant="destructive"
+            onConfirm={handleLeaveCollection}
+            isLoading={leaveMutation.isPending}
+          />
+
+          <ConfirmDialog
+            open={isWithdrawDialogOpen}
+            onOpenChange={setIsWithdrawDialogOpen}
+            title="Retirar fondos"
+            description={`¿Estás seguro de que deseas retirar todos los fondos disponibles?\n\nMonto a retirar: S/ ${collection.currentAmount}\n\nEsta acción no se puede deshacer.`}
+            confirmText="Sí, retirar fondos"
+            cancelText="Cancelar"
+            variant="destructive"
+            onConfirm={handleWithdrawFunds}
+            isLoading={withdrawMutation.isPending}
           />
         </>
       )}
