@@ -35,5 +35,8 @@ export const invitationsApi = {
     );
   },
 
-  // ✅ ELIMINADO: delete() ya no existe en backend
+  // Helper method for the hook
+  respond: (id: string, accepted: boolean): Promise<InvitationResponse> => {
+    return accepted ? invitationsApi.accept(id) : invitationsApi.reject(id);
+  },
 };

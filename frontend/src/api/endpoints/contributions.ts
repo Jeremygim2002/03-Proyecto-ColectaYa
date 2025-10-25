@@ -2,7 +2,6 @@ import { httpClient } from '../client';
 import { API_ENDPOINTS } from '@/constants';
 import type {
   Contribution,
-  CreateContributionData,
 } from '@/types';
 
 export const contributionsApi = {
@@ -14,9 +13,9 @@ export const contributionsApi = {
     );
   },
 
-  // ✅ CORREGIDO: Create nueva contribución (endpoint correcto)
-  create: (collectionId: string, data: CreateContributionData): Promise<Contribution> => {
-    return httpClient.post<Contribution, CreateContributionData>(
+  // ✅ CORREGIDO: Create nueva contribución (solo amount según backend DTO)
+  create: (collectionId: string, data: { amount: number }): Promise<Contribution> => {
+    return httpClient.post<Contribution, { amount: number }>(
       API_ENDPOINTS.CONTRIBUTIONS.CREATE(collectionId),
       data
     );

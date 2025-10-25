@@ -6,7 +6,6 @@ export class WithdrawalsService {
   constructor(private prisma: PrismaService) {}
 
   async intelligentWithdraw(collectionId: string, userId: string) {
-    // Verificar que el usuario es el owner de la colección
     const collection = await this.prisma.collection.findFirst({
       where: {
         id: collectionId,
@@ -27,13 +26,11 @@ export class WithdrawalsService {
     const goalAmount = Number(collection.goalAmount);
 
     if (totalAmount >= goalAmount) {
-      // Meta alcanzada: transferir fondos al owner
       return {
         action: 'TRANSFERRED' as const,
         amount: totalAmount,
       };
     } else {
-      // Meta no alcanzada: reembolsar a contribuidores
       return {
         action: 'REFUNDED' as const,
         amount: totalAmount,
@@ -42,7 +39,6 @@ export class WithdrawalsService {
   }
 
   async listWithdrawals(collectionId: string, userId: string) {
-    // Verificar que la colecta existe y que el usuario es el owner
     const collection = await this.prisma.collection.findUnique({
       where: { id: collectionId },
     });
@@ -55,7 +51,6 @@ export class WithdrawalsService {
       throw new ForbiddenException('Only owner can view withdrawals');
     }
 
-    // Listar retiros
     return this.prisma.withdrawal.findMany({
       where: { collectionId },
       include: {
@@ -63,6 +58,7 @@ export class WithdrawalsService {
           select: {
             id: true,
             email: true,
+            name: true,
           },
         },
       },

@@ -1,2 +1,0 @@
-# React + TypeScript + Vite
-

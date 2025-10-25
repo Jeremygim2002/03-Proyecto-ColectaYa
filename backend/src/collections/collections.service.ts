@@ -97,6 +97,7 @@ export class CollectionsService {
           where: { status: 'PAID' },
           select: {
             amount: true,
+            userId: true,
           },
         },
       },
@@ -116,14 +117,26 @@ export class CollectionsService {
       }
     }
 
-    // Calcular progreso
+    // Calcular progreso y estadísticas
     const totalPaid = collection.contributions.reduce((sum, c) => sum + Number(c.amount), 0);
     const goalAmount = Number(collection.goalAmount);
     const progress = goalAmount > 0 ? (totalPaid / goalAmount) * 100 : 0;
 
+    // Calcular número único de contribuyentes
+    const uniqueContributors = new Set(collection.contributions.map((c) => c.userId).filter(Boolean)).size;
+
+    console.log('DEBUG - Collection calculations:', {
+      totalPaid,
+      goalAmount,
+      progress,
+      contributorsCount: uniqueContributors,
+      contributionsCount: collection.contributions.length,
+    });
+
     return {
       ...collection,
       currentAmount: totalPaid,
+      contributorsCount: uniqueContributors,
       progress: Math.min(progress, 100),
     };
   }
@@ -219,13 +232,22 @@ export class CollectionsService {
       ];
     }
 
-    return this.prisma.collection.findMany({
+    const collections = await this.prisma.collection.findMany({
       where,
       include: {
         owner: {
           select: {
             id: true,
             email: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        contributions: {
+          where: { status: 'PAID' },
+          select: {
+            amount: true,
+            userId: true,
           },
         },
       },
@@ -233,6 +255,46 @@ export class CollectionsService {
         createdAt: 'desc',
       },
     });
+
+    // Calcular estadísticas para cada colecta (igual que findPublicCollections)
+    const collectionsWithStats: CollectionWithStats[] = collections.map((collection) => {
+      const validContributions = collection.contributions || [];
+      const currentAmount = validContributions.reduce((sum, contrib) => {
+        return sum + Number(contrib.amount);
+      }, 0);
+      const contributorsCount = new Set(validContributions.map((c) => c.userId)).size;
+      const progress = collection.goalAmount ? (currentAmount / Number(collection.goalAmount)) * 100 : 0;
+
+      return {
+        id: collection.id,
+        title: collection.title,
+        description: collection.description ?? undefined,
+        imageUrl: collection.imageUrl ?? undefined,
+        isPrivate: collection.isPrivate,
+        goalAmount: Number(collection.goalAmount),
+        currency: 'PEN' as const,
+        ruleType: collection.ruleType,
+        ruleValue: collection.ruleValue ? Number(collection.ruleValue) : undefined,
+        status: collection.status,
+        deadlineAt: collection.deadlineAt ?? undefined,
+        createdAt: collection.createdAt,
+        updatedAt: collection.updatedAt,
+        owner: {
+          id: collection.owner.id,
+          email: collection.owner.email,
+          name: collection.owner.name ?? undefined,
+          avatar: collection.owner.avatar ?? undefined,
+        },
+        currentAmount,
+        contributorsCount,
+        progress: Math.round(progress * 100) / 100,
+      };
+    });
+
+    return {
+      collections: collectionsWithStats,
+      total: collectionsWithStats.length,
+    };
   }
 
   async findPublicCollections(filters: GetPublicCollectionsDto): Promise<PublicCollectionsResponse> {

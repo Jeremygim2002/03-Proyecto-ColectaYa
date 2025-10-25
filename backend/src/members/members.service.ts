@@ -138,14 +138,15 @@ export class MembersService {
       throw new ForbiddenException('No access to this collection');
     }
 
-    // Listar todos los miembros
-    return this.prisma.collectionMember.findMany({
+    // Obtener todos los miembros invitados
+    const invitedMembers = await this.prisma.collectionMember.findMany({
       where: { collectionId },
       include: {
         user: {
           select: {
             id: true,
             email: true,
+            name: true,
           },
         },
       },
@@ -153,5 +154,29 @@ export class MembersService {
         invitedAt: 'desc',
       },
     });
+
+    // Obtener la información del owner
+    const ownerInfo = await this.prisma.user.findUnique({
+      where: { id: collection.ownerId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+      },
+    });
+
+    // Crear un "member" virtual para el owner
+    const ownerMember = {
+      id: `owner-${collection.ownerId}`, // ID único para el owner
+      collectionId,
+      userId: collection.ownerId,
+      user: ownerInfo,
+      invitedAt: collection.createdAt, // Fecha de creación de la colección
+      acceptedAt: collection.createdAt, // El owner siempre está "aceptado"
+      addedBy: collection.ownerId, // Se agregó a sí mismo
+    };
+
+    // Combinar owner y miembros invitados
+    return [ownerMember, ...invitedMembers];
   }
 }

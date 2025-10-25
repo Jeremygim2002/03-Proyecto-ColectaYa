@@ -2,14 +2,7 @@ import { Controller, Get, Post, Body, Param, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ContributionsService } from './contributions.service';
 import { CreateContributionDto } from './dto';
-
-interface AuthenticatedRequest {
-  user: {
-    sub: string;
-    email: string;
-    roles: string[];
-  };
-}
+import { AuthenticatedRequest } from '../auth/types';
 
 @ApiTags('contributions')
 @ApiBearerAuth()
@@ -24,18 +17,44 @@ export class ContributionsController {
     @Request() req: AuthenticatedRequest,
     @Body() dto: CreateContributionDto,
   ) {
-    return this.contributionsService.contribute(collectionId, req.user.sub, dto.amount);
+    const contribution = await this.contributionsService.contribute(collectionId, req.user.id, dto.amount);
+    
+    // Mapear datos de Prisma al formato esperado por el frontend
+    return {
+      id: contribution.id,
+      collectionId: contribution.collectionId,
+      userId: contribution.userId,
+      userName: contribution.user?.name || 'Usuario Anónimo',
+      userAvatar: null, // El campo avatar no existe en User
+      amount: Number(contribution.amount),
+      message: null, // El campo message no existe en Contribution
+      isAnonymous: false, // El campo isAnonymous no existe en Contribution
+      createdAt: contribution.createdAt.toISOString(),
+    };
   }
 
   @Get('collections/:collectionId/contributions')
   @ApiOperation({ summary: 'Listar contribuciones de una colecta' })
   async list(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    return this.contributionsService.listContributions(collectionId, req.user.sub);
+    const contributions = await this.contributionsService.listContributions(collectionId, req.user.id);
+    
+    // Mapear datos de Prisma al formato esperado por el frontend
+    return contributions.map((contribution) => ({
+      id: contribution.id,
+      collectionId: contribution.collectionId,
+      userId: contribution.userId,
+      userName: contribution.user?.name || 'Usuario Anónimo',
+      userAvatar: null, // El campo avatar no existe en User
+      amount: Number(contribution.amount),
+      message: null, // El campo message no existe en Contribution
+      isAnonymous: false, // El campo isAnonymous no existe en Contribution
+      createdAt: contribution.createdAt.toISOString(),
+    }));
   }
 
   @Get('contributions')
   @ApiOperation({ summary: 'Obtener mis contribuciones globales' })
   async getMyContributions(@Request() req: AuthenticatedRequest) {
-    return this.contributionsService.getMyContributions(req.user.sub);
+    return this.contributionsService.getMyContributions(req.user.id);
   }
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, Share2, Edit, MoreVertical, DollarSign, UserPlus, CreditCard } from "lucide-react";
+import { ChevronLeft, Share2, MoreVertical, DollarSign, UserPlus, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -22,6 +22,7 @@ import { ContributeModal } from "@/components/common/ContributeModal";
 import { ShareModal } from "@/components/common/ShareModal";
 import { useCollection } from "@/hooks/queries/useCollections";
 import { useContributions } from "@/hooks/queries/useContributions";
+import { useMembers } from "@/hooks/queries/useMembers";
 import { useAuthStore } from "@/stores/authStore";
 import { getCollectionMetadata } from "@/lib/utils";
 
@@ -31,19 +32,29 @@ export default function CollectionDetail() {
   const user = useAuthStore((state) => state.user);
   
   // Fetch collection data
-  const { 
+  const {
     data: collection, 
     isLoading: isLoadingCollection, 
     error: collectionError 
   } = useCollection(collectionId || "");
+
+  // Fetch members for this collection
+  const {
+    data: members = [],
+    isLoading: isLoadingMembers,
+  } = useMembers(collectionId || "");
+  
+  // DEBUG: Verificar los datos de la colección
+  console.log('Collection data:', collection);
+  console.log('Current amount:', collection?.currentAmount);
+  console.log('Goal amount:', collection?.goalAmount);
+  console.log('Contributors count:', collection?.contributorsCount);
   
   // Fetch contributions for this collection
   const {
     data: contributionsData,
     isLoading: isLoadingContributions,
-  } = useContributions(collectionId || "");
-
-  const [activeTab, setActiveTab] = useState("contributions");
+  } = useContributions(collectionId || "");  const [activeTab, setActiveTab] = useState("contributions");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false);
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
@@ -68,13 +79,20 @@ export default function CollectionDetail() {
 
   // Extract data when available
   const contributions = contributionsData || [];
-  const mockMembers: Array<{
-    userId: string;
-    name: string;
-    phone: string;
-    status: string;
-    role: string;
-  }> = []; // TODO: Replace with members endpoint when available
+  
+  // DEBUG: Verificar los datos de contribuciones
+  console.log('Contributions data:', contributionsData);
+  console.log('Contributions array:', contributions);
+  
+  // DEBUG: Verificar datos específicos de cada contribución
+  contributions.forEach((contribution, index) => {
+    console.log(`Contribution ${index}:`, {
+      userName: contribution.userName,
+      userAvatar: contribution.userAvatar,
+      userId: contribution.userId,
+    });
+  });
+  
   const mockWithdrawals: Array<{
     id: string;
     amount: number;
@@ -92,7 +110,11 @@ export default function CollectionDetail() {
   const ownerAvatar = user?.avatar || "";
   const memberCount = collection?.contributorsCount || 0;
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | undefined | null) => {
+    if (!name || typeof name !== 'string') {
+      return "??";
+    }
+    
     const parts = name.split(" ");
     if (parts.length >= 2) {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
@@ -210,16 +232,6 @@ export default function CollectionDetail() {
                 <Button variant="outline" size="icon" onClick={handleShare} aria-label="Compartir">
                   <Share2 className="h-4 w-4" />
                 </Button>
-                {isOwner && (
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    aria-label="Editar"
-                    onClick={() => setIsEditModalOpen(true)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon" aria-label="Más opciones">
@@ -316,7 +328,7 @@ export default function CollectionDetail() {
                           <AvatarFallback>{getInitials(contribution.userName)}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-semibold">{contribution.userName}</p>
+                          <p className="font-semibold">{contribution.userName || "Usuario Anónimo"}</p>
                           <p className="text-sm text-muted-foreground">{formatDate(contribution.createdAt)}</p>
                           {contribution.message && (
                             <p className="text-sm text-muted-foreground mt-1">{contribution.message}</p>
@@ -341,38 +353,48 @@ export default function CollectionDetail() {
 
             {/* Members Tab */}
             <TabsContent value="members" className="mt-6 space-y-4">
-              {mockMembers.map((member) => (
-                <Card key={member.userId} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold">{member.name}</p>
-                          {member.role === "owner" && (
-                            <Badge variant="outline" className="text-xs">
-                              Organizador
-                            </Badge>
-                          )}
+              {isLoadingMembers ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : (!members || 'members' in members && members.members.length === 0) ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No hay miembros en esta colecta
+                </div>
+              ) : (
+                ('members' in members ? members.members : []).map((member) => (
+                  <Card key={member.id} className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarFallback>{getInitials(member.user?.name || member.user?.email)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold">{member.user?.name || "Usuario sin nombre"}</p>
+                            {collection?.ownerId === member.userId && (
+                              <Badge variant="outline" className="text-xs">
+                                Organizador
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground">{member.user?.email}</p>
                         </div>
-                        <p className="text-sm text-muted-foreground">{member.phone}</p>
                       </div>
+                      <Badge
+                        variant={member.acceptedAt ? "default" : "secondary"}
+                        className={
+                          member.acceptedAt
+                            ? "bg-success text-success-foreground"
+                            : "bg-warning/10 text-warning"
+                        }
+                      >
+                        {member.acceptedAt ? "Activo" : "Pendiente"}
+                      </Badge>
                     </div>
-                    <Badge
-                      variant={member.status === "accepted" ? "default" : "secondary"}
-                      className={
-                        member.status === "accepted"
-                          ? "bg-success text-success-foreground"
-                          : "bg-warning/10 text-warning"
-                      }
-                    >
-                      {member.status === "accepted" ? "Aceptado" : "Pendiente"}
-                    </Badge>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))
+              )}
             </TabsContent>
 
             {/* Withdrawals Tab */}
@@ -394,7 +416,7 @@ export default function CollectionDetail() {
                           <AvatarFallback>{getInitials(withdrawal.byUserName)}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-semibold">{withdrawal.byUserName}</p>
+                          <p className="font-semibold">{withdrawal.byUserName || "Usuario sin nombre"}</p>
                           <p className="text-sm text-muted-foreground">{formatDate(withdrawal.createdAt)}</p>
                           {withdrawal.note && <p className="mt-1 text-sm text-muted-foreground">{withdrawal.note}</p>}
                         </div>

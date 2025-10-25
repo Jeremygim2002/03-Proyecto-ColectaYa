@@ -28,7 +28,7 @@ export class ContributionsService {
       throw new BadRequestException('Collection is not active');
     }
 
-    // Verificar acceso si es privada
+    // Verificar acceso solo si es privada
     if (collection.isPrivate) {
       const isOwner = collection.ownerId === userId;
       const isMember = collection.members.length > 0;
@@ -37,8 +37,9 @@ export class ContributionsService {
         throw new ForbiddenException('No access to this private collection');
       }
     }
+    // Para colecciones públicas, cualquier usuario autenticado puede contribuir
 
-    // Simular pago exitoso
+    // Simular pago exitoso (90% de éxito en lugar de 10%)
     const paymentSuccess = Math.random() > 0.1;
 
     // Crear contribución
@@ -55,9 +56,19 @@ export class ContributionsService {
           select: {
             id: true,
             email: true,
+            name: true,
+            avatar: true,
           },
         },
       },
+    });
+
+    // DEBUG: Verificar los datos del usuario
+    console.log('DEBUG - User data in contribution:', {
+      userId: contribution.userId,
+      userName: contribution.user?.name,
+      userAvatar: contribution.user?.avatar,
+      userEmail: contribution.user?.email,
     });
 
     if (!paymentSuccess) {
@@ -68,7 +79,7 @@ export class ContributionsService {
   }
 
   async listContributions(collectionId: string, userId: string) {
-    // Verificar acceso a la colecta
+    // Verificar que la colecta existe
     const collection = await this.prisma.collection.findUnique({
       where: { id: collectionId },
       include: {
@@ -85,17 +96,39 @@ export class ContributionsService {
       throw new NotFoundException('Collection not found');
     }
 
-    // Verificar acceso si es privada
-    if (collection.isPrivate) {
-      const isOwner = collection.ownerId === userId;
-      const isMember = collection.members.length > 0;
-
-      if (!isOwner && !isMember) {
-        throw new ForbiddenException('No access to this private collection');
-      }
+    // Si es colección pública, cualquiera puede ver las contribuciones
+    if (!collection.isPrivate) {
+      // Listar contribuciones pagadas para colección pública
+      return this.prisma.contribution.findMany({
+        where: {
+          collectionId,
+          status: ContributionStatus.PAID,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              avatar: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
     }
 
-    // Listar contribuciones pagadas
+    // Para colecciones privadas, verificar acceso
+    const isOwner = collection.ownerId === userId;
+    const isMember = collection.members.length > 0;
+
+    if (!isOwner && !isMember) {
+      throw new ForbiddenException('No access to this private collection');
+    }
+
+    // Listar contribuciones pagadas para colección privada
     return this.prisma.contribution.findMany({
       where: {
         collectionId,
@@ -106,6 +139,8 @@ export class ContributionsService {
           select: {
             id: true,
             email: true,
+            name: true,
+            avatar: true,
           },
         },
       },

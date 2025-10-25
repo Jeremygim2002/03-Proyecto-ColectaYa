@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -35,9 +34,15 @@ export function ContributeModal({
   const { mutateAsync: createContribution, isPending } = useCreateContribution(collectionId);
 
   const triggerConfetti = () => {
-    const duration = 2000;
+    const duration = 3000;
     const animationEnd = Date.now() + duration;
-    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+    const defaults = { 
+      startVelocity: 30, 
+      spread: 360, 
+      ticks: 60, 
+      zIndex: 1000,
+      colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
+    };
 
     function randomInRange(min: number, max: number) {
       return Math.random() * (max - min) + min;
@@ -52,15 +57,25 @@ export function ContributeModal({
 
       const particleCount = 50 * (timeLeft / duration);
 
+      // Confetti desde la izquierda
       confetti({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
       });
+      
+      // Confetti desde la derecha
       confetti({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      });
+      
+      // Confetti desde el centro para más efecto
+      confetti({
+        ...defaults,
+        particleCount: particleCount / 2,
+        origin: { x: 0.5, y: 0.5 }
       });
     }, 250);
   };
@@ -72,6 +87,7 @@ export function ContributeModal({
     }
 
     try {
+      // Solo enviamos el amount, que es lo que el backend espera
       await createContribution({
         collectionId,
         amount: parseFloat(amount),
@@ -80,27 +96,65 @@ export function ContributeModal({
         paymentMethod,
       });
 
-      // confetti
+      // Trigger confetti effect
       triggerConfetti();
 
-      toast.success(`¡Aporte de S/ ${parseFloat(amount).toFixed(2)} registrado! 🎉`);
+      // Success message
+      toast.success(`¡Aporte de S/ ${parseFloat(amount).toFixed(2)} registrado exitosamente! 🎉`, {
+        duration: 4000,
+      });
 
-      // close
+      // Reset form and close modal after animation
       setTimeout(() => {
         setAmount(suggestedAmount?.toString() || "");
         setNote("");
+        setPaymentMethod("credit_card");
         onOpenChange(false);
-      }, 500);
-    } catch (error) {
-      toast.error("Error al procesar el aporte. Intenta nuevamente.");
+      }, 1000);
+    } catch (error: unknown) {
       console.error("Contribution error:", error);
+      
+      // Diferentes mensajes según el tipo de error
+      const axiosError = error as { response?: { status: number; data?: { message?: string } } };
+      
+      if (axiosError.response?.status === 400) {
+        const errorMsg = axiosError.response?.data?.message || 'El procesamiento del pago falló';
+        toast.error('Error en el pago', {
+          description: `${errorMsg}. Por favor intenta nuevamente.`,
+          duration: 5000,
+        });
+      } else if (axiosError.response?.status === 403) {
+        toast.error('Acceso denegado', {
+          description: 'No tienes permisos para contribuir a esta colecta.',
+          duration: 5000,
+        });
+      } else if (axiosError.response?.status === 404) {
+        toast.error('Colecta no encontrada', {
+          description: 'La colecta podría haber sido eliminada.',
+          duration: 5000,
+        });
+      } else if (axiosError.response?.status === 500) {
+        toast.error('Error del servidor', {
+          description: 'Hay un problema temporal. Por favor intenta más tarde.',
+          duration: 5000,
+        });
+      } else {
+        const errorMessage = error instanceof Error 
+          ? error.message 
+          : "Error al procesar el aporte. Intenta nuevamente.";
+        
+        toast.error(errorMessage, {
+          description: 'Si el problema persiste, contacta al soporte.',
+          duration: 5000,
+        });
+      }
     }
   };
 
   const paymentMethods = [
-    { id: "yape", name: "Yape", icon: "💜" },
-    { id: "plin", name: "Plin", icon: "💙" },
-    { id: "mercadopago", name: "MercadoPago", icon: "💳" }
+    { id: "credit_card", name: "Tarjeta de Crédito", icon: "💳" },
+    { id: "debit_card", name: "Tarjeta de Débito", icon: "�" },
+    { id: "paypal", name: "PayPal", icon: "💙" },
   ];
 
   return (
@@ -161,21 +215,6 @@ export function ContributeModal({
                 </div>
               ))}
             </RadioGroup>
-          </div>
-
-          {/* Notas */}
-          <div className="space-y-2">
-            <Label htmlFor="note">Nota (opcional)</Label>
-            <Textarea
-              id="note"
-              placeholder="Añade un mensaje..."
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={3}
-              maxLength={200}
-              disabled={isPending}
-            />
-            <p className="text-xs text-muted-foreground">{note.length}/200</p>
           </div>
         </div>
 

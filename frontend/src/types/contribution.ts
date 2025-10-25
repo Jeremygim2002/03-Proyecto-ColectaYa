@@ -3,7 +3,7 @@ export interface Contribution {
   id: string;
   collectionId: string;
   userId: string;
-  userName: string;
+  userName?: string; // Puede ser undefined si el usuario no tiene nombre o la contribución es anónima
   userAvatar?: string;
   amount: number;
   message?: string;

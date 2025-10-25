@@ -166,17 +166,8 @@ export class InvitationsService {
       throw new BadRequestException('User is already a member of this collection');
     }
 
-    // Usar transacción para actualizar invitación y agregar miembro
+    // Usar transacción para agregar miembro y eliminar invitación
     const result = await this.prisma.$transaction(async (prisma) => {
-      // Actualizar invitación a aceptada
-      await prisma.invitation.update({
-        where: { id: invitationId },
-        data: {
-          status: InvitationStatus.ACCEPTED,
-          respondedAt: new Date(),
-        },
-      });
-
       // Agregar como miembro
       const member = await prisma.collectionMember.create({
         data: {
@@ -196,6 +187,11 @@ export class InvitationsService {
             },
           },
         },
+      });
+
+      // Eliminar la invitación después de aceptarla
+      await prisma.invitation.delete({
+        where: { id: invitationId },
       });
 
       return member;
@@ -231,13 +227,9 @@ export class InvitationsService {
       throw new BadRequestException('Invitation is not in a pending state');
     }
 
-    // Actualizar invitación a rechazada
-    await this.prisma.invitation.update({
+    // Eliminar la invitación directamente
+    await this.prisma.invitation.delete({
       where: { id: invitationId },
-      data: {
-        status: InvitationStatus.REJECTED,
-        respondedAt: new Date(),
-      },
     });
 
     return { message: 'Invitation rejected successfully' };

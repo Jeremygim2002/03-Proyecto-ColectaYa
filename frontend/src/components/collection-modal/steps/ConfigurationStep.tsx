@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle } from "lucide-react";
 import type { CollectionFormData } from "../hooks/useCollectionForm";
@@ -72,11 +71,11 @@ export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps
         </Select>
       </div>
 
-  {/* Sección dividida en partes iguales */}
-  <div className="space-y-4 rounded-lg border bg-muted/50 p-4">
-        <div className="space-y-3">
+      {/* Sección de fechas */}
+      <div className="space-y-4 animate-fade-in border-t pt-4">
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Label>¿Dividir el monto equitativamente entre los miembros?</Label>
+            <Label htmlFor="endDate">Fecha límite</Label>
             <TooltipProvider>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
@@ -84,94 +83,24 @@ export function ConfigurationStep({ formData, onUpdate }: ConfigurationStepProps
                     <HelpCircle className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
+                <TooltipContent>
                   <p className="text-sm">
-                    Si escoges "dividir equitativamente", Colectaya calculará automáticamente cuánto le corresponde aportar a cada miembro.
+                    {formData.paymentMode === "recurrente"
+                      ? "Fecha límite para completar los pagos recurrentes"
+                      : "Fecha límite para completar la colecta"
+                    }
                   </p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
-
-          <RadioGroup
-            value={formData.splitEqually}
-            onValueChange={(v: string) => onUpdate("splitEqually", v as "yes" | "no")}
-          >
-            <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-muted/50">
-              <RadioGroupItem value="no" id="split-no" />
-              <Label htmlFor="split-no" className="flex-1 cursor-pointer font-normal">
-                No, cada miembro aporta libremente
-              </Label>
-            </div>
-            <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-muted/50">
-              <RadioGroupItem value="yes" id="split-yes" />
-              <Label htmlFor="split-yes" className="flex-1 cursor-pointer font-normal">
-                Sí, dividir equitativamente
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
-
-        {/* Metodo de pago */}
-        <div className="space-y-4 animate-fade-in border-t pt-4">
-          <div className="space-y-3">
-            <Label>Tipo de pago</Label>
-            <RadioGroup
-              value={formData.paymentMode}
-              onValueChange={(v: string) =>
-                onUpdate("paymentMode", v as "unico" | "recurrente")
-              }
-            >
-              <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-muted/50">
-                <RadioGroupItem value="unico" id="payment-unico" />
-                <Label htmlFor="payment-unico" className="flex-1 cursor-pointer font-normal">
-                  Pago único
-                </Label>
-              </div>
-              <div className="flex items-center space-x-3 rounded-lg border bg-background p-3 hover:bg-muted/50">
-                <RadioGroupItem value="recurrente" id="payment-recurrente" />
-                <Label
-                  htmlFor="payment-recurrente"
-                  className="flex-1 cursor-pointer font-normal"
-                >
-                  Pagos recurrentes (mensual)
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-
-          {/* Fecha límite para ambos tipos de pago - siempre visible */}
-          <div className="space-y-4 animate-fade-in border-t pt-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Label htmlFor="endDate">Fecha límite</Label>
-                <TooltipProvider>
-                  <Tooltip delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <button type="button" className="focus:outline-none">
-                        <HelpCircle className="h-4 w-4 text-muted-foreground transition-colors hover:text-foreground" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-sm">
-                        {formData.paymentMode === "recurrente" 
-                          ? "Fecha límite para completar los pagos recurrentes"
-                          : "Fecha límite para completar la colecta"
-                        }
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <Input
-                id="endDate"
-                type="date"
-                value={formData.endDate}
-                onChange={(e) => onUpdate("endDate", e.target.value)}
-                min={new Date().toISOString().split("T")[0]}
-              />
-            </div>
-          </div>
+          <Input
+            id="endDate"
+            type="date"
+            value={formData.endDate}
+            onChange={(e) => onUpdate("endDate", e.target.value)}
+            min={new Date().toISOString().split("T")[0]}
+          />
         </div>
       </div>
     </div>

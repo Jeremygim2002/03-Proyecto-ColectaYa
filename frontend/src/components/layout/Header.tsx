@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 
 export function Header() {
   const location = useLocation();
@@ -171,6 +171,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80">
+              <SheetTitle className="sr-only">Menú de navegación</SheetTitle>
               <div className="flex flex-col space-y-4 py-4">
                 <div className="flex items-center space-x-3 border-b border-border pb-4">
                   <Avatar className="h-12 w-12">

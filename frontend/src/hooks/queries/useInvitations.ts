@@ -76,28 +76,14 @@ export function useRespondInvitation() {
       });
       
       if (accepted) {
+        // Invalidar collections y members cuando se acepta una invitación
         queryClient.invalidateQueries({ 
           queryKey: queryKeys.collections.lists() 
         });
+        queryClient.invalidateQueries({ 
+          queryKey: queryKeys.members.lists() 
+        });
       }
-    },
-  });
-}
-
-
-//  Hook para eliminar una invitación
-
-export function useDeleteInvitation() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationKey: ['invitations', 'delete'],
-    mutationFn: (id: string) => invitationsApi.delete(id),
-    onSuccess: () => {
-      // Invalidate invitations list
-      queryClient.invalidateQueries({ 
-        queryKey: queryKeys.invitations.lists() 
-      });
     },
   });
 }

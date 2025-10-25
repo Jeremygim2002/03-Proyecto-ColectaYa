@@ -1,16 +1,20 @@
 // Invitation domain types
 export interface Invitation {
   id: string;
-  collectionId: string;
-  collectionTitle: string;
-  collectionImageUrl: string;
-  senderId: string;
-  senderName: string;
-  recipientEmail: string;
   status: InvitationStatus;
-  message?: string;
   createdAt: string;
-  expiresAt: string;
+  respondedAt: string | null;
+  collection: {
+    id: string;
+    title: string;
+    description: string | null;
+    imageUrl: string | null;
+  };
+  inviter: {
+    id: string;
+    name: string | null;
+    email: string;
+  };
 }
 
 export type InvitationStatus = 

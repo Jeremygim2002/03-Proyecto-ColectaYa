@@ -4,7 +4,6 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { CollectionsModule } from './collections/collections.module';
 import { MembersModule } from './members/members.module';
@@ -37,7 +36,6 @@ import { SupabaseAuthGuard, RolesGuard } from './auth/guards';
         limit: parseInt(process.env.THROTTLE_LIMIT ?? '20', 10),
       },
     ]),
-    UserModule,
     AuthModule,
     PrismaModule,
     SupabaseModule,

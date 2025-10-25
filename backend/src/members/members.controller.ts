@@ -4,7 +4,7 @@ import { MembersService } from './members.service';
 
 interface AuthenticatedRequest {
   user: {
-    sub: string;
+    id: string;
     email: string;
     roles: string[];
   };
@@ -24,12 +24,16 @@ export class MembersController {
     @Param('userId') userId: string,
     @Request() req: AuthenticatedRequest,
   ) {
-    await this.membersService.remove(collectionId, req.user.sub, userId);
+    await this.membersService.remove(collectionId, req.user.id, userId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar miembros' })
   async list(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    return this.membersService.listMembers(collectionId, req.user.sub);
+    const members = await this.membersService.listMembers(collectionId, req.user.id);
+    return {
+      members,
+      total: members.length,
+    };
   }
 }

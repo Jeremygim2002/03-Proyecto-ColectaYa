@@ -14,19 +14,19 @@ export default function Invitations() {
   const { data: invitations = [], isLoading } = useInvitations();
   const respondMutation = useRespondInvitation();
 
-  const handleAccept = async (id: string, collectionName: string) => {
+  const handleAccept = async (id: string, collectionTitle: string) => {
     try {
       await respondMutation.mutateAsync({ id, accepted: true });
-      toast.success(`Te has unido a "${collectionName}"`);
+      toast.success(`Te has unido a "${collectionTitle}"`);
     } catch {
       toast.error("Error al aceptar la invitación");
     }
   };
 
-  const handleReject = async (id: string, collectionName: string) => {
+  const handleReject = async (id: string, collectionTitle: string) => {
     try {
       await respondMutation.mutateAsync({ id, accepted: false });
-      toast.error(`Has rechazado la invitación a "${collectionName}"`);
+      toast.error(`Has rechazado la invitación a "${collectionTitle}"`);
     } catch {
       toast.error("Error al rechazar la invitación");
     }
@@ -100,21 +100,23 @@ export default function Invitations() {
                       <div className="flex items-start gap-4 flex-1">
                         <Avatar className="h-12 w-12 border-2 border-border">
                           <AvatarFallback className="bg-primary text-primary-foreground">
-                            {invitation.senderName.split(" ").map((n: string) => n[0]).join("")}
+                            {invitation.inviter?.name ? 
+                              invitation.inviter.name.split(" ").map((n: string) => n[0]).join("") :
+                              invitation.inviter?.email?.charAt(0).toUpperCase() || "?"
+                            }
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <p className="text-sm text-muted-foreground mb-1">
-                            <span className="font-semibold text-foreground">{invitation.senderName}</span> te invita a
+                            <span className="font-semibold text-foreground">
+                              {invitation.inviter?.name || invitation.inviter?.email || "Usuario"}
+                            </span> te invita a
                           </p>
-                          <h3 className="text-xl font-bold mb-2">{invitation.collectionTitle}</h3>
-                          {invitation.message && (
-                            <p className="text-sm text-muted-foreground">{invitation.message}</p>
-                          )}
+                          <h3 className="text-xl font-bold mb-2">{invitation.collection?.title}</h3>
                         </div>
                       </div>
                       <Badge variant="secondary" className="shrink-0">
-                        {invitation.status === 'pending' ? 'Pendiente' : invitation.status}
+                        {invitation.status === 'PENDING' ? 'Pendiente' : invitation.status}
                       </Badge>
                     </div>
 
@@ -126,7 +128,7 @@ export default function Invitations() {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Colecta</p>
-                          <p className="font-semibold">{invitation.collectionTitle}</p>
+                          <p className="font-semibold">{invitation.collection?.title}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -134,9 +136,9 @@ export default function Invitations() {
                           <Calendar className="h-5 w-5 text-success" />
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Expira</p>
+                          <p className="text-xs text-muted-foreground">Invitado</p>
                           <p className="font-semibold">
-                            {new Date(invitation.expiresAt).toLocaleDateString('es-PE', { 
+                            {new Date(invitation.createdAt).toLocaleDateString('es-PE', { 
                               day: 'numeric', 
                               month: 'short', 
                               year: 'numeric' 
@@ -151,7 +153,7 @@ export default function Invitations() {
                       <Button
                         variant="outline"
                         className="flex-1"
-                        onClick={() => handleReject(invitation.id, invitation.collectionTitle)}
+                        onClick={() => handleReject(invitation.id, invitation.collection?.title || '')}
                         disabled={respondMutation.isPending}
                       >
                         <X className="mr-2 h-4 w-4" />
@@ -160,7 +162,7 @@ export default function Invitations() {
                       <Button
                         variant="accent"
                         className="flex-1"
-                        onClick={() => handleAccept(invitation.id, invitation.collectionTitle)}
+                        onClick={() => handleAccept(invitation.id, invitation.collection?.title || '')}
                         disabled={respondMutation.isPending}
                       >
                         <Check className="mr-2 h-4 w-4" />
