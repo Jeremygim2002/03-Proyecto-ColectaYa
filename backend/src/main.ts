@@ -10,10 +10,6 @@ import compression from 'compression';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Middleware de seguridad - DEBE ir ANTES de cualquier otra configuración
-  app.use(helmet());
-  app.use(compression());
-
   // CORS: allow a whitelist of origins and respond correctly to preflight requests
   const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -30,14 +26,25 @@ async function bootstrap() {
         return callback(null, true);
       }
 
-      // For debugging, return an explicit error so logs show the rejected origin
-      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+      // For debugging, log rejected origin and deny CORS without throwing an exception
+      console.warn(`CORS: rejected origin ${origin}`);
+      return callback(null, false);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     optionsSuccessStatus: 200,
+    preflightContinue: false,
   });
+
+  // ✅ Helmet configurado para NO interferir con CORS
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' }, // ✅ NUEVO
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // ✅ NUEVO
+    }),
+  );
+  app.use(compression());
 
   // Interceptores globales ( Logging primero, Response después)
   app.useGlobalInterceptors(new LoggingInterceptor(), new ResponseInterceptor());
@@ -65,6 +72,10 @@ async function bootstrap() {
   });
 
   await app.listen(process.env.PORT ?? 3000);
+
+  // ✅ Log para debug
+  console.log(`🚀 Backend running on: ${await app.getUrl()}`);
+  console.log(`✅ Allowed origins: ${allowedOrigins.join(', ')}`);
 }
 
 void bootstrap();
