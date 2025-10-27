@@ -14,16 +14,29 @@ async function bootstrap() {
   app.use(helmet());
   app.use(compression());
 
-  // CORS
+  // CORS: allow a whitelist of origins and respond correctly to preflight requests
+  const allowedOrigins = [
+    process.env.FRONTEND_URL || 'http://localhost:5173',
+    'https://03-proyecto-colecta-ya.vercel.app',
+    'https://portafolio-backend-eryj3.ondigitalocean.app',
+  ];
+
   app.enableCors({
-    origin: [
-      process.env.FRONTEND_URL || 'http://localhost:5173',
-      'https://03-proyecto-colecta-ya.vercel.app',
-      'https://portafolio-backend-eryj3.ondigitalocean.app',
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // Allow requests with no origin (e.g. server-to-server or curl)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      // For debugging, return an explicit error so logs show the rejected origin
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
+    optionsSuccessStatus: 200,
   });
 
   // Interceptores globales ( Logging primero, Response después)
