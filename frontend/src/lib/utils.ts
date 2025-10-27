@@ -89,7 +89,7 @@ export function preconnect(href: string) {
  */
 export function preloadCriticalAssets() {
   // Preload hero images
-  preloadImage('/hero-collaboration.jpg', { fetchPriority: 'high' });
+  preloadImage('/hero-collaboration.webp', { fetchPriority: 'high' });
   
   // Preconnect to API
   const apiUrl = import.meta.env.VITE_API_BASE_URL;
