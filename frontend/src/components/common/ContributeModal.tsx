@@ -179,8 +179,8 @@ export function ContributeModal({
 
   const paymentMethods = [
     { id: "credit_card", name: "Tarjeta de Crédito", icon: "💳" },
-    { id: "debit_card", name: "Tarjeta de Débito", icon: "�" },
-    { id: "paypal", name: "PayPal", icon: "💙" },
+    { id: "debit_card", name: "Tarjeta de Débito", icon: "💳" },
+    { id: "paypal", name: "PayPal", icon: "💳" },
   ];
 
   return (

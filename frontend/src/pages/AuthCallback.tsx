@@ -48,8 +48,7 @@ export default function AuthCallback() {
         }
       }, 1000);
 
-    } catch (error) {
-      console.error('Error en callback de autenticación:', error);
+    } catch {
       toast.error("Error en la autenticación", {
         description: "Redirigiendo al login...",
       });

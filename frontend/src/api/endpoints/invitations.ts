@@ -21,14 +21,14 @@ export const invitationsApi = {
     );
   },
 
-  // ✅ CORREGIDO: Aceptar invitación (endpoint separado)
+  // Aceptar invitación (endpoint separado)
   accept: (id: string): Promise<InvitationResponse> => {
     return httpClient.put<InvitationResponse>(
       API_ENDPOINTS.INVITATIONS.ACCEPT(id)
     );
   },
 
-  // ✅ CORREGIDO: Rechazar invitación (endpoint separado)
+  // Rechazar invitación (endpoint separado)
   reject: (id: string): Promise<InvitationResponse> => {
     return httpClient.put<InvitationResponse>(
       API_ENDPOINTS.INVITATIONS.REJECT(id)

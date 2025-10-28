@@ -20,7 +20,7 @@ export const collectionsApi = {
     );
   },
 
-  // ✅ CORREGIDO: Get colectas públicas para explorar (era /explore ahora /public)
+  // Get colectas públicas para explorar (era /explore ahora /public)
   public: (filters?: CollectionFilters): Promise<CollectionListResponse> => {
     return httpClient.get<CollectionListResponse>(
       API_ENDPOINTS.COLLECTIONS.PUBLIC,
@@ -57,14 +57,14 @@ export const collectionsApi = {
     return httpClient.delete<void>(API_ENDPOINTS.COLLECTIONS.DELETE(id));
   },
 
-  // ✅ NUEVO: Unirse a colección pública
+  // Unirse a colección pública
   join: (id: string): Promise<JoinCollectionResponse> => {
     return httpClient.post<JoinCollectionResponse>(
       API_ENDPOINTS.COLLECTIONS.JOIN(id)
     );
   },
 
-  // ✅ NUEVO: Salirse de la colección
+  // Salirse de la colección
   leave: (id: string): Promise<LeaveCollectionResponse> => {
     return httpClient.post<LeaveCollectionResponse>(
       API_ENDPOINTS.COLLECTIONS.LEAVE(id)

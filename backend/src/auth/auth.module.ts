@@ -11,6 +11,6 @@ import { SupabaseAuthGuard } from './guards';
   providers: [
     SupabaseAuthGuard, // Registrar el guard
   ],
-  exports: [SupabaseAuthGuard], // Exportar para usar en otros módulos
+  exports: [SupabaseAuthGuard],
 })
 export class AuthModule {}

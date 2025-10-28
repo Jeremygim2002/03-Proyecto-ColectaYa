@@ -13,8 +13,6 @@ export const membersApi = {
     );
   },
 
-  // ✅ ELIMINADO: invite() - Ahora se usa invitationsApi.create()
-  // ✅ ELIMINADO: accept() - Ahora se usa collectionsApi.join()
 
   // Remove a un miembro de la colecta (solo owner)
   remove: (collectionId: string, userId: string): Promise<void> => {

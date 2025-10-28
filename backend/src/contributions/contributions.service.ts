@@ -39,7 +39,7 @@ export class ContributionsService {
     }
     // Para colecciones públicas, cualquier usuario autenticado puede contribuir
 
-    // Simular pago exitoso (90% de éxito en lugar de 10%)
+    // Simular pago exitoso
     const paymentSuccess = Math.random() > 0.1;
 
     // Crear contribución
@@ -61,14 +61,6 @@ export class ContributionsService {
           },
         },
       },
-    });
-
-    // DEBUG: Verificar los datos del usuario
-    console.log('DEBUG - User data in contribution:', {
-      userId: contribution.userId,
-      userName: contribution.user?.name,
-      userAvatar: contribution.user?.avatar,
-      userEmail: contribution.user?.email,
     });
 
     if (!paymentSuccess) {

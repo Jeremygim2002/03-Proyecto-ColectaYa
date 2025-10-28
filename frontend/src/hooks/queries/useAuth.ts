@@ -32,7 +32,7 @@ export const useMagicLink = () => {
   return useMutation({
     mutationFn: (data: MagicLinkRequest) => authApi.magicLink(data.email),
     onSuccess: () => {
-      toast.success('Magic link enviado! Revisa tu email y haz clic en el enlace para ingresar.');
+      toast.success('Mensaje enviado! Revisa tu email y haz clic en el enlace para ingresar.');
     },
     onError: (error: Error) => {
       console.error('Error en magic link:', error);

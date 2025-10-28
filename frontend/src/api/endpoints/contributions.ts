@@ -13,7 +13,7 @@ export const contributionsApi = {
     );
   },
 
-  // ✅ CORREGIDO: Create nueva contribución (solo amount según backend DTO)
+  //Create nueva contribución (solo amount según backend DTO)
   create: (collectionId: string, data: { amount: number }): Promise<Contribution> => {
     return httpClient.post<Contribution, { amount: number }>(
       API_ENDPOINTS.CONTRIBUTIONS.CREATE(collectionId),
@@ -21,12 +21,12 @@ export const contributionsApi = {
     );
   },
 
-  // ✅ NUEVO: Get mis contribuciones globales (para profile.tsx)
+  // Get mis contribuciones globales (para profile.tsx)
   getMyContributions: (): Promise<Contribution[]> => {
     return httpClient.get<Contribution[]>(
       API_ENDPOINTS.CONTRIBUTIONS.MY_CONTRIBUTIONS
     );
   },
 
-  // ✅ ELIMINADO: get() y stats() no existen en backend
+  //get() y stats() no existen en backend
 };

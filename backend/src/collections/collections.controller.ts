@@ -28,10 +28,7 @@ export class CollectionsController {
 
   @Public()
   @Get('public')
-  @ApiOperation({
-    summary: 'Listar colectas públicas',
-    description: 'Obtiene colectas públicas con filtros para la página Explore. No requiere autenticación.',
-  })
+  @ApiOperation({ summary: 'Listar colectas públicas' })
   async findPublic(@Query() filters: GetPublicCollectionsDto): Promise<PublicCollectionsResponse> {
     return await this.collectionsService.findPublicCollections(filters);
   }
@@ -39,9 +36,6 @@ export class CollectionsController {
   @Post()
   @ApiOperation({ summary: 'Crear colecta' })
   async create(@Request() req: AuthenticatedRequest, @Body() dto: CreateCollectionDto) {
-    // DEBUG: Log para verificar req.user
-    console.log('🔍 [CollectionsController.create] req.user:', req.user);
-    console.log('🔍 [CollectionsController.create] req.user.id:', req.user.id);
     if (!req.user.id) {
       throw new BadRequestException('User ID is required');
     }
@@ -56,13 +50,9 @@ export class CollectionsController {
   @Get()
   @ApiOperation({ summary: 'Listar colectas del usuario (dashboard)' })
   async list(@Query() filters: { search?: string; status?: string }, @Request() req: AuthenticatedRequest) {
-    console.log('🔍 [CollectionsController.list] Filters received:', filters);
-
-    // Map status to CollectionStatus if provided
     const serviceFilters: { search?: string; status?: CollectionStatus | undefined } = {};
     if (filters.search) serviceFilters.search = filters.search;
     if (filters.status && filters.status !== 'all') {
-      // Validate status value - convert to uppercase
       const statusUpper = filters.status.toUpperCase();
 
       if (statusUpper === 'ACTIVE' || statusUpper === 'COMPLETED') {
@@ -71,9 +61,7 @@ export class CollectionsController {
         throw new BadRequestException(`Invalid status: ${filters.status}. Valid values: active, completed, all`);
       }
     }
-    // Si status es 'all' o undefined, no agregamos filtro de status para mostrar todas
 
-    console.log('🔍 [CollectionsController.list] Service filters:', serviceFilters);
     return this.collectionsService.findUserCollections(req.user.id, serviceFilters);
   }
 

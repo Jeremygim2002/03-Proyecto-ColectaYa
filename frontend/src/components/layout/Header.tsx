@@ -94,7 +94,7 @@ export function Header() {
 
         <div className="flex items-center space-x-2">
           
-          {/* ✅ Notificaciones - SOLO en desktop (añadido hidden) */}
+          {/*  Notificaciones - SOLO en desktop (añadido hidden) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden md:flex">
               <Button
@@ -210,7 +210,7 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* ✅ Menú móvil - SIN badge de notificaciones */}
+          {/* Menú móvil - SIN badge de notificaciones */}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" aria-label="Abrir menú">
@@ -263,7 +263,7 @@ export function Header() {
                     })}
                   </div>
 
-                  {/* ✅ REMOVIDA toda la sección de notificaciones del menú móvil */}
+                  {/* REMOVIDA toda la sección de notificaciones del menú móvil */}
 
                   <div className="space-y-1 pt-2 border-t">
                     <p className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">

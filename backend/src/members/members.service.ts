@@ -200,13 +200,13 @@ export class MembersService {
 
     // Crear un "member" virtual para el owner
     const ownerMember = {
-      id: `owner-${collection.ownerId}`, // ID único para el owner
+      id: `owner-${collection.ownerId}`,
       collectionId,
       userId: collection.ownerId,
       user: ownerInfo,
-      invitedAt: collection.createdAt, // Fecha de creación de la colección
-      acceptedAt: collection.createdAt, // El owner siempre está "aceptado"
-      addedBy: collection.ownerId, // Se agregó a sí mismo
+      invitedAt: collection.createdAt,
+      acceptedAt: collection.createdAt,
+      addedBy: collection.ownerId,
     };
 
     // Combinar owner y miembros invitados

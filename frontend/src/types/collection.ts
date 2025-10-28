@@ -19,8 +19,8 @@ export interface Collection {
 }
 
 export type CollectionRuleType = 
-  | 'GOAL_ONLY'   // Solo retiro al 100% de meta  
-  | 'ANYTIME';    // Retiro en cualquier momento
+  | 'GOAL_ONLY'   
+  | 'ANYTIME';    
 
 export type CollectionStatus = 
   | 'ACTIVE' 

@@ -43,7 +43,7 @@ export class CollectionsService {
           title: dto.title,
           description: dto.description,
           imageUrl: dto.imageUrl,
-          isPrivate: true, // Forzar que todas las colectas sean privadas
+          isPrivate: true,
           goalAmount: dto.goalAmount,
           ruleType: dto.ruleType,
           ruleValue: dto.ruleValue,
@@ -53,9 +53,6 @@ export class CollectionsService {
 
       return newCollection;
     } catch (err: unknown) {
-      // Log detallado para diagnóstico en desarrollo
-      console.error('[CollectionsService.create] Prisma error:', err);
-      // Prisma errores comunes: P2002 unique, P2003 FK, etc.
       const code =
         typeof err === 'object' && err && 'code' in err
           ? ((err as Record<string, unknown>)['code'] as string)
@@ -67,7 +64,6 @@ export class CollectionsService {
       if (code === 'P2002') {
         throw new BadRequestException('Duplicate value violates a unique constraint');
       }
-      // Re-lanzar con detalle para depuración en desarrollo
       throw err;
     }
   }
@@ -222,7 +218,6 @@ export class CollectionsService {
 
     // Aplicar búsqueda en título/descripcion si se proporciona
     if (filters?.search) {
-      // Normalize existing AND to an array if needed
       const existingAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : [];
       where.AND = [
         ...existingAnd,
@@ -301,7 +296,6 @@ export class CollectionsService {
   }
 
   async findPublicCollections(filters: GetPublicCollectionsDto): Promise<PublicCollectionsResponse> {
-    // Primero actualizar automáticamente el status de las colectas
     await this.updateCollectionStatuses();
 
     const { search, status, skip, take } = filters;
@@ -320,9 +314,8 @@ export class CollectionsService {
 
     // Filtro por estado
     if (status && status !== PublicCollectionFilter.TODOS) {
-      whereCondition.status = status as CollectionStatus; // 'ACTIVE' o 'COMPLETED'
+      whereCondition.status = status as CollectionStatus;
     }
-    // Si es TODOS, no agregamos filtro de status (muestra ambos)
 
     // Filtro de búsqueda en título y descripción
     if (search) {
@@ -504,7 +497,6 @@ export class CollectionsService {
 
   // Función para actualizar automáticamente el status de las colectas
   private async updateCollectionStatuses() {
-    // Obtener todas las colectas ACTIVE
     const activeCollections = await this.prisma.collection.findMany({
       where: {
         status: CollectionStatus.ACTIVE,

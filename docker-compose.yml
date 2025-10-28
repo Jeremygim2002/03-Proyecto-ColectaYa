@@ -1,0 +1,43 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15
+    container_name: colectaya_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: colecta
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: colectaya_backend
+    ports:
+      - "4000:3000" # host:container -> backend escucha en 3000
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: colectaya_frontend
+    ports:
+      - "3000:80" # host:container -> nginx sirve en 80
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db_data:

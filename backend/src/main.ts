@@ -10,7 +10,6 @@ import compression from 'compression';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // CORS: allow a whitelist of origins and respond correctly to preflight requests
   const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:5173',
     'https://03-proyecto-colecta-ya.vercel.app',
@@ -19,15 +18,11 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      // Allow requests with no origin (e.g. server-to-server or curl)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-
-      // For debugging, log rejected origin and deny CORS without throwing an exception
-      console.warn(`CORS: rejected origin ${origin}`);
       return callback(null, false);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -37,11 +32,10 @@ async function bootstrap() {
     preflightContinue: false,
   });
 
-  // ✅ Helmet configurado para NO interferir con CORS
   app.use(
     helmet({
-      crossOriginResourcePolicy: { policy: 'cross-origin' }, // ✅ NUEVO
-      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // ✅ NUEVO
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
     }),
   );
   app.use(compression());
@@ -58,7 +52,7 @@ async function bootstrap() {
     }),
   );
 
-  // Filtros globales para manejo de errores
+  // Filtros globales
   app.useGlobalFilters(new PrismaExceptionFilter());
 
   // Swagger
@@ -72,10 +66,6 @@ async function bootstrap() {
   });
 
   await app.listen(process.env.PORT ?? 3000);
-
-  // ✅ Log para debug
-  console.log(`🚀 Backend running on: ${await app.getUrl()}`);
-  console.log(`✅ Allowed origins: ${allowedOrigins.join(', ')}`);
 }
 
 void bootstrap();

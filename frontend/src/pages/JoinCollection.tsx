@@ -46,7 +46,7 @@ export default function JoinCollection() {
   };
 
   if (!user) {
-    return null; // Will redirect to login
+    return null;
   }
 
   if (isLoading) {
@@ -80,7 +80,6 @@ export default function JoinCollection() {
     );
   }
 
-  // Check if user is already the owner
   const isOwner = collection.ownerId === user.id;
   
   return (
