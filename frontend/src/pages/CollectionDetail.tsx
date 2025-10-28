@@ -53,12 +53,6 @@ export default function CollectionDetail() {
   // Withdrawal mutation
   const withdrawMutation = useCreateWithdrawal(collectionId || "");
   
-  // DEBUG: Verificar los datos de la colección
-  console.log('Collection data:', collection);
-  console.log('Current amount:', collection?.currentAmount);
-  console.log('Goal amount:', collection?.goalAmount);
-  console.log('Contributors count:', collection?.contributorsCount);
-  
   // Fetch contributions for this collection
   const {
     data: contributionsData,
@@ -90,19 +84,7 @@ export default function CollectionDetail() {
 
   // Extract data when available
   const contributions = contributionsData || [];
-  
-  // DEBUG: Verificar los datos de contribuciones
-  console.log('Contributions data:', contributionsData);
-  console.log('Contributions array:', contributions);
-  
-  // DEBUG: Verificar datos específicos de cada contribución
-  contributions.forEach((contribution, index) => {
-    console.log(`Contribution ${index}:`, {
-      userName: contribution.userName,
-      userAvatar: contribution.userAvatar,
-      userId: contribution.userId,
-    });
-  });
+
 
   // Calculate values only when collection is available
   const percentage = collection ? Math.min(100, Math.round((collection.currentAmount / collection.goalAmount) * 100)) : 0;
