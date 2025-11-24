@@ -3,6 +3,12 @@ export interface Collection {
   title: string;
   description?: string;
   ownerId: string; 
+  owner?: {
+    id: string;
+    name?: string;
+    email: string;
+    avatar?: string;
+  };
   goalAmount: number;
   currentAmount: number;
   progress: number; 

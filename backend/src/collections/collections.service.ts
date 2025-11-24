@@ -72,7 +72,62 @@ export class CollectionsService {
     }
   }
 
-  async findOne(id: string, userId: string) {
+  // Método para preview/compartir - permite ver cualquier colecta vía link
+  async findOneForPreview(id: string, userId?: string) {
+    const collection = await this.prisma.collection.findUnique({
+      where: { id },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            email: true,
+            roles: true,
+          },
+        },
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+              },
+            },
+          },
+        },
+        contributions: {
+          where: { status: 'PAID' },
+          select: {
+            amount: true,
+            userId: true,
+          },
+        },
+      },
+    });
+
+    if (!collection) {
+      throw new NotFoundException('Collection not found');
+    }
+
+    // NO verificar permisos - permitir ver cualquier colecta vía link de compartir
+    // Esto permite que alguien con el link pueda ver la colecta antes de unirse
+
+    // Calcular progreso y estadísticas
+    const totalPaid = collection.contributions.reduce((sum, c) => sum + Number(c.amount), 0);
+    const goalAmount = Number(collection.goalAmount);
+    const progress = goalAmount > 0 ? (totalPaid / goalAmount) * 100 : 0;
+
+    // Calcular número único de contribuyentes
+    const uniqueContributors = new Set(collection.contributions.map((c) => c.userId).filter(Boolean)).size;
+
+    return {
+      ...collection,
+      currentAmount: totalPaid,
+      contributorsCount: uniqueContributors,
+      progress: Math.min(progress, 100),
+    };
+  }
+
+  async findOne(id: string, userId?: string) {
     const collection = await this.prisma.collection.findUnique({
       where: { id },
       include: {
@@ -109,6 +164,11 @@ export class CollectionsService {
 
     // Verificar acceso a colectas privadas
     if (collection.isPrivate) {
+      // Si la colecta es privada y no hay usuario autenticado, denegar acceso
+      if (!userId) {
+        throw new ForbiddenException('Authentication required to view private collection');
+      }
+
       const isOwner = collection.ownerId === userId;
       const isMember = collection.members.some((m) => m.userId === userId && m.acceptedAt !== null);
 
@@ -410,8 +470,8 @@ export class CollectionsService {
     };
   }
 
-  async joinCollection(collectionId: string, userId: string) {
-    // Verificar que la colección existe y es pública
+  async joinCollection(collectionId: string, userId: string, fromSharedLink: boolean = false) {
+    // Verificar que la colección existe
     const collection = await this.prisma.collection.findUnique({
       where: { id: collectionId },
       include: {
@@ -423,7 +483,8 @@ export class CollectionsService {
       throw new NotFoundException('Collection not found');
     }
 
-    if (collection.isPrivate) {
+    // Si es privada y NO viene del link compartido, requerir invitación
+    if (collection.isPrivate && !fromSharedLink) {
       throw new BadRequestException('Cannot join private collection directly - an invitation is required');
     }
 

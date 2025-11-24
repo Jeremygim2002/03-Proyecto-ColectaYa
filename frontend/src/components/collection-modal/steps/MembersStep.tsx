@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Users, X } from "lucide-react";
 import type { Member } from "../hooks/useCollectionForm";
+import { getInitials } from "@/utils/string";
 
 interface MembersStepProps {
   members: Member[];
@@ -19,13 +20,6 @@ export function MembersStep({ members, onAddMember, onRemoveMember }: MembersSte
     if (onAddMember(newMember)) {
       setNewMember("");
     }
-  };
-
-  const getInitials = (text: string) => {
-    const parts = text.split(/[@\s.]/);
-    return parts.length >= 2
-      ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : text.substring(0, 2).toUpperCase();
   };
 
   return (

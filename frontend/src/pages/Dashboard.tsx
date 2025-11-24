@@ -5,11 +5,13 @@ import { motion } from "framer-motion";
 import { CollectCard } from "@/components/common/CollectCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Filter, Loader2 } from "lucide-react";
+import { CollectionSkeletonGrid } from "@/components/common/skeletons";
+import { EmptyState, ErrorState } from "@/components/common/EmptyState";
 import { useCollections } from "@/hooks/queries";
 import { useDebounced } from "@/hooks/useReact19";
 import { getDashboardMetadata } from "@/lib/utils";
+import { mapCollectionStatus } from "@/constants/status";
 import type { CollectionStatus } from "@/types";
 
 type FilterType = "all" | "active" | "completed";
@@ -88,45 +90,22 @@ export default function Dashboard() {
 
             <TabsContent value={filter} className="space-y-6">
               {/* Loading State with Skeleton */}
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="space-y-3">
-                      <Skeleton className="h-48 w-full" />
-                      <div className="space-y-2">
-                        <Skeleton className="h-5 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-4 w-2/3" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
+              {isLoading ? <CollectionSkeletonGrid count={6} /> : null}
 
               {/* Error State */}
               {isError && (
-                <motion.div
-                  className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed border-destructive/50 bg-destructive/5 p-8 md:p-12 text-center"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <h3 className="mb-2 text-lg md:text-xl font-semibold text-destructive">Error al cargar colectas</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground">
-                    Por favor, intenta recargar la página
-                  </p>
-                </motion.div>
+                <ErrorState
+                  icon={<Filter className="h-12 w-12 md:h-16 md:w-16" />}
+                  title="Error al cargar colectas"
+                  description="Por favor, intenta recargar la página"
+                />
               )}
 
               {/* Collections List */}
               {!isLoading && !isError && collections.length > 0 && (
                 <div className="grid gap-4 md:gap-6">
                   {collections.map((collection, index) => {
-                    // Map API status to CollectCard status
-                    const cardStatus = 
-                      collection.status === "ACTIVE" ? "active" :
-                      collection.status === "COMPLETED" ? "completed" :
-                      "closed"; // Map CANCELLED/EXPIRED to closed
+                    const cardStatus = mapCollectionStatus(collection.status);
 
                     return (
                       <motion.div
@@ -157,18 +136,11 @@ export default function Dashboard() {
 
               {/* Empty State */}
               {!isLoading && !isError && collections.length === 0 && (
-                <motion.div
-                  className="flex min-h-[400px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/20 p-8 md:p-12 text-center"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <Filter className="mb-4 h-12 w-12 md:h-16 md:w-16 text-muted-foreground/50" />
-                  <h3 className="mb-2 text-lg md:text-xl font-semibold">No se encontraron colectas</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground">
-                    {searchQuery ? "Intenta con otros términos de búsqueda" : "Crea tu primera vaquita para comenzar"}
-                  </p>
-                </motion.div>
+                <EmptyState
+                  icon={<Filter className="h-12 w-12 md:h-16 md:w-16" />}
+                  title="No se encontraron colectas"
+                  description={searchQuery ? "Intenta con otros términos de búsqueda" : "Crea tu primera vaquita para comenzar"}
+                />
               )}
             </TabsContent>
           </Tabs>

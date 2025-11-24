@@ -12,7 +12,7 @@ export default defineConfig({
       },
     }),
     tailwindcss(),
-    basicSsl(), 
+    basicSsl(), // ✅ HTTPS en desarrollo
   ],
   server: {
     port: 5173,

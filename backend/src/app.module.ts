@@ -10,6 +10,7 @@ import { MembersModule } from './members/members.module';
 import { ContributionsModule } from './contributions/contributions.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { WithdrawalsModule } from './withdrawals/withdrawals.module';
+import { PayPalModule } from './paypal/paypal.module';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation';
 import { SupabaseModule } from './supabase/supabase.module';
@@ -44,6 +45,7 @@ import { SupabaseAuthGuard, RolesGuard } from './auth/guards';
     ContributionsModule,
     InvitationsModule,
     WithdrawalsModule,
+    PayPalModule,
   ],
   controllers: [AppController],
   providers: [

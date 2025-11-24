@@ -9,7 +9,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 import { useCreateContribution } from "@/hooks/queries/useContributions";
+import { httpClient } from "@/api/client";
 import type { PaymentMethod } from "@/types/contribution";
 
 interface ContributeModalProps {
@@ -32,7 +34,7 @@ export function ContributeModal({
   goalAmount
 }: ContributeModalProps) {
   const [amount, setAmount] = useState(suggestedAmount?.toString() || "");
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("credit_card");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('paypal');
   const [note, setNote] = useState("");
 
   const { mutateAsync: createContribution, isPending } = useCreateContribution(collectionId);
@@ -82,6 +84,55 @@ export function ContributeModal({
         origin: { x: 0.5, y: 0.5 }
       });
     }, 250);
+  };
+
+  // Estado para PayPal
+  const [isProcessingPayPal, setIsProcessingPayPal] = useState(false);
+
+  // NUEVO: Callbacks para PayPal
+  const createPayPalOrder = async () => {
+    try {
+      const response = await httpClient.post<{ id: string }>(`/collections/${collectionId}/paypal/create-order`, {
+        amount: parseFloat(amount),
+      });
+      return response.id; // PayPal Order ID
+    } catch (error) {
+      toast.error('Error al crear orden de PayPal');
+      throw error;
+    }
+  };
+
+  const onPayPalApprove = async (data: { orderID: string }) => {
+    setIsProcessingPayPal(true);
+    try {
+      // Capturar pago en backend
+      await httpClient.post(`/collections/${collectionId}/paypal/capture-order`, {
+        orderId: data.orderID,
+      });
+
+      // Registrar contribución
+      await createContribution({
+        collectionId,
+        amount: parseFloat(amount),
+        message: undefined,
+        isAnonymous: false,
+        paymentMethod: 'paypal',
+      });
+
+      triggerConfetti();
+      toast.success(`¡Pago de S/ ${parseFloat(amount).toFixed(2)} exitoso! 🎉`);
+
+      setTimeout(() => {
+        setAmount(suggestedAmount?.toString() || "");
+        setPaymentMethod("paypal");
+        setNote("");
+        onOpenChange(false);
+      }, 1000);
+    } catch {
+      toast.error('Error al procesar el pago de PayPal');
+    } finally {
+      setIsProcessingPayPal(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -134,7 +185,7 @@ export function ContributeModal({
       setTimeout(() => {
         setAmount(suggestedAmount?.toString() || "");
         setNote("");
-        setPaymentMethod("credit_card");
+        setPaymentMethod("paypal");
         onOpenChange(false);
       }, 1000);
     } catch (error: unknown) {
@@ -250,36 +301,54 @@ export function ContributeModal({
               ))}
             </RadioGroup>
           </div>
+
+          {/* NUEVO: Mostrar PayPal Buttons SOLO si método es 'paypal' */}
+          {paymentMethod === 'paypal' && parseFloat(amount) > 0 && (
+            <div className="pt-4">
+              <PayPalButtons
+                style={{ layout: 'vertical' }}
+                disabled={isProcessingPayPal}
+                createOrder={createPayPalOrder}
+                onApprove={onPayPalApprove}
+                onError={(err: unknown) => {
+                  console.error('PayPal error:', err);
+                  toast.error('Error en PayPal. Intenta de nuevo.');
+                }}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-3 pt-4 border-t">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={isPending}
-            className="flex-1"
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isPending}
-            className="flex-1"
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Procesando...
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-4 h-4 mr-2" />
-                Confirmar
-              </>
-            )}
-          </Button>
-        </div>
+        {/* Actions - Mostrar SOLO si NO es PayPal */}
+        {paymentMethod !== 'paypal' && (
+          <div className="flex gap-3 pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isPending}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isPending}
+              className="flex-1"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Procesando...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Confirmar
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

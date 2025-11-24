@@ -35,7 +35,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obtener información del usuario autenticado' })
   async getProfile(@Request() req: AuthenticatedRequest) {
-    return this.supabaseAuth.getUserInfo(req.user.id);
+    return this.supabaseAuth.getUserInfo(req.user!.id);
   }
 
   // MAGIC LINK LOGIN

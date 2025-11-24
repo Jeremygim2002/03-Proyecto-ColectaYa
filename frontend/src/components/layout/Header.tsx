@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Bell, Menu, LogOut, UserCircle, Mail, Home, Compass } from "lucide-react";
+import { Menu, LogOut, UserCircle, Mail, Home, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -39,7 +39,6 @@ export function Header() {
     (inv) => inv.status === 'PENDING'
   );
   const invitationCount = pendingInvitations.length;
-  const unreadCount = invitationCount;
 
   const navLinks = [
     { href: "/dashboard", label: "Inicio", icon: Home },
@@ -94,60 +93,6 @@ export function Header() {
 
         <div className="flex items-center space-x-2">
           
-          {/* ✅ Notificaciones - SOLO en desktop (añadido hidden) */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="hidden md:flex">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative"
-                aria-label="Notificaciones"
-              >
-                <Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <Badge 
-                    variant="destructive" 
-                    className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px]"
-                  >
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </Badge>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel className="flex items-center justify-between">
-                <span>Notificaciones</span>
-                {unreadCount > 0 && (
-                  <Badge variant="secondary" className="ml-auto">
-                    {unreadCount}
-                  </Badge>
-                )}
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <ScrollArea className="max-h-96">
-                {pendingInvitations.length > 0 ? (
-                  pendingInvitations.map((invitation) => (
-                    <DropdownMenuItem key={invitation.id} className="cursor-pointer py-3">
-                      <Link to="/invitations" className="flex flex-col w-full">
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-primary" />
-                          <p className="text-sm font-medium">Nueva invitación</p>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {invitation.inviter?.name || invitation.inviter?.email} te invitó a "{invitation.collection?.title}"
-                        </p>
-                      </Link>
-                    </DropdownMenuItem>
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <Bell className="h-12 w-12 text-muted-foreground/50 mb-2" />
-                    <p className="text-sm text-muted-foreground">No hay notificaciones nuevas</p>
-                  </div>
-                )}
-              </ScrollArea>
-            </DropdownMenuContent>
-          </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild className="hidden md:flex">

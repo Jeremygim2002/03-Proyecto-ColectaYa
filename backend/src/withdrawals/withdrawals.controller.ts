@@ -19,12 +19,12 @@ export class WithdrawalsController {
   @Post()
   @ApiOperation({ summary: 'Crear retiro total de fondos' })
   async create(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    return this.withdrawalsService.createWithdrawal(collectionId, req.user.id);
+    return this.withdrawalsService.createWithdrawal(collectionId, req.user!.id);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar retiros' })
   async list(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    return this.withdrawalsService.listWithdrawals(collectionId, req.user.id);
+    return this.withdrawalsService.listWithdrawals(collectionId, req.user!.id);
   }
 }

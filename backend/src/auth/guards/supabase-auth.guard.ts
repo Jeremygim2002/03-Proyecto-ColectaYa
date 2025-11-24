@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { SupabaseAuthService } from '../../supabase/supabase-auth.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { IS_PUBLIC_KEY } from '../decorators';
+import { IS_PUBLIC_KEY, IS_OPTIONAL_AUTH_KEY } from '../decorators';
 import { AuthenticatedRequest } from '../types';
 
 @Injectable()
@@ -25,11 +25,22 @@ export class SupabaseAuthGuard implements CanActivate {
       return true;
     }
 
-    // 2. EXTRAER TOKEN DEL HEADER
+    // 2. VERIFICAR SI ES RUTA CON AUTH OPCIONAL
+    const isOptionalAuth = this.reflector.getAllAndOverride<boolean>(IS_OPTIONAL_AUTH_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    // 3. EXTRAER TOKEN DEL HEADER
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
+      // Si no hay token y auth es opcional, permitir acceso sin usuario
+      if (isOptionalAuth) {
+        request.user = undefined;
+        return true;
+      }
       throw new UnauthorizedException('Token no proporcionado');
     }
 

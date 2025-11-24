@@ -13,7 +13,7 @@ export class InvitationsController {
   @Get()
   @ApiOperation({ summary: 'Obtener mis invitaciones pendientes' })
   async getMyInvitations(@Request() req: AuthenticatedRequest) {
-    return this.invitationsService.getMyInvitations(req.user.id);
+    return this.invitationsService.getMyInvitations(req.user!.id);
   }
 
   @Post()
@@ -21,7 +21,7 @@ export class InvitationsController {
   async createInvitation(@Request() req: AuthenticatedRequest, @Body() createInvitationDto: CreateInvitationDto) {
     return this.invitationsService.createInvitation(
       createInvitationDto.collectionId,
-      req.user.id,
+      req.user!.id,
       createInvitationDto.invitedEmail,
     );
   }
@@ -30,13 +30,13 @@ export class InvitationsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Aceptar invitación' })
   async acceptInvitation(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
-    return this.invitationsService.acceptInvitation(id, req.user.id);
+    return this.invitationsService.acceptInvitation(id, req.user!.id);
   }
 
   @Put(':id/reject')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rechazar invitación' })
   async rejectInvitation(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
-    return this.invitationsService.rejectInvitation(id, req.user.id);
+    return this.invitationsService.rejectInvitation(id, req.user!.id);
   }
 }

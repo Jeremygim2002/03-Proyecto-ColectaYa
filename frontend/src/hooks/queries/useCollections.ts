@@ -33,10 +33,24 @@ export function useExploreCollections(filters?: CollectionFilters) {
 
 
 // Hook para obtener una colección individual por ID
-export function useCollection(id: string) {
+// Si requireAuth es false, la petición no incluirá el token de autenticación
+export function useCollection(id: string, options?: { requireAuth?: boolean }) {
+  const requireAuth = options?.requireAuth !== false; // Por defecto requiere auth
+  
   return useQuery({
     queryKey: queryKeys.collections.detail(id),
-    queryFn: () => collectionsApi.get(id),
+    queryFn: () => collectionsApi.get(id, { requiresAuth: requireAuth }),
+    staleTime: APP_CONFIG.STALE_TIME.MEDIUM,
+    enabled: !!id,
+  });
+}
+
+// Hook para obtener preview de colecta (para compartir link)
+// Permite ver colectas privadas vía link de compartir
+export function useCollectionPreview(id: string) {
+  return useQuery({
+    queryKey: ['collections', 'preview', id],
+    queryFn: () => collectionsApi.getPreview(id),
     staleTime: APP_CONFIG.STALE_TIME.MEDIUM,
     enabled: !!id,
   });
@@ -141,6 +155,30 @@ export function useJoinCollection() {
     onSuccess: (_data, id) => {
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.collections.detail(id) 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.collections.lists() 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.members.list(id) 
+      });
+    },
+  });
+}
+
+// Hook to join a collection via shared link (allows private collections)
+export function useJoinCollectionViaLink() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['collections', 'join-via-link'],
+    mutationFn: (id: string) => collectionsApi.joinViaLink(id),
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ 
+        queryKey: queryKeys.collections.detail(id) 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: ['collections', 'preview', id]
       });
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.collections.lists() 

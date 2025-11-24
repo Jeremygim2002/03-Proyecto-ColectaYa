@@ -7,6 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/utils/string";
+import { getDaysRemaining } from "@/utils/date";
 
 interface CollectCardProps {
   id: string;
@@ -56,27 +58,7 @@ export function CollectCard({
 }: CollectCardProps) {
   const percentage = Math.round((progress / goal) * 100);
   const config = statusConfig[status];
-
-  const getDaysRemaining = (deadline?: string) => {
-    if (!deadline) return null;
-    const now = new Date();
-    const end = new Date(deadline);
-    const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    if (diff < 0) return "Vencido";
-    if (diff === 0) return "Hoy";
-    if (diff === 1) return "Mañana";
-    return `${diff} días`;
-  };
-
   const daysRemaining = getDaysRemaining(deadline);
-
-  const getInitials = (name: string) => {
-    const parts = name.split(" ");
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  };
 
   return (
     <Link to={`/collections/${id}`} className="block">

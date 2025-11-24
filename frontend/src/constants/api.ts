@@ -18,10 +18,12 @@ export const API_ENDPOINTS = {
     LIST: '/collections',
     CREATE: '/collections',
     GET: (id: string) => `/collections/${id}`,
+    PREVIEW: (id: string) => `/collections/${id}/preview`, // Para compartir - permite ver privadas
     UPDATE: (id: string) => `/collections/${id}`,
     DELETE: (id: string) => `/collections/${id}`,
     PUBLIC: '/collections/public',
     JOIN: (id: string) => `/collections/${id}/members/join`,
+    JOIN_VIA_LINK: (id: string) => `/collections/${id}/members/join-via-link`, // Unirse desde link compartido
     LEAVE: (id: string) => `/collections/${id}/members/leave`,
   },
   

@@ -17,7 +17,7 @@ export class ContributionsController {
     @Request() req: AuthenticatedRequest,
     @Body() dto: CreateContributionDto,
   ) {
-    const contribution = await this.contributionsService.contribute(collectionId, req.user.id, dto.amount);
+    const contribution = await this.contributionsService.contribute(collectionId, req.user!.id, dto.amount);
 
     // Mapear datos de Prisma al formato esperado por el frontend
     return {
@@ -36,7 +36,7 @@ export class ContributionsController {
   @Get('collections/:collectionId/contributions')
   @ApiOperation({ summary: 'Listar contribuciones de una colecta' })
   async list(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    const contributions = await this.contributionsService.listContributions(collectionId, req.user.id);
+    const contributions = await this.contributionsService.listContributions(collectionId, req.user!.id);
 
     // Mapear datos de Prisma al formato esperado por el frontend
     return contributions.map((contribution) => ({
@@ -55,6 +55,6 @@ export class ContributionsController {
   @Get('contributions')
   @ApiOperation({ summary: 'Obtener mis contribuciones globales' })
   async getMyContributions(@Request() req: AuthenticatedRequest) {
-    return this.contributionsService.getMyContributions(req.user.id);
+    return this.contributionsService.getMyContributions(req.user!.id);
   }
 }

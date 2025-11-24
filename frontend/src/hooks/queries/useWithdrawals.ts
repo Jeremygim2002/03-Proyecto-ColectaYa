@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { withdrawalsApi } from '@/api/endpoints';
 import { queryKeys } from '@/constants';
+import { toast } from 'sonner';
 
 
 //  Hook para obtener todos los retiros de una colecta
@@ -28,6 +29,10 @@ export function useCreateWithdrawal(collectionId: string) {
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.collections.detail(collectionId) 
       });
+      toast.success('Retiro solicitado exitosamente');
     },
+    onError: (error: Error) => {
+      toast.error(error?.message || 'Error al solicitar el retiro');
+    }
   });
 }

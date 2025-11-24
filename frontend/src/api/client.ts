@@ -66,7 +66,7 @@ class HttpClient {
   /**
    * Handle API errors with proper typing
    */
-  private async handleError(response: Response): Promise<never> {
+  private async handleError(response: Response, requiresAuth: boolean = true): Promise<never> {
     let errorData: ApiError;
 
     try {
@@ -85,7 +85,8 @@ class HttpClient {
     }
 
     // Handle specific status codes
-    if (response.status === 401) {
+    // Solo limpiar y redirigir si la petición requería autenticación
+    if (response.status === 401 && requiresAuth) {
       // Clear auth data on unauthorized
       localStorage.removeItem(APP_CONFIG.TOKEN_KEY);
       localStorage.removeItem(APP_CONFIG.REFRESH_TOKEN_KEY);
@@ -109,6 +110,7 @@ class HttpClient {
   ): Promise<T> {
     const url = this.buildURL(endpoint, config?.params);
     const headers = this.buildHeaders(config);
+    const requiresAuth = config?.requiresAuth !== false;
 
     try {
       const response = await fetch(url, {
@@ -117,7 +119,7 @@ class HttpClient {
       });
 
       if (!response.ok) {
-        await this.handleError(response);
+        await this.handleError(response, requiresAuth);
       }
 
       // Handle 204 No Content

@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { useCollection, useJoinCollection } from "@/hooks/queries/useCollections";
+import { useCollectionPreview, useJoinCollectionViaLink } from "@/hooks/queries/useCollections";
 import { useAuthStore } from "@/stores/authStore";
 
 export default function JoinCollection() {
@@ -14,20 +13,31 @@ export default function JoinCollection() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   
-  const { data: collection, isLoading, error } = useCollection(collectionId!);
-  const joinMutation = useJoinCollection();
+  // Usar preview - permite ver colectas privadas vía link de compartir
+  const { data: collection, isLoading, error } = useCollectionPreview(collectionId!);
+  // Usar joinViaLink - permite unirse a colectas privadas desde link compartido
+  const joinMutation = useJoinCollectionViaLink();
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!user) {
-      // Guardar la URL de retorno en sessionStorage
-      sessionStorage.setItem('returnTo', `/join/${collectionId}`);
-      navigate('/login');
-    }
-  }, [user, navigate, collectionId]);
+  // DEBUG: Ver qué está pasando
+  console.log('🔍 JoinCollection - collectionId:', collectionId);
+  console.log('🔍 JoinCollection - isLoading:', isLoading);
+  console.log('🔍 JoinCollection - error:', error);
+  console.log('🔍 JoinCollection - error details:', error ? JSON.stringify(error, null, 2) : 'no error');
+  console.log('🔍 JoinCollection - collection:', collection);
+  console.log('🔍 JoinCollection - user:', user);
+
+  // NO redirigir automáticamente - permitir ver la colecta primero
+  // Solo redirigir al intentar unirse sin estar autenticado
 
   const handleJoinCollection = async () => {
-    if (!collection || !user) return;
+    if (!collection) return;
+    
+    // Si no está autenticado, guardar URL y redirigir a login
+    if (!user) {
+      sessionStorage.setItem('returnTo', `/join/${collectionId}`);
+      navigate('/login');
+      return;
+    }
     
     try {
       await joinMutation.mutateAsync(collection.id);
@@ -38,16 +48,6 @@ export default function JoinCollection() {
       toast.error('Error al unirse a la colecta');
     }
   };
-
-  const handleViewCollection = () => {
-    if (collection) {
-      navigate(`/collections/${collection.id}`);
-    }
-  };
-
-  if (!user) {
-    return null; // Will redirect to login
-  }
 
   if (isLoading) {
     return (
@@ -80,8 +80,8 @@ export default function JoinCollection() {
     );
   }
 
-  // Check if user is already the owner
-  const isOwner = collection.ownerId === user.id;
+  // Check if user is already the owner (solo si está autenticado)
+  const isOwner = user && collection.ownerId === user.id;
   
   return (
     <div className="container mx-auto max-w-md px-4 py-8">
@@ -104,19 +104,34 @@ export default function JoinCollection() {
             </p>
           </div>
 
-          {isOwner ? (
+          {!user ? (
+            // Usuario NO autenticado - mostrar botón de login
+            <div className="space-y-2">
+              <p className="text-center text-muted-foreground">
+                Inicia sesión para unirte a esta colecta
+              </p>
+              <Button 
+                onClick={handleJoinCollection}
+                className="w-full"
+              >
+                Iniciar sesión y unirme
+              </Button>
+            </div>
+          ) : isOwner ? (
+            // Usuario ES el owner
             <div className="space-y-2">
               <p className="text-center text-muted-foreground">
                 Esta es tu colecta
               </p>
               <Button 
-                onClick={handleViewCollection}
+                onClick={() => navigate(`/collections/${collection.id}`)}
                 className="w-full"
               >
-                Ver colecta
+                Ver mi colecta
               </Button>
             </div>
           ) : (
+            // Usuario autenticado pero NO es owner
             <div className="space-y-2">
               <p className="text-center text-muted-foreground">
                 ¿Te gustaría unirte a esta colecta?
@@ -127,13 +142,6 @@ export default function JoinCollection() {
                 disabled={joinMutation.isPending}
               >
                 {joinMutation.isPending ? "Uniéndose..." : "Unirse a la colecta"}
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={handleViewCollection}
-                className="w-full"
-              >
-                Solo ver colecta
               </Button>
             </div>
           )}

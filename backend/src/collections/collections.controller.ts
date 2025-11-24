@@ -17,7 +17,7 @@ import { CollectionsService } from './collections.service';
 import { CreateCollectionDto, UpdateCollectionDto, GetPublicCollectionsDto } from './dto';
 import { CollectionStatus } from '@prisma/client';
 import { PublicCollectionsResponse } from '../types';
-import { Public } from '../auth/decorators/public.decorator';
+import { Public, OptionalAuth } from '../auth/decorators';
 import { AuthenticatedRequest } from '../auth/types';
 
 @ApiTags('collections')
@@ -41,16 +41,16 @@ export class CollectionsController {
   async create(@Request() req: AuthenticatedRequest, @Body() dto: CreateCollectionDto) {
     // DEBUG: Log para verificar req.user
     console.log('🔍 [CollectionsController.create] req.user:', req.user);
-    console.log('🔍 [CollectionsController.create] req.user.id:', req.user.id);
-    if (!req.user.id) {
+    console.log('🔍 [CollectionsController.create] req.user.id:', req.user?.id);
+    if (!req.user?.id) {
       throw new BadRequestException('User ID is required');
     }
-    return this.collectionsService.create(req.user.id, dto);
+    return this.collectionsService.create(req.user!.id, dto);
   }
 
   @Get('my')
   async findUserCollections(@Request() req: AuthenticatedRequest) {
-    return this.collectionsService.findUserCollections(req.user.id);
+    return this.collectionsService.findUserCollections(req.user!.id);
   }
 
   @Get()
@@ -74,38 +74,56 @@ export class CollectionsController {
     // Si status es 'all' o undefined, no agregamos filtro de status para mostrar todas
 
     console.log('🔍 [CollectionsController.list] Service filters:', serviceFilters);
-    return this.collectionsService.findUserCollections(req.user.id, serviceFilters);
+    return this.collectionsService.findUserCollections(req.user!.id, serviceFilters);
   }
 
+  @OptionalAuth()
+  @Get(':id/preview')
+  @ApiOperation({ summary: 'Ver preview de colecta para compartir (permite ver colectas privadas vía link)' })
+  async getPreview(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    // Endpoint público para compartir - permite ver cualquier colecta
+    const userId = req.user?.id;
+    return this.collectionsService.findOneForPreview(id, userId);
+  }
+
+  @OptionalAuth()
   @Get(':id')
-  @ApiOperation({ summary: 'Ver detalle de colecta' })
+  @ApiOperation({ summary: 'Ver detalle de colecta (público para colectas públicas)' })
   async findOne(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
-    return this.collectionsService.findOne(id, req.user.id);
+    // Si hay usuario autenticado, usar su ID, sino undefined
+    const userId = req.user?.id;
+    return this.collectionsService.findOne(id, userId);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualizar colecta' })
   async update(@Param('id') id: string, @Request() req: AuthenticatedRequest, @Body() dto: UpdateCollectionDto) {
-    return this.collectionsService.update(id, req.user.id, dto);
+    return this.collectionsService.update(id, req.user!.id, dto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Eliminar colecta' })
   async delete(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
-    await this.collectionsService.delete(id, req.user.id);
+    await this.collectionsService.delete(id, req.user!.id);
   }
 
   @Post(':id/members/join')
   @ApiOperation({ summary: 'Unirse a colección pública' })
   async joinCollection(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
-    return this.collectionsService.joinCollection(id, req.user.id);
+    return this.collectionsService.joinCollection(id, req.user!.id, false);
+  }
+
+  @Post(':id/members/join-via-link')
+  @ApiOperation({ summary: 'Unirse a colección desde link compartido (permite privadas)' })
+  async joinViaSharedLink(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
+    return this.collectionsService.joinCollection(id, req.user!.id, true);
   }
 
   @Post(':id/members/leave')
   @ApiOperation({ summary: 'Salirse de la colección' })
   async leaveCollection(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
-    await this.collectionsService.leaveCollection(id, req.user.id);
+    await this.collectionsService.leaveCollection(id, req.user!.id);
     return { message: 'Left collection successfully' };
   }
 }

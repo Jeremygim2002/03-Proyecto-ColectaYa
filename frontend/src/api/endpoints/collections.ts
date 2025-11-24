@@ -32,8 +32,14 @@ export const collectionsApi = {
   },
 
   // Get una colecta única por ID
-  get: (id: string): Promise<Collection> => {
-    return httpClient.get<Collection>(API_ENDPOINTS.COLLECTIONS.GET(id));
+  // Permite requiresAuth: false para acceder a colectas públicas sin autenticación
+  get: (id: string, options?: { requiresAuth?: boolean }): Promise<Collection> => {
+    return httpClient.get<Collection>(API_ENDPOINTS.COLLECTIONS.GET(id), options);
+  },
+
+  // Get preview de colecta para compartir - permite ver colectas privadas vía link
+  getPreview: (id: string): Promise<Collection> => {
+    return httpClient.get<Collection>(API_ENDPOINTS.COLLECTIONS.PREVIEW(id), { requiresAuth: false });
   },
 
   // Create nueva colecta
@@ -61,6 +67,13 @@ export const collectionsApi = {
   join: (id: string): Promise<JoinCollectionResponse> => {
     return httpClient.post<JoinCollectionResponse>(
       API_ENDPOINTS.COLLECTIONS.JOIN(id)
+    );
+  },
+
+  // Unirse desde link compartido (permite colectas privadas)
+  joinViaLink: (id: string): Promise<JoinCollectionResponse> => {
+    return httpClient.post<JoinCollectionResponse>(
+      API_ENDPOINTS.COLLECTIONS.JOIN_VIA_LINK(id)
     );
   },
 

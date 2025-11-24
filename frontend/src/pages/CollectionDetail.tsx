@@ -28,6 +28,10 @@ import { useMembers } from "@/hooks/queries/useMembers";
 import { useCreateWithdrawal } from "@/hooks/queries/useWithdrawals";
 import { useAuthStore } from "@/stores/authStore";
 import { getCollectionMetadata } from "@/lib/utils";
+import { getInitials } from "@/utils/string";
+import { formatRelativeDate } from "@/utils/date";
+import { ListSkeleton } from "@/components/common/skeletons";
+import { EmptyState } from "@/components/common/EmptyState";
 
 export default function CollectionDetail() {
   const { id: collectionId } = useParams();
@@ -113,36 +117,10 @@ export default function CollectionDetail() {
     members.members.some(member => member.userId === user.id && member.acceptedAt) : false;
   const canLeave = isMember && !isOwner;
 
-  // Owner info (temporary until we have user data in collection)
-  const ownerName = user?.name || "Organizador";
-  const ownerAvatar = user?.avatar || "";
+  // Owner info from collection data (usar misma lógica que en pestaña de miembros)
+  const ownerName = collection?.owner?.name || collection?.owner?.email || "Usuario sin nombre";
+  const ownerAvatar = collection?.owner?.avatar || "";
   const memberCount = collection?.contributorsCount || 0;
-
-  const getInitials = (name: string | undefined | null) => {
-    if (!name || typeof name !== 'string') {
-      return "??";
-    }
-    
-    const parts = name.split(" ");
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) return `Hace ${diffMins} min`;
-    if (diffHours < 24) return `Hace ${diffHours}h`;
-    if (diffDays < 7) return `Hace ${diffDays}d`;
-    return date.toLocaleDateString("es-PE", { day: "numeric", month: "short" });
-  };
 
   const handleShare = () => {
     setIsShareModalOpen(true);
@@ -346,22 +324,7 @@ export default function CollectionDetail() {
             {/* Contributions Tab */}
             <TabsContent value="contributions" className="mt-6 space-y-4">
               {isLoadingContributions ? (
-                <div className="space-y-4">
-                  {[1, 2, 3, 4].map((i) => (
-                    <Card key={i} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Skeleton className="h-12 w-12 rounded-full" />
-                          <div className="space-y-2">
-                            <Skeleton className="h-4 w-32" />
-                            <Skeleton className="h-3 w-24" />
-                          </div>
-                        </div>
-                        <Skeleton className="h-6 w-20" />
-                      </div>
-                    </Card>
-                  ))}
-                </div>
+                <ListSkeleton count={4} />
               ) : contributions.length > 0 ? (
                 contributions.map((contribution) => (
                   <Card key={contribution.id} className="p-4 hover-lift transition-smooth">
@@ -373,7 +336,7 @@ export default function CollectionDetail() {
                         </Avatar>
                         <div>
                           <p className="font-semibold">{contribution.userName || "Usuario Anónimo"}</p>
-                          <p className="text-sm text-muted-foreground">{formatDate(contribution.createdAt)}</p>
+                          <p className="text-sm text-muted-foreground">{formatRelativeDate(contribution.createdAt)}</p>
                           {contribution.message && (
                             <p className="text-sm text-muted-foreground mt-1">{contribution.message}</p>
                           )}
@@ -388,10 +351,11 @@ export default function CollectionDetail() {
                   </Card>
                 ))
               ) : (
-                <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border-2 border-dashed border-border p-8 text-center">
-                  <DollarSign className="mb-3 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">No hay aportes registrados aún</p>
-                </div>
+                <EmptyState
+                  icon={<DollarSign className="h-12 w-12" />}
+                  title="No hay aportes registrados"
+                  description="Sé el primero en contribuir a esta colecta"
+                />
               )}
             </TabsContent>
 

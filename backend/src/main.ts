@@ -13,6 +13,8 @@ async function bootstrap() {
   // CORS: allow a whitelist of origins and respond correctly to preflight requests
   const allowedOrigins = [
     process.env.FRONTEND_URL || 'http://localhost:5173',
+    'http://localhost:5173', // ✅ Desarrollo HTTP
+    'https://localhost:5173', // ✅ Desarrollo HTTPS (por si usas basicSsl)
     'https://03-proyecto-colecta-ya.vercel.app',
     'https://portafolio-backend-eryj3.ondigitalocean.app',
   ];

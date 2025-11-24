@@ -13,7 +13,7 @@ export interface SupabaseAuthUser {
 }
 
 export interface AuthenticatedRequest extends Request {
-  user: SupabaseAuthUser;
+  user?: SupabaseAuthUser; // Opcional para rutas con @OptionalAuth()
 }
 
 // RESPUESTAS DE AUTENTICACIÓN
