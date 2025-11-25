@@ -1,7 +1,7 @@
 "use client";
 
 import { useOptimistic, useTransition } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
@@ -34,7 +34,7 @@ interface OptimisticState {
 // Eliminado StepSkeleton - no es necesario para formularios
 
 const STEPS = [
-  { number: 1, label: "Información Básica" },
+  { number: 1, label: "Información" },
   { number: 2, label: "Configuración" },
   { number: 3, label: "Miembros" },
 ];
@@ -183,12 +183,6 @@ export default function CreateCollectionModal({
               "Crear Nueva Colecta"
             )}
           </DialogTitle>
-          <DialogDescription className="text-center text-gray-600">
-            {optimisticState.isSuccess 
-              ? "Tu colecta ha sido creada exitosamente y ya está disponible"
-              : "Configura tu colecta paso a paso para empezar a recaudar fondos"
-            }
-          </DialogDescription>
         </DialogHeader>
 
         {/* Indicador de progreso optimista */}

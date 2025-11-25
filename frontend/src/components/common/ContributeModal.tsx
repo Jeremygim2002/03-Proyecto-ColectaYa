@@ -32,7 +32,7 @@ export function ContributeModal({
   currentAmount,
   goalAmount
 }: ContributeModalProps) {
-  const [amount, setAmount] = useState(suggestedAmount?.toString() || "");
+  const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('paypal');
   const [note, setNote] = useState("");
 
@@ -257,11 +257,6 @@ export function ContributeModal({
                 disabled={isPending}
               />
             </div>
-            {suggestedAmount && (
-              <p className="text-sm text-muted-foreground">
-                Monto sugerido: S/ {suggestedAmount.toFixed(2)}
-              </p>
-            )}
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
                 Recaudado: S/ {currentAmount.toFixed(2)}

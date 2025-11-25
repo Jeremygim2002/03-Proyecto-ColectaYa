@@ -17,6 +17,7 @@ export const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         hero: "bg-gradient-primary text-primary-foreground font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200",
         accent: "bg-accent text-accent-foreground font-semibold hover:bg-accent/90 shadow-md hover:shadow-lg transition-all duration-200",
+        success: "bg-success text-success-foreground font-semibold hover:bg-success/90 shadow-md hover:shadow-lg transition-all duration-200",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

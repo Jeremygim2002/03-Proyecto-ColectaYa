@@ -344,14 +344,14 @@ export class CollectionsService {
       const currentAmount = validContributions.reduce((sum, contrib) => {
         return sum + Number(contrib.amount);
       }, 0);
-      
+
       // Contar miembros: owner siempre cuenta + miembros aceptados que no sean el owner
       const acceptedMembers = collection.members || [];
-      const memberIds = new Set(acceptedMembers.map(m => m.userId));
+      const memberIds = new Set(acceptedMembers.map((m) => m.userId));
       // Asegurar que el owner siempre se cuente
       memberIds.add(collection.ownerId);
       const memberCount = memberIds.size;
-      
+
       const progress = collection.goalAmount ? (currentAmount / Number(collection.goalAmount)) * 100 : 0;
 
       return {
@@ -463,14 +463,14 @@ export class CollectionsService {
         const currentAmount = validContributions.reduce((sum, contrib) => {
           return sum + Number(contrib.amount);
         }, 0);
-        
+
         // Contar miembros: owner siempre cuenta + miembros aceptados que no sean el owner
         const acceptedMembers = collection.members || [];
-        const memberIds = new Set(acceptedMembers.map(m => m.userId));
+        const memberIds = new Set(acceptedMembers.map((m) => m.userId));
         // Asegurar que el owner siempre se cuente
         memberIds.add(collection.ownerId);
         const memberCount = memberIds.size;
-        
+
         const progress = collection.goalAmount ? (currentAmount / Number(collection.goalAmount)) * 100 : 0;
 
         return {

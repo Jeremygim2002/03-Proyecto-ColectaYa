@@ -22,7 +22,7 @@ export function BasicInfoStep({ formData, onUpdate }: BasicInfoStepProps) {
         </Label>
         <Input
           id="title"
-          placeholder="Ej: Viaje a Cusco 2025"
+          placeholder="Viaje a Cusco 2025..."
           value={formData.title}
           onChange={(e) => onUpdate("title", e.target.value)}
           maxLength={100}

@@ -14,14 +14,14 @@ interface StepIndicatorProps {
 export function StepIndicator({ steps, currentStep }: StepIndicatorProps) {
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between max-w-2xl mx-auto">
         {steps.map((step, index) => {
           const isActive = currentStep === step.number;
           const isCompleted = currentStep > step.number;
           const isLast = index === steps.length - 1;
 
           return (
-            <div key={step.number} className="flex flex-1 items-center">
+            <div key={step.number} className="flex items-center">
               {/* Step Circle */}
               <div className="flex flex-col items-center">
                 <div

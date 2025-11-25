@@ -290,9 +290,9 @@ export default function CollectionDetail() {
             {/* Action Buttons */}
             <div className="mt-4 flex flex-col gap-3 sm:flex-row">
               <Button 
-                variant="accent" 
+                variant="success" 
                 size="lg" 
-                className="flex-1 sm:flex-initial text-base py-3 sm:py-3 sm:text-sm"
+                className="flex-1 sm:flex-initial text-base py-3 sm:py-3 sm:text-sm "
                 onClick={() => setIsContributeModalOpen(true)}
               >
                 Aportar ahora
@@ -409,7 +409,7 @@ export default function CollectionDetail() {
               {isOwner && (
                 <div className="mb-4">
                   <Button 
-                    variant="accent" 
+                    variant="success" 
                     className="w-full md:w-auto"
                     onClick={handleWithdrawClick}
                   >
