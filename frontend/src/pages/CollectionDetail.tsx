@@ -10,16 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
 import CreateCollectionModal from "@/components/common/CreateCollectionModal";
 import { ContributeModal } from "@/components/common/ContributeModal";
 import { ShareModal } from "@/components/common/ShareModal";
+import { OptionsModal } from "@/components/common/OptionsModal";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { WithdrawalsList } from "@/components/common/WithdrawalsList";
 import { useCollection, useLeaveCollection } from "@/hooks/queries/useCollections";
@@ -72,6 +66,7 @@ export default function CollectionDetail() {
   const [isContributeModalOpen, setIsContributeModalOpen] = useState(false);
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
 
@@ -255,21 +250,14 @@ export default function CollectionDetail() {
                 <Button variant="outline" size="icon" onClick={handleShare} aria-label="Compartir">
                   <Share2 className="h-4 w-4" />
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon" aria-label="Más opciones">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem onClick={() => toast.info("Función en desarrollo: Ver estadísticas detalladas de la colecta")}>
-                      📊 Ver estadísticas
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => toast.info("Función en desarrollo: Descargar reporte en PDF")}>
-                      📥 Descargar reporte
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => setIsOptionsModalOpen(true)} 
+                  aria-label="Más opciones"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
@@ -453,6 +441,11 @@ export default function CollectionDetail() {
             onOpenChange={setIsShareModalOpen}
             title={collection.title}
             url={`${window.location.origin}/join/${collection.id}`}
+          />
+
+          <OptionsModal
+            open={isOptionsModalOpen}
+            onOpenChange={setIsOptionsModalOpen}
           />
 
           <ConfirmDialog

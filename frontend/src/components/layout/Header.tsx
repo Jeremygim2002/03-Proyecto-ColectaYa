@@ -26,6 +26,7 @@ import { useLogout } from "@/hooks/queries/useAuth";
 import { useInvitations } from "@/hooks/queries/useInvitations";
 import { useUserInfo } from "@/hooks/useUserInfo";
 import type { Invitation } from "@/types/invitation";
+import logo from "@/assets/logo.png";
 
 export function Header() {
   const location = useLocation();
@@ -63,8 +64,12 @@ export function Header() {
           to="/dashboard"
           className="flex items-center space-x-2 transition-all duration-300 hover:opacity-80"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary shadow-md">
-            <span className="text-xl font-bold text-primary-foreground">C</span>
+          <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl overflow-hidden shadow-md bg-background">
+            <img 
+              src={logo} 
+              alt="ColectaYa Logo" 
+              className="h-full w-full object-contain"
+            />
           </div>
           <span className="hidden text-xl font-bold text-foreground sm:inline-block">
             Colectaya

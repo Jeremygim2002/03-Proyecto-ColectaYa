@@ -9,7 +9,10 @@ import {
     useFacebookAuth
 } from '@/hooks/queries/useAuth';
 import { toast } from 'sonner';
-import { Mail, Chrome, Facebook } from 'lucide-react';
+import { Mail } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
+import { FaFacebookF } from 'react-icons/fa';
+import logo from '@/assets/logo.png';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -54,40 +57,55 @@ export default function Login() {
     const isLoading = magicLinkMutation.isPending || googleAuthMutation.isPending || facebookAuthMutation.isPending;
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-            <Card className="w-full max-w-md">
-                <CardHeader className="text-center">
-                    <CardTitle className="text-3xl font-bold text-gray-900">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+            <Card className="w-full max-w-md shadow-xl">
+                <CardHeader className="text-center space-y-4 pb-8">
+                    {/* Logo */}
+                    <div className="flex justify-center">
+                        <div className="flex h-20 w-20 items-center justify-center rounded-2xl overflow-hidden shadow-lg bg-background">
+                            <img 
+                                src={logo} 
+                                alt="ColectaYa Logo" 
+                                className="h-full w-full object-contain"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
                             ColectaYa
-                    </CardTitle>
-                    <CardDescription className="text-gray-600">
-                        Inicia sesión en tu cuenta
-                    </CardDescription>
+                        </CardTitle>
+                        <CardDescription className="text-base mt-2">
+                            Inicia sesión para continuar
+                        </CardDescription>
+                    </div>
                 </CardHeader>
 
                 <CardContent className="space-y-6">
                     {/* Magic Link Form */}
                     <form onSubmit={handleMagicLink} className="space-y-4">
                         <div className="space-y-2">
+                            <label className="text-sm font-medium text-muted-foreground">
+                                Ingresa tu correo
+                            </label>
                             <Input
                                 type="email"
-                                placeholder="xyz@ejemplo.com"
+                                placeholder="tu@correo.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 disabled={isLoading}
-                                className="w-full"
+                                className="w-full h-11"
                                 autoFocus
                             />
                         </div>
                         <Button
                             type="submit"
-                            className="w-full"
+                            className="w-full h-11"
                             variant="hero"
                             disabled={isLoading}
-
                         >
                             <Mail className="w-4 h-4 mr-2" />
-                            {magicLinkMutation.isPending ? 'Enviando...' : 'Continuar con Email'}
+                            {magicLinkMutation.isPending ? 'Enviando enlace...' : 'Enviar enlace de acceso'}
                         </Button>
                     </form>
 
@@ -96,7 +114,7 @@ export default function Login() {
                             <Separator className="w-full" />
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-white px-2 text-gray-500">O continúa con</span>
+                            <span className="bg-card px-3 text-muted-foreground font-medium">O inicia con</span>
                         </div>
                     </div>
 
@@ -105,31 +123,33 @@ export default function Login() {
                         <Button
                             onClick={handleGoogleAuth}
                             variant="outline"
-                            className="w-full"
+                            className="w-full h-11 font-medium hover:bg-muted"
                             disabled={isLoading}
                         >
-                            <Chrome className="w-4 h-4 mr-2" />
+                            <FcGoogle className="w-5 h-5 mr-2" />
                             {googleAuthMutation.isPending ? 'Redirigiendo...' : 'Continuar con Google'}
                         </Button>
 
                         <Button
                             onClick={handleFacebookAuth}
                             variant="outline"
-                            className="w-full"
+                            className="w-full h-11 font-medium hover:bg-muted"
                             disabled={isLoading}
                         >
-                            <Facebook className="w-4 h-4 mr-2" />
+                            <div className="flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-[#1877F2]">
+                                <FaFacebookF className="w-3 h-3 text-white" />
+                            </div>
                             {facebookAuthMutation.isPending ? 'Redirigiendo...' : 'Continuar con Facebook'}
                         </Button>
                     </div>
                 </CardContent>
 
-                <CardFooter className="text-center">
-                    <p className="text-sm text-gray-600">
-                        ¿Primera vez en ColectaYa?{' '}
-                        <span className="text-blue-600">
-                            Usa cualquier método de login
-                        </span>
+                <CardFooter className="flex-col text-center space-y-2 pt-6">
+                    <p className="text-sm text-muted-foreground">
+                        ¿Primera vez aquí? No te preocupes
+                    </p>
+                    <p className="text-xs text-muted-foreground/80">
+                        Elige cualquier método y crearemos tu cuenta automáticamente
                     </p>
                 </CardFooter>
             </Card>
