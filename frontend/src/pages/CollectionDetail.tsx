@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import CreateCollectionModal from "@/components/common/CreateCollectionModal";
 import { ContributeModal } from "@/components/common/ContributeModal";
 import { ShareModal } from "@/components/common/ShareModal";
