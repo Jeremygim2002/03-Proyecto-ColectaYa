@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { CreditCard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
@@ -24,9 +23,9 @@ interface ContributeModalProps {
   goalAmount: number;
 }
 
-export function ContributeModal({ 
-  open, 
-  onOpenChange, 
+export function ContributeModal({
+  open,
+  onOpenChange,
   collectionTitle,
   collectionId,
   suggestedAmount,
@@ -42,10 +41,10 @@ export function ContributeModal({
   const triggerConfetti = () => {
     const duration = 3000;
     const animationEnd = Date.now() + duration;
-    const defaults = { 
-      startVelocity: 30, 
-      spread: 360, 
-      ticks: 60, 
+    const defaults = {
+      startVelocity: 30,
+      spread: 360,
+      ticks: 60,
       zIndex: 1000,
       colors: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7']
     };
@@ -54,7 +53,7 @@ export function ContributeModal({
       return Math.random() * (max - min) + min;
     }
 
-    const interval = setInterval(function() {
+    const interval = setInterval(function () {
       const timeLeft = animationEnd - Date.now();
 
       if (timeLeft <= 0) {
@@ -69,14 +68,14 @@ export function ContributeModal({
         particleCount,
         origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
       });
-      
+
       // Confetti desde la derecha
       confetti({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
       });
-      
+
       // Confetti desde el centro para más efecto
       confetti({
         ...defaults,
@@ -143,7 +142,7 @@ export function ContributeModal({
 
     const contributionAmount = parseFloat(amount);
     const remainingAmount = goalAmount - currentAmount;
-    
+
     // Validar que no supere el 100%
     if (contributionAmount > remainingAmount) {
       const formattedRemaining = remainingAmount.toFixed(2);
@@ -190,10 +189,10 @@ export function ContributeModal({
       }, 1000);
     } catch (error: unknown) {
       console.error("Contribution error:", error);
-      
+
       // Diferentes mensajes según el tipo de error
       const axiosError = error as { response?: { status: number; data?: { message?: string } } };
-      
+
       if (axiosError.response?.status === 400) {
         const errorMsg = axiosError.response?.data?.message || 'El procesamiento del pago falló';
         toast.error('Error en el pago', {
@@ -216,10 +215,10 @@ export function ContributeModal({
           duration: 5000,
         });
       } else {
-        const errorMessage = error instanceof Error 
-          ? error.message 
+        const errorMessage = error instanceof Error
+          ? error.message
           : "Error al procesar el aporte. Intenta nuevamente.";
-        
+
         toast.error(errorMessage, {
           description: 'Si el problema persiste, contacta al soporte.',
           duration: 5000,
@@ -227,12 +226,6 @@ export function ContributeModal({
       }
     }
   };
-
-  const paymentMethods = [
-    { id: "credit_card", name: "Tarjeta de Crédito", icon: "💳" },
-    { id: "debit_card", name: "Tarjeta de Débito", icon: "�" },
-    { id: "paypal", name: "PayPal", icon: "💙" },
-  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -279,28 +272,6 @@ export function ContributeModal({
             </div>
           </div>
 
-          {/* Metodo de pago */}
-          <div className="space-y-3">
-            <Label>Método de pago *</Label>
-            <RadioGroup 
-              value={paymentMethod} 
-              onValueChange={(value) => setPaymentMethod(value as PaymentMethod)} 
-              disabled={isPending}
-            >
-              {paymentMethods.map((method) => (
-                <div 
-                  key={method.id}
-                  className="flex items-center space-x-3 border rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5"
-                >
-                  <RadioGroupItem value={method.id} id={method.id} />
-                  <Label htmlFor={method.id} className="flex items-center gap-2 cursor-pointer flex-1 font-normal">
-                    <span className="text-xl">{method.icon}</span>
-                    <span>{method.name}</span>
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          </div>
 
           {/* NUEVO: Mostrar PayPal Buttons SOLO si método es 'paypal' */}
           {paymentMethod === 'paypal' && parseFloat(amount) > 0 && (

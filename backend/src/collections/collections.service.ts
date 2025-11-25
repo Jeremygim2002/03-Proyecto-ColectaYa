@@ -15,6 +15,11 @@ type CollectionWithIncludesForPublic = Prisma.CollectionGetPayload<{
         avatar: true;
       };
     };
+    members: {
+      select: {
+        userId: true;
+      };
+    };
     contributions: {
       select: {
         amount: true;
@@ -81,6 +86,8 @@ export class CollectionsService {
           select: {
             id: true,
             email: true,
+            name: true,
+            avatar: true,
             roles: true,
           },
         },
@@ -90,6 +97,8 @@ export class CollectionsService {
               select: {
                 id: true,
                 email: true,
+                name: true,
+                avatar: true,
               },
             },
           },
@@ -135,6 +144,8 @@ export class CollectionsService {
           select: {
             id: true,
             email: true,
+            name: true,
+            avatar: true,
             roles: true,
           },
         },
@@ -144,6 +155,8 @@ export class CollectionsService {
               select: {
                 id: true,
                 email: true,
+                name: true,
+                avatar: true,
               },
             },
           },
@@ -306,6 +319,12 @@ export class CollectionsService {
             avatar: true,
           },
         },
+        members: {
+          where: { acceptedAt: { not: null } },
+          select: {
+            userId: true,
+          },
+        },
         contributions: {
           where: { status: 'PAID' },
           select: {
@@ -325,7 +344,14 @@ export class CollectionsService {
       const currentAmount = validContributions.reduce((sum, contrib) => {
         return sum + Number(contrib.amount);
       }, 0);
-      const contributorsCount = new Set(validContributions.map((c) => c.userId)).size;
+      
+      // Contar miembros: owner siempre cuenta + miembros aceptados que no sean el owner
+      const acceptedMembers = collection.members || [];
+      const memberIds = new Set(acceptedMembers.map(m => m.userId));
+      // Asegurar que el owner siempre se cuente
+      memberIds.add(collection.ownerId);
+      const memberCount = memberIds.size;
+      
       const progress = collection.goalAmount ? (currentAmount / Number(collection.goalAmount)) * 100 : 0;
 
       return {
@@ -349,7 +375,7 @@ export class CollectionsService {
           avatar: collection.owner.avatar ?? undefined,
         },
         currentAmount,
-        contributorsCount,
+        contributorsCount: memberCount,
         progress: Math.round(progress * 100) / 100,
       };
     });
@@ -405,6 +431,12 @@ export class CollectionsService {
               avatar: true,
             },
           },
+          members: {
+            where: { acceptedAt: { not: null } },
+            select: {
+              userId: true,
+            },
+          },
           contributions: {
             where: { status: 'PAID' },
             select: {
@@ -431,7 +463,14 @@ export class CollectionsService {
         const currentAmount = validContributions.reduce((sum, contrib) => {
           return sum + Number(contrib.amount);
         }, 0);
-        const contributorsCount = new Set(validContributions.map((c) => c.userId)).size;
+        
+        // Contar miembros: owner siempre cuenta + miembros aceptados que no sean el owner
+        const acceptedMembers = collection.members || [];
+        const memberIds = new Set(acceptedMembers.map(m => m.userId));
+        // Asegurar que el owner siempre se cuente
+        memberIds.add(collection.ownerId);
+        const memberCount = memberIds.size;
+        
         const progress = collection.goalAmount ? (currentAmount / Number(collection.goalAmount)) * 100 : 0;
 
         return {
@@ -455,7 +494,7 @@ export class CollectionsService {
             avatar: collection.owner.avatar ?? undefined,
           },
           currentAmount,
-          contributorsCount,
+          contributorsCount: memberCount,
           progress: Math.round(progress * 100) / 100,
         };
       },

@@ -13,10 +13,10 @@ import { useDebounced } from "@/hooks/useReact19";
 import { getExploreMetadata, prefetchPage } from "@/lib/utils";
 import { mapCollectionStatus } from "@/constants/status";
 
-type FilterType = "all" | "active" | "completed";
+type FilterType = "active" | "completed";
 
 export default function Explore() {
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [filter, setFilter] = useState<FilterType>("active");
   const [searchQuery, setSearchQuery] = useState("");
   
   // React 19: Debounced search with useDeferredValue
@@ -30,9 +30,7 @@ export default function Explore() {
       apiFilters.search = deferredSearch;
     }
     
-    if (filter !== "all") {
-      apiFilters.status = filter;
-    }
+    apiFilters.status = filter;
     
     return Object.keys(apiFilters).length > 0 ? apiFilters : undefined;
   }, [deferredSearch, filter]);
@@ -40,14 +38,22 @@ export default function Explore() {
   // Fetch public collections with TanStack Query
   const { data, isLoading, error } = useExploreCollections(filters);
 
+  // Fetch all collections for stats (without filter)
+  const allFilters = useMemo(() => {
+    return deferredSearch ? { search: deferredSearch } : undefined;
+  }, [deferredSearch]);
+  
+  const { data: allData } = useExploreCollections(allFilters);
+
   // Get collections from API response
   const collections = data?.collections || [];
+  const allCollections = allData?.collections || [];
   
-  // Stats for tabs
+  // Stats from all collections (not filtered by tab)
   const stats = {
-    total: collections.length,
-    active: collections.filter((c) => c.status === "ACTIVE").length,
-    completed: collections.filter((c) => c.status === "COMPLETED").length,
+    total: allCollections.length,
+    active: allCollections.filter((c) => c.status === "ACTIVE").length,
+    completed: allCollections.filter((c) => c.status === "COMPLETED").length,
   };
   
   // Handle prefetch on hover (React 19 pattern)
@@ -74,12 +80,25 @@ export default function Explore() {
             <p className="text-sm md:text-base text-muted-foreground">Descubre vaquitas públicas y únete para contribuir</p>
           </motion.div>
 
+          {/* Search with React 19 deferred value indicator */}
+          <div className="relative mb-6">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar colectas públicas..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 transition-colors duration-200 focus:ring-2 focus:ring-primary/50"
+              aria-label="Buscar colectas"
+            />
+            {isSearchPending && (
+              <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+            )}
+          </div>
+
           {/* Tabs */}
           <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)} className="space-y-6">
             <TabsList className="w-full sm:w-auto">
-              <TabsTrigger value="all">
-                Todas <span className="ml-1 text-xs">({stats.total})</span>
-              </TabsTrigger>
               <TabsTrigger value="active">
                 Activas <span className="ml-1 text-xs">({stats.active})</span>
               </TabsTrigger>
@@ -87,21 +106,6 @@ export default function Explore() {
                 Completadas <span className="ml-1 text-xs">({stats.completed})</span>
               </TabsTrigger>
             </TabsList>
-
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Buscar colectas públicas..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 transition-colors duration-200 focus:ring-2 focus:ring-primary/50"
-              />
-              {isSearchPending && (
-                <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-              )}
-            </div>
 
             <TabsContent value={filter} className="space-y-6">
               {/* Loading State with Skeleton */}
@@ -129,8 +133,8 @@ export default function Explore() {
                         description={collection.description || 'Sin descripción'}
                         imageUrl={collection.imageUrl}
                         ownerId={collection.ownerId}
-                        ownerName="Usuario" // TODO: Agregar nombre de usuario al tipo Collection
-                        ownerAvatar=""
+                        ownerName={collection.owner?.name || "Usuario"}
+                        ownerAvatar={collection.owner?.avatar || ""}
                         progress={collection.currentAmount}
                         goal={collection.goalAmount}
                         status={mapCollectionStatus(collection.status)}

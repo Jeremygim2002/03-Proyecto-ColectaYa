@@ -118,9 +118,13 @@ export default function CollectionDetail() {
   const canLeave = isMember && !isOwner;
 
   // Owner info from collection data (usar misma lógica que en pestaña de miembros)
-  const ownerName = collection?.owner?.name || collection?.owner?.email || "Usuario sin nombre";
+  const ownerName = collection?.owner?.name || "Usuario sin nombre";
   const ownerAvatar = collection?.owner?.avatar || "";
-  const memberCount = collection?.contributorsCount || 0;
+  
+  // Calcular memberCount desde la lista real de miembros aceptados
+  const memberCount = members && 'members' in members 
+    ? members.members.filter(m => m.acceptedAt).length 
+    : collection?.contributorsCount || 0;
 
   const handleShare = () => {
     setIsShareModalOpen(true);
@@ -281,10 +285,6 @@ export default function CollectionDetail() {
                 <span className="text-xl font-semibold text-primary">{percentage}%</span>
               </div>
               <Progress value={percentage} className="h-3" aria-label={`Progreso: ${percentage}%`} />
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>{memberCount} miembros</span>
-                <span>Meta: S/ {collection.goalAmount.toLocaleString("es-PE")}</span>
-              </div>
             </div>
 
             {/* Action Buttons */}
@@ -292,10 +292,9 @@ export default function CollectionDetail() {
               <Button 
                 variant="accent" 
                 size="lg" 
-                className="flex-1 sm:flex-initial"
+                className="flex-1 sm:flex-initial text-base py-3 sm:py-3 sm:text-sm"
                 onClick={() => setIsContributeModalOpen(true)}
               >
-                <DollarSign className="h-4 w-4" />
                 Aportar ahora
               </Button>
               
@@ -303,7 +302,7 @@ export default function CollectionDetail() {
                 <Button 
                   variant="destructive" 
                   size="lg" 
-                  className="flex-1 sm:flex-initial"
+                  className="flex-1 sm:flex-initial text-base py-3 sm:py-3 sm:text-sm"
                   onClick={handleLeaveClick}
                   disabled={leaveMutation.isPending}
                 >
