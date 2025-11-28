@@ -24,20 +24,20 @@ export class MembersController {
     @Param('userId') userId: string,
     @Request() req: AuthenticatedRequest,
   ) {
-    await this.membersService.remove(collectionId, req.user!.id, userId);
+    await this.membersService.remove(collectionId, req.user.id, userId);
   }
 
   @Delete()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Dejar colecta' })
   async leave(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    await this.membersService.leave(collectionId, req.user!.id);
+    await this.membersService.leave(collectionId, req.user.id);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar miembros' })
   async list(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
-    const members = await this.membersService.listMembers(collectionId, req.user!.id);
+    const members = await this.membersService.listMembers(collectionId, req.user.id);
     return {
       members,
       total: members.length,

@@ -55,14 +55,6 @@ export class AuthController {
     return this.supabaseAuth.getGoogleLoginUrl();
   }
 
-  // OAUTH - FACEBOOK
-  @Public()
-  @Get('facebook')
-  @ApiOperation({ summary: 'Obtener URL de login con Facebook' })
-  async facebookLogin() {
-    return this.supabaseAuth.getFacebookLoginUrl();
-  }
-
   // CALLBACK HANDLER (para Magic Link y OAuth)
   @Public()
   @Post('callback')

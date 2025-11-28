@@ -45,7 +45,7 @@ export class CollectionsController {
     if (!req.user?.id) {
       throw new BadRequestException('User ID is required');
     }
-    return this.collectionsService.create(req.user!.id, dto);
+    return this.collectionsService.create(req.user.id, dto);
   }
 
   @Get('my')
@@ -76,8 +76,6 @@ export class CollectionsController {
     console.log('🔍 [CollectionsController.list] Service filters:', serviceFilters);
     return this.collectionsService.findUserCollections(req.user!.id, serviceFilters);
   }
-
-
 
   @OptionalAuth()
   @Get(':id')
