@@ -18,7 +18,7 @@ export const API_ENDPOINTS = {
     LIST: '/collections',
     CREATE: '/collections',
     GET: (id: string) => `/collections/${id}`,
-    PREVIEW: (id: string) => `/collections/${id}/preview`, // Para compartir - permite ver privadas
+    PREVIEW: (id: string) => `/collections/${id}`, // Para compartir - permite ver privadas
     UPDATE: (id: string) => `/collections/${id}`,
     DELETE: (id: string) => `/collections/${id}`,
     PUBLIC: '/collections/public',

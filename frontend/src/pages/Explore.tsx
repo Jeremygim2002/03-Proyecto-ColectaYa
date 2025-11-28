@@ -30,7 +30,8 @@ export default function Explore() {
       apiFilters.search = deferredSearch;
     }
     
-    apiFilters.status = filter;
+    // Convert to uppercase for backend validation
+    apiFilters.status = filter.toUpperCase();
     
     return Object.keys(apiFilters).length > 0 ? apiFilters : undefined;
   }, [deferredSearch, filter]);
@@ -77,7 +78,7 @@ export default function Explore() {
             <h1 className="flex items-center gap-2 text-2xl lg:text-3xl font-bold">
               Explorar Colectas
             </h1>
-            <p className="text-sm md:text-base text-muted-foreground">Descubre vaquitas públicas y únete para contribuir</p>
+            <p className="text-sm md:text-base text-muted-foreground">Descubre colectas públicas y únete para contribuir</p>
           </motion.div>
 
           {/* Search with React 19 deferred value indicator */}

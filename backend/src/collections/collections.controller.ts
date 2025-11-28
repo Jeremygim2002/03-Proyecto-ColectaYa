@@ -77,14 +77,7 @@ export class CollectionsController {
     return this.collectionsService.findUserCollections(req.user!.id, serviceFilters);
   }
 
-  @OptionalAuth()
-  @Get(':id/preview')
-  @ApiOperation({ summary: 'Ver preview de colecta para compartir (permite ver colectas privadas vía link)' })
-  async getPreview(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
-    // Endpoint público para compartir - permite ver cualquier colecta
-    const userId = req.user?.id;
-    return this.collectionsService.findOneForPreview(id, userId);
-  }
+
 
   @OptionalAuth()
   @Get(':id')
