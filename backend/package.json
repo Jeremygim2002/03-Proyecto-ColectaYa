@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prebuild": "node -e \"if (!process.env.DATABASE_URL) { require('fs').writeFileSync('.env', 'DATABASE_URL=postgresql://user:pass@localhost:5432/db'); }\"",
     "build": "prisma generate && nest build",
     "heroku-postbuild": "npm run build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
