@@ -11,7 +11,6 @@ import {
 import { toast } from 'sonner';
 import { Mail } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
-import { FaFacebookF } from 'react-icons/fa';
 import logo from '@/assets/logo.png';
 
 export default function Login() {
@@ -49,10 +48,6 @@ export default function Login() {
         googleAuthMutation.mutate();
     };
 
-    // Manejar Facebook Auth
-    const handleFacebookAuth = () => {
-        facebookAuthMutation.mutate();
-    };
 
     const isLoading = magicLinkMutation.isPending || googleAuthMutation.isPending || facebookAuthMutation.isPending;
 
@@ -128,18 +123,6 @@ export default function Login() {
                         >
                             <FcGoogle className="w-5 h-5 mr-2" />
                             {googleAuthMutation.isPending ? 'Redirigiendo...' : 'Continuar con Google'}
-                        </Button>
-
-                        <Button
-                            onClick={handleFacebookAuth}
-                            variant="outline"
-                            className="w-full h-11 font-medium hover:bg-muted"
-                            disabled={isLoading}
-                        >
-                            <div className="flex items-center justify-center w-5 h-5 mr-2 rounded-full bg-[#1877F2]">
-                                <FaFacebookF className="w-3 h-3 text-white" />
-                            </div>
-                            {facebookAuthMutation.isPending ? 'Redirigiendo...' : 'Continuar con Facebook'}
                         </Button>
                     </div>
                 </CardContent>
