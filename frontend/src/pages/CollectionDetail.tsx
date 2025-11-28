@@ -20,7 +20,7 @@ import { WithdrawalsList } from "@/components/common/WithdrawalsList";
 import { useCollection, useLeaveCollection } from "@/hooks/queries/useCollections";
 import { useContributions } from "@/hooks/queries/useContributions";
 import { useMembers } from "@/hooks/queries/useMembers";
-import { useCreateWithdrawal } from "@/hooks/queries/useWithdrawals";
+import { useCreateWithdrawal, useWithdrawals } from "@/hooks/queries/useWithdrawals";
 import { useAuthStore } from "@/stores/authStore";
 import { getCollectionMetadata } from "@/lib/utils";
 import { getInitials } from "@/utils/string";
@@ -51,6 +51,9 @@ export default function CollectionDetail() {
 
   // Withdrawal mutation
   const withdrawMutation = useCreateWithdrawal(collectionId || "");
+
+  // 🔍 Fetch withdrawals to check if there's already a withdrawal request
+  const { data: withdrawals = [] } = useWithdrawals(collectionId || "");
   
   // DEBUG: Verificar los datos de la colección
   console.log('Collection data:', collection);
@@ -112,6 +115,9 @@ export default function CollectionDetail() {
   const isMember = members && 'members' in members && user ? 
     members.members.some(member => member.userId === user.id && member.acceptedAt) : false;
   const canLeave = isMember && !isOwner;
+
+  // 🔍 Check if there's already a withdrawal request
+  const hasAnyWithdrawal = withdrawals.length > 0;
 
   // Owner info from collection data (usar misma lógica que en pestaña de miembros)
   const ownerName = collection?.owner?.name || "Usuario sin nombre";
@@ -397,14 +403,22 @@ export default function CollectionDetail() {
             <TabsContent value="withdrawals" className="mt-6 space-y-4">
               {isOwner && (
                 <div className="mb-4">
-                  <Button 
-                    variant="success" 
-                    className="w-full md:w-auto"
-                    onClick={handleWithdrawClick}
-                  >
-                    <CreditCard className="h-4 w-4" />
-                    Retirar fondos
-                  </Button>
+                  {hasAnyWithdrawal ? (
+                    <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4">
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                        Ya existe un retiro solicitado para esta colecta. Solo se permite un retiro por colecta.
+                      </p>
+                    </div>
+                  ) : (
+                    <Button 
+                      variant="success" 
+                      className="w-full md:w-auto"
+                      onClick={handleWithdrawClick}
+                    >
+                      <CreditCard className="h-4 w-4" />
+                      Retirar fondos
+                    </Button>
+                  )}
                 </div>
               )}
               <WithdrawalsList collectionId={collectionId || ""} />

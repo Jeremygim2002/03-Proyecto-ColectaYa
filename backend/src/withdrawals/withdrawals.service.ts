@@ -39,6 +39,20 @@ export class WithdrawalsService {
     // Calcular el monto total de retiros ya realizados
     const totalWithdrawals = collection.withdrawals.reduce((sum, w) => sum + Number(w.amount), 0);
 
+    // 🔍 Validación PRINCIPAL: Solo permitir UN retiro por colecta, sin importar el estado
+    const allWithdrawals = await this.prisma.withdrawal.findMany({
+      where: { collectionId },
+    });
+
+    if (allWithdrawals.length > 0) {
+      const existingWithdrawal = allWithdrawals[0];
+      throw new BadRequestException(
+        `Ya existe un retiro solicitado para esta colecta. ` +
+          `Estado: ${existingWithdrawal.status}, Monto: S/ ${Number(existingWithdrawal.amount).toFixed(2)}. ` +
+          `Solo se permite un retiro por colecta.`,
+      );
+    }
+
     // Calcular el monto disponible para retirar
     const availableAmount = totalContributions - totalWithdrawals;
 

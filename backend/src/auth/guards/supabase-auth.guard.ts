@@ -77,13 +77,13 @@ export class SupabaseAuthGuard implements CanActivate {
       return true;
     } catch (error) {
       console.error('Error en SupabaseAuthGuard:', error);
-      
+
       // Si auth es opcional y hay error en validación, permitir acceso sin usuario
       if (isOptionalAuth) {
         request.user = undefined;
         return true;
       }
-      
+
       throw new UnauthorizedException('Token inválido o expirado');
     }
   }

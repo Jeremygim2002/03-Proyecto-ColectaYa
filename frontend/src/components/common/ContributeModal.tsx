@@ -38,6 +38,12 @@ export function ContributeModal({
 
   const { mutateAsync: createContribution, isPending } = useCreateContribution(collectionId);
 
+  // 🔍 Calcular monto disponible y validar en tiempo real
+  const availableAmount = Math.max(0, goalAmount - currentAmount);
+  const contributionAmount = parseFloat(amount) || 0;
+  const isAmountInvalid = contributionAmount > availableAmount || contributionAmount <= 0;
+  const isGoalReached = availableAmount <= 0;
+
   const triggerConfetti = () => {
     const duration = 3000;
     const animationEnd = Date.now() + duration;
@@ -119,7 +125,7 @@ export function ContributeModal({
       });
 
       triggerConfetti();
-      toast.success(`¡Pago de S/ ${parseFloat(amount).toFixed(2)} exitoso! 🎉`);
+      toast.success(`¡Pago de S/ ${parseFloat(amount).toFixed(2)} exitoso!`);
 
       setTimeout(() => {
         setAmount(suggestedAmount?.toString() || "");
@@ -176,7 +182,7 @@ export function ContributeModal({
       triggerConfetti();
 
       // Success message
-      toast.success(`¡Aporte de S/ ${parseFloat(amount).toFixed(2)} registrado exitosamente! 🎉`, {
+      toast.success(`¡Aporte de S/ ${parseFloat(amount).toFixed(2)} registrado exitosamente!`, {
         duration: 4000,
       });
 
@@ -251,29 +257,44 @@ export function ContributeModal({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="pl-10 text-lg"
+                className={`pl-10 text-lg ${
+                  amount && isAmountInvalid ? 'border-red-500 focus-visible:ring-red-500' : ''
+                }`}
                 min="0"
                 step="0.01"
-                disabled={isPending}
+                max={availableAmount}
+                disabled={isPending || isGoalReached}
               />
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
                 Recaudado: S/ {currentAmount.toFixed(2)}
               </span>
-              <span className="text-muted-foreground">
-                Falta: S/ {(goalAmount - currentAmount).toFixed(2)}
+              <span className={availableAmount <= 0 ? 'text-green-600 font-medium' : 'text-muted-foreground'}>
+                Falta: S/ {availableAmount.toFixed(2)}
               </span>
             </div>
+            {/* 🚨 Mensaje de error si el monto excede el disponible */}
+            {amount && contributionAmount > availableAmount && (
+              <p className="text-sm text-red-500 font-medium">
+                El monto excede lo disponible. Máximo: S/ {availableAmount.toFixed(2)}
+              </p>
+            )}
+            {/*  Mensaje si la meta ya se alcanzó */}
+            {isGoalReached && (
+              <p className="text-sm text-green-600 font-medium">
+                 ¡La meta ya fue alcanzada! No se pueden realizar más aportes.
+              </p>
+            )}
           </div>
 
 
-          {/* NUEVO: Mostrar PayPal Buttons SOLO si método es 'paypal' */}
-          {paymentMethod === 'paypal' && parseFloat(amount) > 0 && (
+          {/* NUEVO: Mostrar PayPal Buttons SOLO si método es 'paypal' Y el monto es válido */}
+          {paymentMethod === 'paypal' && contributionAmount > 0 && !isAmountInvalid && !isGoalReached && (
             <div className="pt-4">
               <PayPalButtons
                 style={{ layout: 'vertical' }}
-                disabled={isProcessingPayPal}
+                disabled={isProcessingPayPal || isAmountInvalid}
                 createOrder={createPayPalOrder}
                 onApprove={onPayPalApprove}
                 onError={(err: unknown) => {
@@ -281,6 +302,14 @@ export function ContributeModal({
                   toast.error('Error en PayPal. Intenta de nuevo.');
                 }}
               />
+            </div>
+          )}
+          {/* Mensaje informativo si no se muestran los botones de PayPal */}
+          {paymentMethod === 'paypal' && amount && isAmountInvalid && !isGoalReached && (
+            <div className="pt-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                Ingresa un monto válido para continuar con PayPal
+              </p>
             </div>
           )}
         </div>
