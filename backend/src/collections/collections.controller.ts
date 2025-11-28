@@ -81,11 +81,12 @@ export class CollectionsController {
 
   @OptionalAuth()
   @Get(':id')
-  @ApiOperation({ summary: 'Ver detalle de colecta (público para colectas públicas)' })
+  @ApiOperation({ summary: 'Ver detalle de colecta (permite preview para links compartidos)' })
   async findOne(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     // Si hay usuario autenticado, usar su ID, sino undefined
     const userId = req.user?.id;
-    return this.collectionsService.findOne(id, userId);
+    // Usar findOneForPreview que permite ver cualquier colecta vía link compartido
+    return this.collectionsService.findOneForPreview(id, userId);
   }
 
   @Patch(':id')

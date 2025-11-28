@@ -44,11 +44,10 @@ export class PayPalService {
     this.apiUrl = this.config.get<string>('PAYPAL_API_URL', 'https://api-m.sandbox.paypal.com');
 
     if (!this.clientId || !this.secret) {
-      this.logger.error('PayPal credentials not configured');
-      throw new Error('PayPal credentials missing in environment variables');
+      this.logger.warn('⚠️ PayPal credentials not configured - PayPal functionality will be disabled');
+    } else {
+      this.logger.log(`✅ PayPal service initialized with API: ${this.apiUrl}`);
     }
-
-    this.logger.log(`PayPal service initialized with API: ${this.apiUrl}`);
   }
 
   /**
@@ -56,6 +55,12 @@ export class PayPalService {
    * Cachea el token hasta que expire para reducir llamadas a la API.
    */
   private async getAccessToken(): Promise<string> {
+    // Validar que las credenciales estén configuradas
+    if (!this.clientId || !this.secret) {
+      this.logger.error('PayPal credentials not configured');
+      throw new BadRequestException('PayPal is not configured on this server. Please contact support.');
+    }
+
     // Retornar token cacheado si aún es válido
     if (this.cachedToken && Date.now() < this.tokenExpiry) {
       return this.cachedToken;
