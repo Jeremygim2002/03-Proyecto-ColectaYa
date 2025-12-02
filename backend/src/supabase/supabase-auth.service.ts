@@ -172,7 +172,6 @@ export class SupabaseAuthService {
         },
       });
     } catch (error) {
-      console.error('Error syncing user with Prisma:', error);
       throw new BadRequestException('Error al sincronizar usuario con la base de datos');
     }
   }
@@ -186,7 +185,7 @@ export class SupabaseAuthService {
         },
       });
     } catch (error) {
-      console.error('Error updating last login:', error);
+      // Silent fail - not critical
     }
   }
 

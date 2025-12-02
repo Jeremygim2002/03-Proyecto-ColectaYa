@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { useInvitations, useRespondInvitation } from "@/hooks/queries";
 
 export default function Invitations() {
-  // Fetch invitations from API
   const { data: invitations = [], isLoading } = useInvitations();
   const respondMutation = useRespondInvitation();
 
@@ -34,7 +33,6 @@ export default function Invitations() {
 
   return (
     <div className="container mx-auto max-w-4xl px-4 md:px-6 py-6 md:py-8">
-      {/* Header */}
       <div className="mb-6 md:mb-8 space-y-2 animate-fade-in">
         <h1 className="text-2xl lg:text-3xl font-bold">Invitaciones</h1>
         <p className="text-sm md:text-base text-muted-foreground">
@@ -46,7 +44,6 @@ export default function Invitations() {
         </p>
       </div>
 
-      {/* Invitations List */}
       <div className="space-y-4 md:space-y-6">
             {isLoading ? (
               // Skeleton Loading - Improved Visibility

@@ -1,7 +1,6 @@
 import { ContributionStatus } from '@prisma/client';
 import { BasicUser } from './user.types';
 
-// Contribución con información del usuario
 export interface ContributionWithUser {
   id: string;
   amount: number;
@@ -18,7 +17,6 @@ export interface ContributionWithUser {
   };
 }
 
-//  Contribución básica para listas
 export interface BasicContribution {
   id: string;
   amount: number;
@@ -29,7 +27,6 @@ export interface BasicContribution {
   userId: string;
 }
 
-//  Estadísticas de contribuciones
 export interface ContributionStats {
   total: number;
   totalAmount: number;
@@ -38,7 +35,6 @@ export interface ContributionStats {
   failedContributions: number;
 }
 
-// Respuesta de contribuciones del usuario
 export interface UserContributionsResponse {
   contributions: ContributionWithUser[];
   stats: ContributionStats;

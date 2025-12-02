@@ -75,9 +75,7 @@ export class SupabaseAuthGuard implements CanActivate {
       };
 
       return true;
-    } catch (error) {
-      console.error('Error en SupabaseAuthGuard:', error);
-
+    } catch {
       // Si auth es opcional y hay error en validación, permitir acceso sin usuario
       if (isOptionalAuth) {
         request.user = undefined;

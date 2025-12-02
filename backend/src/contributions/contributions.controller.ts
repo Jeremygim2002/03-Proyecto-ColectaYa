@@ -19,16 +19,15 @@ export class ContributionsController {
   ) {
     const contribution = await this.contributionsService.contribute(collectionId, req.user!.id, dto.amount);
 
-    // Mapear datos de Prisma al formato esperado por el frontend
     return {
       id: contribution.id,
       collectionId: contribution.collectionId,
       userId: contribution.userId,
       userName: contribution.user?.name || 'Usuario Anónimo',
-      userAvatar: null, // El campo avatar no existe en User
+      userAvatar: null,
       amount: Number(contribution.amount),
-      message: null, // El campo message no existe en Contribution
-      isAnonymous: false, // El campo isAnonymous no existe en Contribution
+      message: null,
+      isAnonymous: false,
       createdAt: contribution.createdAt.toISOString(),
     };
   }
@@ -38,16 +37,15 @@ export class ContributionsController {
   async list(@Param('collectionId') collectionId: string, @Request() req: AuthenticatedRequest) {
     const contributions = await this.contributionsService.listContributions(collectionId, req.user!.id);
 
-    // Mapear datos de Prisma al formato esperado por el frontend
     return contributions.map((contribution) => ({
       id: contribution.id,
       collectionId: contribution.collectionId,
       userId: contribution.userId,
       userName: contribution.user?.name || 'Usuario Anónimo',
-      userAvatar: null, // El campo avatar no existe en User
+      userAvatar: null,
       amount: Number(contribution.amount),
-      message: null, // El campo message no existe en Contribution
-      isAnonymous: false, // El campo isAnonymous no existe en Contribution
+      message: null,
+      isAnonymous: false,
       createdAt: contribution.createdAt.toISOString(),
     }));
   }

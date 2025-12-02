@@ -18,14 +18,12 @@ export interface CollectionWithStats {
 
   owner: BasicUser;
 
-  // Estadísticas calculadas
   currentAmount: number;
   contributorsCount: number;
-  progress: number; // Porcentaje de progreso
+  progress: number;
 }
 
 export interface CollectionWithDetails extends CollectionWithStats {
-  // Miembros y contribuciones para vista detallada
   members: Array<{
     id: string;
     user: BasicUser;
@@ -44,7 +42,6 @@ export interface CollectionWithDetails extends CollectionWithStats {
   }>;
 }
 
-// Respuesta de colectas públicas con paginación
 export interface PublicCollectionsResponse {
   collections: CollectionWithStats[];
   total: number;
@@ -53,14 +50,12 @@ export interface PublicCollectionsResponse {
   hasNextPage: boolean;
 }
 
-// Filtros para colectas públicas
 export enum PublicCollectionFilter {
   ACTIVE = 'ACTIVE',
   COMPLETED = 'COMPLETED',
   TODOS = 'TODOS',
 }
 
-// Colección básica para listas
 export interface BasicCollection {
   id: string;
   title: string;
@@ -77,7 +72,6 @@ export interface BasicCollection {
   };
 }
 
-// Estadísticas de una colección
 export interface CollectionStats {
   id: string;
   collectionId: string;
@@ -88,13 +82,11 @@ export interface CollectionStats {
   lastUpdated: Date;
 }
 
-// Respuesta de creación/actualización de colección
 export interface CollectionResponse {
   collection: CollectionWithStats;
   message: string;
 }
 
-// Dashboard de colecciones del usuario
 export interface UserCollectionsDashboard {
   owned: CollectionWithStats[];
   participating: CollectionWithStats[];

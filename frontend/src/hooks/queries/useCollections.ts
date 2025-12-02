@@ -9,9 +9,6 @@ import type {
   UpdateCollectionData,
 } from '@/types';
 
-
-//  Hook para obtener las colectas del usuario con filtros
-//  Uses TanStack Query para almacenamiento en caché y recuperación
 export function useCollections(filters?: CollectionFilters) {
   return useQuery({
     queryKey: queryKeys.collections.list(filters as Record<string, unknown>),
@@ -21,8 +18,6 @@ export function useCollections(filters?: CollectionFilters) {
   });
 }
 
-
-//  Hook para obtener las colectas públicas para la página de exploración
 export function useExploreCollections(filters?: CollectionFilters) {
   return useQuery({
     queryKey: queryKeys.collections.explore(filters as Record<string, unknown>),
@@ -31,11 +26,8 @@ export function useExploreCollections(filters?: CollectionFilters) {
   });
 }
 
-
-// Hook para obtener una colección individual por ID
-// Si requireAuth es false, la petición no incluirá el token de autenticación
 export function useCollection(id: string, options?: { requireAuth?: boolean }) {
-  const requireAuth = options?.requireAuth !== false; // Por defecto requiere auth
+  const requireAuth = options?.requireAuth !== false;
   
   return useQuery({
     queryKey: queryKeys.collections.detail(id),
@@ -45,8 +37,6 @@ export function useCollection(id: string, options?: { requireAuth?: boolean }) {
   });
 }
 
-// Hook para obtener preview de colecta (para compartir link)
-// Permite ver colectas privadas vía link de compartir
 export function useCollectionPreview(id: string) {
   return useQuery({
     queryKey: ['collections', 'preview', id],
@@ -56,9 +46,6 @@ export function useCollectionPreview(id: string) {
   });
 }
 
-
-//  Hook para crear una nueva colecta
-//  Invalida automáticamente la lista de colectas
 export function useCreateCollection() {
   const queryClient = useQueryClient();
 
@@ -78,8 +65,6 @@ export function useCreateCollection() {
   });
 }
 
-
-//  Hook par aa actualizar una colecta
 export function useUpdateCollection() {
   const queryClient = useQueryClient();
 
@@ -124,9 +109,6 @@ export function useUpdateCollection() {
   });
 }
 
-
-//  Hook to delete a collection
-//  Remover de la cache y actualizar la lista
 export function useDeleteCollection() {
   const queryClient = useQueryClient();
 
@@ -145,7 +127,6 @@ export function useDeleteCollection() {
   });
 }
 
-// Hook to join a collection
 export function useJoinCollection() {
   const queryClient = useQueryClient();
 
@@ -166,7 +147,6 @@ export function useJoinCollection() {
   });
 }
 
-// Hook to join a collection via shared link (allows private collections)
 export function useJoinCollectionViaLink() {
   const queryClient = useQueryClient();
 

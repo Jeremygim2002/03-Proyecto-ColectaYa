@@ -19,10 +19,8 @@ export default function Explore() {
   const [filter, setFilter] = useState<FilterType>("active");
   const [searchQuery, setSearchQuery] = useState("");
   
-  // React 19: Debounced search with useDeferredValue
   const { deferredValue: deferredSearch, isPending: isSearchPending } = useDebounced(searchQuery, 300);
   
-  // Build filters for API
   const filters = useMemo(() => {
     const apiFilters: Record<string, string> = {};
     
@@ -30,34 +28,28 @@ export default function Explore() {
       apiFilters.search = deferredSearch;
     }
     
-    // Convert to uppercase for backend validation
     apiFilters.status = filter.toUpperCase();
     
     return Object.keys(apiFilters).length > 0 ? apiFilters : undefined;
   }, [deferredSearch, filter]);
   
-  // Fetch public collections with TanStack Query
   const { data, isLoading, error } = useExploreCollections(filters);
 
-  // Fetch all collections for stats (without filter)
   const allFilters = useMemo(() => {
     return deferredSearch ? { search: deferredSearch } : undefined;
   }, [deferredSearch]);
   
   const { data: allData } = useExploreCollections(allFilters);
 
-  // Get collections from API response
   const collections = data?.collections || [];
   const allCollections = allData?.collections || [];
   
-  // Stats from all collections (not filtered by tab)
   const stats = {
     total: allCollections.length,
     active: allCollections.filter((c) => c.status === "ACTIVE").length,
     completed: allCollections.filter((c) => c.status === "COMPLETED").length,
   };
   
-  // Handle prefetch on hover (React 19 pattern)
   const handleCardHover = (collectionId: string) => {
     prefetchPage(`/collection/${collectionId}`);
   };

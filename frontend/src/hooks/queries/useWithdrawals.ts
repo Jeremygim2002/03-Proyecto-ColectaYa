@@ -3,8 +3,6 @@ import { withdrawalsApi } from '@/api/endpoints';
 import { queryKeys } from '@/constants';
 import { toast } from 'sonner';
 
-
-//  Hook para obtener todos los retiros de una colecta
 export function useWithdrawals(collectionId: string) {
   return useQuery({
     queryKey: queryKeys.withdrawals.list(collectionId),
@@ -14,8 +12,6 @@ export function useWithdrawals(collectionId: string) {
   });
 }
 
-
-//  Hook para solicitar un retiro total de una colecta
 export function useCreateWithdrawal(collectionId: string) {
   const queryClient = useQueryClient();
 

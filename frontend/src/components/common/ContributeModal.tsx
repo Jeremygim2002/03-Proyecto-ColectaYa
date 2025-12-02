@@ -38,7 +38,6 @@ export function ContributeModal({
 
   const { mutateAsync: createContribution, isPending } = useCreateContribution(collectionId);
 
-  // 🔍 Calcular monto disponible y validar en tiempo real
   const availableAmount = Math.max(0, goalAmount - currentAmount);
   const contributionAmount = parseFloat(amount) || 0;
   const isAmountInvalid = contributionAmount > availableAmount || contributionAmount <= 0;
@@ -68,21 +67,18 @@ export function ContributeModal({
 
       const particleCount = 50 * (timeLeft / duration);
 
-      // Confetti desde la izquierda
       confetti({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
       });
 
-      // Confetti desde la derecha
       confetti({
         ...defaults,
         particleCount,
         origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
       });
 
-      // Confetti desde el centro para más efecto
       confetti({
         ...defaults,
         particleCount: particleCount / 2,
@@ -91,10 +87,8 @@ export function ContributeModal({
     }, 250);
   };
 
-  // Estado para PayPal
   const [isProcessingPayPal, setIsProcessingPayPal] = useState(false);
 
-  // NUEVO: Callbacks para PayPal
   const createPayPalOrder = async () => {
     try {
       const response = await httpClient.post<{ id: string }>(`/collections/${collectionId}/paypal/create-order`, {
@@ -110,12 +104,10 @@ export function ContributeModal({
   const onPayPalApprove = async (data: { orderID: string }) => {
     setIsProcessingPayPal(true);
     try {
-      // Capturar pago en backend
       await httpClient.post(`/collections/${collectionId}/paypal/capture-order`, {
         orderId: data.orderID,
       });
 
-      // Registrar contribución
       await createContribution({
         collectionId,
         amount: parseFloat(amount),
@@ -149,7 +141,6 @@ export function ContributeModal({
     const contributionAmount = parseFloat(amount);
     const remainingAmount = goalAmount - currentAmount;
 
-    // Validar que no supere el 100%
     if (contributionAmount > remainingAmount) {
       const formattedRemaining = remainingAmount.toFixed(2);
       toast.error("No puedes agregar un monto que supere el 100%", {
@@ -159,7 +150,6 @@ export function ContributeModal({
       return;
     }
 
-    // Validar que no sea exactamente 0 lo que falta
     if (remainingAmount <= 0) {
       toast.error("Esta colecta ya ha alcanzado su meta", {
         description: "No se pueden agregar más contribuciones.",
@@ -169,7 +159,6 @@ export function ContributeModal({
     }
 
     try {
-      // Solo enviamos el amount, que es lo que el backend espera
       await createContribution({
         collectionId,
         amount: parseFloat(amount),
@@ -178,15 +167,12 @@ export function ContributeModal({
         paymentMethod,
       });
 
-      // Trigger confetti effect
       triggerConfetti();
 
-      // Success message
       toast.success(`¡Aporte de S/ ${parseFloat(amount).toFixed(2)} registrado exitosamente!`, {
         duration: 4000,
       });
 
-      // Reset form and close modal after animation
       setTimeout(() => {
         setAmount(suggestedAmount?.toString() || "");
         setNote("");
@@ -194,9 +180,6 @@ export function ContributeModal({
         onOpenChange(false);
       }, 1000);
     } catch (error: unknown) {
-      console.error("Contribution error:", error);
-
-      // Diferentes mensajes según el tipo de error
       const axiosError = error as { response?: { status: number; data?: { message?: string } } };
 
       if (axiosError.response?.status === 400) {
@@ -298,7 +281,6 @@ export function ContributeModal({
                 createOrder={createPayPalOrder}
                 onApprove={onPayPalApprove}
                 onError={(err: unknown) => {
-                  console.error('PayPal error:', err);
                   toast.error('Error en PayPal. Intenta de nuevo.');
                 }}
               />

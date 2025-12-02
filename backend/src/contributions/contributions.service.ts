@@ -63,14 +63,6 @@ export class ContributionsService {
       },
     });
 
-    // DEBUG: Verificar los datos del usuario
-    console.log('DEBUG - User data in contribution:', {
-      userId: contribution.userId,
-      userName: contribution.user?.name,
-      userAvatar: contribution.user?.avatar,
-      userEmail: contribution.user?.email,
-    });
-
     if (!paymentSuccess) {
       throw new BadRequestException('Payment failed - please try again');
     }

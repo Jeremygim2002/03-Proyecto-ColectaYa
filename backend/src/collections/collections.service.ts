@@ -58,8 +58,6 @@ export class CollectionsService {
 
       return newCollection;
     } catch (err: unknown) {
-      // Log detallado para diagnóstico en desarrollo
-      console.error('[CollectionsService.create] Prisma error:', err);
       // Prisma errores comunes: P2002 unique, P2003 FK, etc.
       const code =
         typeof err === 'object' && err && 'code' in err
@@ -197,14 +195,6 @@ export class CollectionsService {
 
     // Calcular número único de contribuyentes
     const uniqueContributors = new Set(collection.contributions.map((c) => c.userId).filter(Boolean)).size;
-
-    console.log('DEBUG - Collection calculations:', {
-      totalPaid,
-      goalAmount,
-      progress,
-      contributorsCount: uniqueContributors,
-      contributionsCount: collection.contributions.length,
-    });
 
     return {
       ...collection,

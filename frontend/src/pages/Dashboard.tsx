@@ -20,16 +20,13 @@ export default function Dashboard() {
   const [filter, setFilter] = useState<FilterType>("active");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // React 19: Debounced search for non-blocking UI
   const { deferredValue: deferredSearch, isPending: isSearchPending } = useDebounced(searchQuery, 300);
 
-  // TanStack Query: Fetch collections with filters
   const { data: collectionsData, isLoading, isError } = useCollections({
     status: filter as CollectionStatus,
     search: deferredSearch,
   });
 
-  // Fetch all collections for stats (without filter)
   const { data: allCollectionsData } = useCollections({
     search: deferredSearch,
   });
@@ -37,7 +34,6 @@ export default function Dashboard() {
   const collections = collectionsData?.collections || [];
   const allCollections = allCollectionsData?.collections || [];
 
-  // Stats from all collections (not filtered by tab)
   const stats = {
     total: allCollections.length,
     active: allCollections.filter((c) => c.status === "ACTIVE").length,

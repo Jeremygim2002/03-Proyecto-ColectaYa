@@ -7,8 +7,6 @@ import type {
   CreateInvitationData,
 } from '@/types';
 
-
-//  Hook para obtener las invitaciones del usuario
 export function useInvitations() {
   return useQuery({
     queryKey: queryKeys.invitations.list(),
@@ -17,7 +15,6 @@ export function useInvitations() {
   });
 }
 
-// Hook para crear una nueva invitación
 export function useCreateInvitation() {
   const queryClient = useQueryClient();
 
@@ -25,7 +22,6 @@ export function useCreateInvitation() {
     mutationKey: ['invitations', 'create'],
     mutationFn: (data: CreateInvitationData) => invitationsApi.create(data),
     onSuccess: () => {
-      // Invalidate invitations list
       queryClient.invalidateQueries({ 
         queryKey: queryKeys.invitations.lists() 
       });
@@ -33,8 +29,6 @@ export function useCreateInvitation() {
   });
 }
 
-
-//  Hook para responder a una invitación (aceptar/declinar)
 export function useRespondInvitation() {
   const queryClient = useQueryClient();
 
@@ -76,7 +70,6 @@ export function useRespondInvitation() {
       });
       
       if (accepted) {
-        // Invalidar collections y members cuando se acepta una invitación
         queryClient.invalidateQueries({ 
           queryKey: queryKeys.collections.lists() 
         });

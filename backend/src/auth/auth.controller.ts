@@ -17,7 +17,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cerrar sesión' })
   async logout() {
-    return await this.supabaseAuth.signOut(); // Espera a que se complete
+    return await this.supabaseAuth.signOut();
   }
 
   // REFRESH TOKEN

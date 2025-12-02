@@ -12,10 +12,9 @@ import {
   Query,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { CollectionsService } from './collections.service';
 import { CreateCollectionDto, UpdateCollectionDto, GetPublicCollectionsDto } from './dto';
-import { CollectionStatus } from '@prisma/client';
 import { PublicCollectionsResponse } from '../types';
 import { Public, OptionalAuth } from '../auth/decorators';
 import { AuthenticatedRequest } from '../auth/types';
@@ -28,20 +27,14 @@ export class CollectionsController {
 
   @Public()
   @Get('public')
-  @ApiOperation({
-    summary: 'Listar colectas públicas',
-    description: 'Obtiene colectas públicas con filtros para la página Explore. No requiere autenticación.',
-  })
+  @ApiOperation({ summary: 'Obtener colectas públicas' })
   async findPublic(@Query() filters: GetPublicCollectionsDto): Promise<PublicCollectionsResponse> {
     return await this.collectionsService.findPublicCollections(filters);
   }
 
   @Post()
-  @ApiOperation({ summary: 'Crear colecta' })
+  @ApiOperation({ summary: 'Crear nueva colecta' })
   async create(@Request() req: AuthenticatedRequest, @Body() dto: CreateCollectionDto) {
-    // DEBUG: Log para verificar req.user
-    console.log('🔍 [CollectionsController.create] req.user:', req.user);
-    console.log('🔍 [CollectionsController.create] req.user.id:', req.user?.id);
     if (!req.user?.id) {
       throw new BadRequestException('User ID is required');
     }
@@ -49,37 +42,20 @@ export class CollectionsController {
   }
 
   @Get('my')
+  @ApiOperation({ summary: 'Obtener mis colectas (propias y participando)' })
   async findUserCollections(@Request() req: AuthenticatedRequest) {
     return this.collectionsService.findUserCollections(req.user!.id);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar colectas del usuario (dashboard)' })
+  @ApiOperation({ summary: 'Listar colectas del usuario con filtros' })
   async list(@Query() filters: { search?: string; status?: string }, @Request() req: AuthenticatedRequest) {
-    console.log('🔍 [CollectionsController.list] Filters received:', filters);
-
-    // Map status to CollectionStatus if provided
-    const serviceFilters: { search?: string; status?: CollectionStatus | undefined } = {};
-    if (filters.search) serviceFilters.search = filters.search;
-    if (filters.status && filters.status !== 'all') {
-      // Validate status value - convert to uppercase
-      const statusUpper = filters.status.toUpperCase();
-
-      if (statusUpper === 'ACTIVE' || statusUpper === 'COMPLETED') {
-        serviceFilters.status = statusUpper as CollectionStatus;
-      } else {
-        throw new BadRequestException(`Invalid status: ${filters.status}. Valid values: active, completed, all`);
-      }
-    }
-    // Si status es 'all' o undefined, no agregamos filtro de status para mostrar todas
-
-    console.log('🔍 [CollectionsController.list] Service filters:', serviceFilters);
-    return this.collectionsService.findUserCollections(req.user!.id, serviceFilters);
+    return this.collectionsService.findUserCollections(req.user!.id, filters);
   }
 
   @OptionalAuth()
   @Get(':id')
-  @ApiOperation({ summary: 'Ver detalle de colecta (permite preview para links compartidos)' })
+  @ApiOperation({ summary: 'Obtener detalles de una colecta' })
   async findOne(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     // Si hay usuario autenticado, usar su ID, sino undefined
     const userId = req.user?.id;
@@ -101,19 +77,19 @@ export class CollectionsController {
   }
 
   @Post(':id/members/join')
-  @ApiOperation({ summary: 'Unirse a colección pública' })
+  @ApiOperation({ summary: 'Unirse a una colecta pública' })
   async joinCollection(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.collectionsService.joinCollection(id, req.user!.id, false);
   }
 
   @Post(':id/members/join-via-link')
-  @ApiOperation({ summary: 'Unirse a colección desde link compartido (permite privadas)' })
+  @ApiOperation({ summary: 'Unirse a una colecta mediante link compartido' })
   async joinViaSharedLink(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     return this.collectionsService.joinCollection(id, req.user!.id, true);
   }
 
   @Post(':id/members/leave')
-  @ApiOperation({ summary: 'Salirse de la colección' })
+  @ApiOperation({ summary: 'Salir de una colecta' })
   async leaveCollection(@Param('id') id: string, @Request() req: AuthenticatedRequest) {
     await this.collectionsService.leaveCollection(id, req.user!.id);
     return { message: 'Left collection successfully' };

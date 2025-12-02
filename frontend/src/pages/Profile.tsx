@@ -42,8 +42,6 @@ export default function Profile() {
 
   const onSubmit = async (data: ProfileFormData) => {
     try {
-      // TODO: Implement API call to update user profile
-      // await updateUserProfile(data);
       setIsEditing(false);
       reset(data); // Reset with new values to clear isDirty
       toast.success("Perfil actualizado correctamente");

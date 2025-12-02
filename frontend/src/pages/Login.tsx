@@ -16,12 +16,10 @@ import logo from '@/assets/logo.png';
 export default function Login() {
     const [email, setEmail] = useState('');
 
-    // Hooks de autenticación
     const magicLinkMutation = useMagicLink();
     const googleAuthMutation = useGoogleAuth();
     const facebookAuthMutation = useFacebookAuth();
 
-    // Manejar Magic Link
     const handleMagicLink = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -39,11 +37,10 @@ export default function Login() {
             await magicLinkMutation.mutateAsync({ email: email.trim() });
             setEmail('');
         } catch (error) {
-            console.error('Error en magic link:', error);
+            // Error handled by mutation
         }
     };
 
-    // Manejar Google Auth
     const handleGoogleAuth = () => {
         googleAuthMutation.mutate();
     };

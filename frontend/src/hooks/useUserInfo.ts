@@ -5,10 +5,8 @@ export const useUserInfo = () => {
   const { user: storeUser, isAuthenticated } = useAuthStore();
   const { data: currentUser } = useCurrentUser();
 
-  // Usar datos del servidor si están disponibles, sino del store
   const user = currentUser || storeUser;
 
-  // Generar iniciales del nombre
   const userInitials = user?.name
     ? user.name
         .split(" ")
@@ -18,7 +16,6 @@ export const useUserInfo = () => {
         .toUpperCase()
     : "??";
 
-  // Datos del usuario
   const userName = user?.name || "Usuario";
   const userEmail = user?.email || "usuario@ejemplo.com";
   const userAvatar = user?.avatar || "";

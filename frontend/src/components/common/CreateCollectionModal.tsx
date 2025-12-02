@@ -12,9 +12,8 @@ import { collectionsApi } from "@/api/endpoints/collections";
 import { invitationsApi } from "@/api/endpoints/invitations";
 import { mapFormToApiData, validateFormData } from "@/utils/collectionMapper";
 import { useAuthStore } from "@/stores/authStore";
-import type { CreateInvitationData } from "@/types";
+import type { CreateInvitationData } from '@/types';
 
-// Importaciones directas (sin lazy loading para formularios)
 import { BasicInfoStep } from "../collection-modal/steps/BasicInfoStep";
 import { ConfigurationStep } from "../collection-modal/steps/ConfigurationStep";
 import { MembersStep } from "../collection-modal/steps/MembersStep";
@@ -31,8 +30,6 @@ interface OptimisticState {
   progress: number;
 }
 
-// Eliminado StepSkeleton - no es necesario para formularios
-
 const STEPS = [
   { number: 1, label: "Información" },
   { number: 2, label: "Configuración" },
@@ -48,7 +45,6 @@ export default function CreateCollectionModal({
   const { formData, updateField, addMember, removeMember, resetForm } = useCollectionForm();
   const { isAuthenticated, user } = useAuthStore();
   
-  // Estado optimista para UX más fluida
   const [optimisticState, addOptimistic] = useOptimistic(
     { isSubmitting: false, isSuccess: false, progress: 0 },
     (state: OptimisticState, action: { type: string; progress?: number }) => {
@@ -78,16 +74,6 @@ export default function CreateCollectionModal({
       return;
     }
 
-    // Debug: Log estado de autenticación
-    const token = localStorage.getItem('colectaya_auth_token');
-    const authStorage = localStorage.getItem('auth-storage');
-    console.log('🔐 Estado de autenticación:', {
-      isAuthenticated,
-      user,
-      token,
-      authStorage
-    });
-
     // Validar formulario antes de enviar
     const validation = validateFormData(formData);
     if (!validation.isValid) {
@@ -104,8 +90,6 @@ export default function CreateCollectionModal({
         addOptimistic({ type: 'progress', progress: 25 });
         const collectionData = mapFormToApiData(formData);
         
-        console.log('🚀 Enviando datos de colecta:', collectionData);
-        
         // Crear la colección
         addOptimistic({ type: 'progress', progress: 50 });
         const newCollection = await collectionsApi.create(collectionData);
@@ -114,7 +98,7 @@ export default function CreateCollectionModal({
         addOptimistic({ type: 'progress', progress: 75 });
         if (formData.members.length > 0) {
           const invitationPromises = formData.members
-            .filter(member => member.type === 'email') // Solo emails por ahora
+            .filter(member => member.type === 'email')
             .map(member => {
               const invitationData: CreateInvitationData = {
                 collectionId: newCollection.id,
@@ -129,20 +113,16 @@ export default function CreateCollectionModal({
         addOptimistic({ type: 'success' });
         toast.success("¡Colecta creada exitosamente!");
         
-        // Reset después de mostrar éxito
         setTimeout(() => {
           addOptimistic({ type: 'reset' });
           resetForm();
           onClose();
-          // Opcional: recargar datos o navegar a la colección
-          window.location.reload(); // Temporal - mejor usar React Query invalidation
+          window.location.reload();
         }, 1500);
         
       } catch (error) {
         addOptimistic({ type: 'error' });
-        console.error("Error creating collection:", error);
         
-        // Mostrar error específico basado en la respuesta
         if (error && typeof error === 'object' && 'message' in error) {
           toast.error(`Error: ${error.message}`);
         } else {
@@ -185,7 +165,6 @@ export default function CreateCollectionModal({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Indicador de progreso optimista */}
         {optimisticState.isSubmitting && (
           <div className="mb-4">
             <div className="text-sm text-gray-600 mb-2">

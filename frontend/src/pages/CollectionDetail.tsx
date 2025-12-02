@@ -33,35 +33,20 @@ export default function CollectionDetail() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   
-  // Fetch collection data
   const {
     data: collection, 
     isLoading: isLoadingCollection, 
     error: collectionError 
   } = useCollection(collectionId || "");
 
-  // Fetch members for this collection
   const {
     data: members = [],
     isLoading: isLoadingMembers,
   } = useMembers(collectionId || "");
 
-  // Leave collection mutation
   const leaveMutation = useLeaveCollection();
-
-  // Withdrawal mutation
   const withdrawMutation = useCreateWithdrawal(collectionId || "");
-
-  // 🔍 Fetch withdrawals to check if there's already a withdrawal request
   const { data: withdrawals = [] } = useWithdrawals(collectionId || "");
-  
-  // DEBUG: Verificar los datos de la colección
-  console.log('Collection data:', collection);
-  console.log('Current amount:', collection?.currentAmount);
-  console.log('Goal amount:', collection?.goalAmount);
-  console.log('Contributors count:', collection?.contributorsCount);
-  
-  // Fetch contributions for this collection
   const {
     data: contributionsData,
     isLoading: isLoadingContributions,
@@ -74,7 +59,6 @@ export default function CollectionDetail() {
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isWithdrawDialogOpen, setIsWithdrawDialogOpen] = useState(false);
 
-  // Error state
   if (collectionError && !isLoadingCollection) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -91,39 +75,19 @@ export default function CollectionDetail() {
     );
   }
 
-  // Extract data when available
   const contributions = contributionsData || [];
-  
-  // DEBUG: Verificar los datos de contribuciones
-  console.log('Contributions data:', contributionsData);
-  console.log('Contributions array:', contributions);
-  
-  // DEBUG: Verificar datos específicos de cada contribución
-  contributions.forEach((contribution, index) => {
-    console.log(`Contribution ${index}:`, {
-      userName: contribution.userName,
-      userAvatar: contribution.userAvatar,
-      userId: contribution.userId,
-    });
-  });
 
-  // Calculate values only when collection is available
   const percentage = collection ? Math.min(100, Math.round((collection.currentAmount / collection.goalAmount) * 100)) : 0;
   const isOwner = collection ? collection.ownerId === user?.id : false;
   
-  // Check if current user is a member (but not owner)
   const isMember = members && 'members' in members && user ? 
     members.members.some(member => member.userId === user.id && member.acceptedAt) : false;
   const canLeave = isMember && !isOwner;
 
-  // 🔍 Check if there's already a withdrawal request
   const hasAnyWithdrawal = withdrawals.length > 0;
 
-  // Owner info from collection data (usar misma lógica que en pestaña de miembros)
   const ownerName = collection?.owner?.name || "Usuario sin nombre";
   const ownerAvatar = collection?.owner?.avatar || "";
-  
-  // Calcular memberCount desde la lista real de miembros aceptados
   const memberCount = members && 'members' in members 
     ? members.members.filter(m => m.acceptedAt).length 
     : collection?.contributorsCount || 0;
@@ -139,7 +103,7 @@ export default function CollectionDetail() {
       await leaveMutation.mutateAsync(collection.id);
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error leaving collection:', error);
+      toast.error('Error al salir de la colecta');
     }
   };
 
@@ -155,7 +119,6 @@ export default function CollectionDetail() {
       toast.success('Retiro solicitado exitosamente');
       setIsWithdrawDialogOpen(false);
     } catch (error) {
-      console.error('Error requesting withdrawal:', error);
       const errorMessage = error instanceof Error ? error.message : 'Error al solicitar retiro';
       toast.error(errorMessage);
     }

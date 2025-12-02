@@ -9,7 +9,6 @@ export default function AuthCallback() {
   const hasProcessed = useRef(false);
 
   const handleCallback = useCallback(async () => {
-    // Evitar ejecuciones múltiples
     if (hasProcessed.current) {
       return;
     }
@@ -17,7 +16,6 @@ export default function AuthCallback() {
     try {
       hasProcessed.current = true;
 
-      // Obtener tokens de la URL (para OAuth) o de fragmentos (para Magic Link)
       const urlParams = new URLSearchParams(window.location.search);
       const urlHash = new URLSearchParams(window.location.hash.slice(1));
       
@@ -28,7 +26,6 @@ export default function AuthCallback() {
         throw new Error('No se encontró el token de acceso');
       }
 
-      // Procesar el callback
       await authCallbackMutation.mutateAsync({
         accessToken,
         refreshToken: refreshToken || undefined,
@@ -38,7 +35,6 @@ export default function AuthCallback() {
       });
 
       setTimeout(() => {
-        // Verificar si hay una URL de retorno
         const returnTo = sessionStorage.getItem('returnTo');
         if (returnTo) {
           sessionStorage.removeItem('returnTo');
@@ -49,7 +45,6 @@ export default function AuthCallback() {
       }, 1000);
 
     } catch (error) {
-      console.error('Error en callback de autenticación:', error);
       toast.error("Error en la autenticación", {
         description: "Redirigiendo al login...",
       });

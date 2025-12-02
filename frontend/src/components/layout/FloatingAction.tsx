@@ -4,9 +4,8 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import CreateCollectionModal from "@/components/common/CreateCollectionModal";
+import CreateCollectionModal from '@/components/common/CreateCollectionModal';
 
-// Páginas donde NO se debe mostrar el botón de crear colecta
 const HIDDEN_PAGES = [
   '/auth/callback',
   '/login',
@@ -20,10 +19,9 @@ export function FloatingAction() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const location = useLocation();
 
-  // Verificar si la página actual está en la lista de páginas donde se debe ocultar
   const shouldHide = HIDDEN_PAGES.some(page => 
     location.pathname === page || location.pathname.startsWith(page)
-  ) || location.pathname.startsWith('/collections/'); // Ocultar en collection detail
+  ) || location.pathname.startsWith('/collections/');
 
   if (shouldHide) return null;
 

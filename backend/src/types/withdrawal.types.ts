@@ -1,7 +1,6 @@
 import { WithdrawalStatus } from '@prisma/client';
 import { BasicUser } from './user.types';
 
-//  Retiro con información del usuario
 export interface WithdrawalWithUser {
   id: string;
   amount: number;
@@ -11,10 +10,8 @@ export interface WithdrawalWithUser {
   requestedAt: Date;
   processedAt?: Date;
 
-  // Usuario que solicitó el retiro
   requestedBy: BasicUser;
 
-  // Información de la colecta
   collection: {
     id: string;
     title: string;
@@ -22,7 +19,6 @@ export interface WithdrawalWithUser {
   };
 }
 
-// Retiro básico para listas
 export interface BasicWithdrawal {
   id: string;
   amount: number;
@@ -33,7 +29,6 @@ export interface BasicWithdrawal {
   processedAt?: Date;
 }
 
-// Estadísticas de retiros
 export interface WithdrawalStats {
   totalRequested: number;
   totalApproved: number;
@@ -42,7 +37,6 @@ export interface WithdrawalStats {
   totalAmount: number;
 }
 
-// Respuesta de retiros de colecta
 export interface CollectionWithdrawalsResponse {
   withdrawals: WithdrawalWithUser[];
   stats: WithdrawalStats;

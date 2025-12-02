@@ -43,22 +43,13 @@ export class PayPalService {
     this.secret = this.config.get<string>('PAYPAL_SECRET') || '';
     this.apiUrl = this.config.get<string>('PAYPAL_API_URL', 'https://api-m.sandbox.paypal.com');
 
-    // 🔍 DEBUG: Log para verificar qué credenciales se están leyendo
-    this.logger.log(`🔍 PayPal Client ID: ${this.clientId ? this.clientId.substring(0, 20) + '...' : 'NOT SET'}`);
-    this.logger.log(`🔍 PayPal Secret: ${this.secret ? this.secret.substring(0, 10) + '...' : 'NOT SET'}`);
-    this.logger.log(`🔍 PayPal API URL: ${this.apiUrl}`);
-
     if (!this.clientId || !this.secret) {
-      this.logger.warn('⚠️ PayPal credentials not configured - PayPal functionality will be disabled');
+      this.logger.warn('PayPal credentials not configured - PayPal functionality will be disabled');
     } else {
-      this.logger.log(`✅ PayPal service initialized with API: ${this.apiUrl}`);
+      this.logger.log(`PayPal service initialized with API: ${this.apiUrl}`);
     }
   }
 
-  /**
-   * Obtiene un access token de PayPal usando autenticación básica HTTP.
-   * Cachea el token hasta que expire para reducir llamadas a la API.
-   */
   private async getAccessToken(): Promise<string> {
     // Validar que las credenciales estén configuradas
     if (!this.clientId || !this.secret) {

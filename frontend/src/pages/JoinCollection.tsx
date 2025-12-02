@@ -13,26 +13,12 @@ export default function JoinCollection() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   
-  // Usar preview - permite ver colectas privadas vía link de compartir
   const { data: collection, isLoading, error } = useCollectionPreview(collectionId!);
-  // Usar joinViaLink - permite unirse a colectas privadas desde link compartido
   const joinMutation = useJoinCollectionViaLink();
-
-  // DEBUG: Ver qué está pasando
-  console.log('🔍 JoinCollection - collectionId:', collectionId);
-  console.log('🔍 JoinCollection - isLoading:', isLoading);
-  console.log('🔍 JoinCollection - error:', error);
-  console.log('🔍 JoinCollection - error details:', error ? JSON.stringify(error, null, 2) : 'no error');
-  console.log('🔍 JoinCollection - collection:', collection);
-  console.log('🔍 JoinCollection - user:', user);
-
-  // NO redirigir automáticamente - permitir ver la colecta primero
-  // Solo redirigir al intentar unirse sin estar autenticado
 
   const handleJoinCollection = async () => {
     if (!collection) return;
     
-    // Si no está autenticado, guardar URL y redirigir a login
     if (!user) {
       sessionStorage.setItem('returnTo', `/join/${collectionId}`);
       navigate('/login');
@@ -43,8 +29,7 @@ export default function JoinCollection() {
       await joinMutation.mutateAsync(collection.id);
       toast.success(`Te has unido a la colecta "${collection.title}"`);
       navigate(`/collections/${collection.id}`);
-    } catch (error) {
-      console.error('Error joining collection:', error);
+    } catch {
       toast.error('Error al unirse a la colecta');
     }
   };
@@ -77,10 +62,9 @@ export default function JoinCollection() {
           </Button>
         </Card>
       </div>
-    );
+    )
   }
 
-  // Check if user is already the owner (solo si está autenticado)
   const isOwner = user && collection.ownerId === user.id;
   
   return (
